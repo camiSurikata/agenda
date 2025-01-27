@@ -1,0 +1,140 @@
+{
+    "menu": [
+        {
+            "name": "Dashboards",
+            "icon": "menu-icon tf-icons mdi mdi-home-outline",
+            "slug": "dashboard",
+            "badge": [
+                "primary",
+                "5"
+            ],
+            "submenu": [
+                {
+                    "url": "app/ecommerce/dashboard",
+                    "name": "eCommerce",
+                    "slug": "app-ecommerce-dashboard"
+                },
+                {
+                    "url": "dashboard/crm",
+                    "name": "CRM",
+                    "slug": "dashboard-crm"
+                },
+                {
+                    "url": "/",
+                    "name": "Analytics",
+                    "slug": "dashboard-analytics"
+                },
+                {
+                    "url": "app/logistics/dashboard",
+                    "name": "Logistics",
+                    "slug": "app-logistics-dashboard"
+                },
+                {
+                    "url": "app/academy/dashboard",
+                    "name": "Academy",
+                    "slug": "app-academy-dashboard"
+                }
+            ]
+        },
+        {
+            "name": "RedLacer",
+            "icon": "menu-icon tf-icons mdi mdi-domain",
+            "slug": "redLacer",
+            "submenu": [
+                {
+                    "url": "detallesemanal",
+                    "name": "Detalle Semanal",
+                    "icon": "menu-icon tf-icons mdi mdi-information",
+                    "slug": ""
+                },
+                {
+                    "url": "charts/chartjs",
+                    "icon": "menu-icon tf-icons mdi mdi-facebook",
+                    "name": "Facebook",
+                    "slug": ""
+                },
+                {
+                    "url": "charts/apex",
+                    "icon": "menu-icon tf-icons mdi mdi-instagram",
+                    "name": "Instagram",
+                    "slug": ""
+                },
+                {
+                    "url": "charts/apex",
+                    "name": "Google Analytics",
+                    "icon": "menu-icon tf-icons mdi mdi-google-analytics",
+                    "slug": ""
+                },
+                {
+                    "url": "charts/apex",
+                    "name": "RedVoiss",
+                    "icon": "menu-icon tf-icons mdi mdi-phone",
+                    "slug": ""
+                }
+                ,
+                {
+                    "url": "charts/apex",
+                    "name": "Uniboxi",
+                    "icon": "menu-icon tf-icons mdi mdi-phone",
+                    "slug": ""
+                }
+            ]
+        },
+        {
+            "name": "Averclaro",
+            "icon": "menu-icon tf-icons mdi mdi-domain",
+            "slug": "averclaro",
+            "submenu": [
+                {
+                    "url": "charts/chartjs",
+                    "icon": "menu-icon tf-icons mdi mdi-facebook",
+                    "name": "Facebook",
+                    "slug": ""
+                },
+                {
+                    "url": "charts/apex",
+                    "icon": "menu-icon tf-icons mdi mdi-instagram",
+                    "name": "Instagram",
+                    "slug": ""
+                },
+                {
+                    "url": "charts/apex",
+                    "name": "Google Analytics",
+                    "icon": "menu-icon tf-icons mdi mdi-google-analytics",
+                    "slug": ""
+                },
+                {
+                    "url": "callBell",
+                    "name": "CallBell",
+                    "icon": "menu-icon tf-icons mdi mdi-whatsapp",
+                    "slug": ""
+                }
+            ]
+        },
+        {
+            "name": "MejorAbogado",
+            "icon": "menu-icon tf-icons mdi mdi-domain",
+            "slug": "mejorAbogado",
+            "submenu": [
+                {
+                    "url": "charts/chartjs",
+                    "icon": "menu-icon tf-icons mdi mdi-facebook",
+                    "name": "Facebook",
+                    "slug": ""
+                },
+                {
+                    "url": "charts/apex",
+                    "icon": "menu-icon tf-icons mdi mdi-instagram",
+                    "name": "Instagram",
+                    "slug": ""
+                },
+                {
+                    "url": "charts/apex",
+                    "name": "Google Analytics",
+                    "icon": "menu-icon tf-icons mdi mdi-google-analytics",
+                    "slug": ""
+                }
+            ]
+        }
+    ]
+}

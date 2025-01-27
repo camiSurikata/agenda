@@ -1,0 +1,75 @@
+{
+  "menu": [
+    {
+      "idRol": 1,
+      "idCompany": 0,
+      "name": "Dashboards",
+      "icon": "menu-icon tf-icons mdi mdi-home-outline",
+      "slug": "dashboard",
+      "badge": [
+        "primary",
+        "5"
+      ],
+      "submenu": [
+        {
+          "url": "/users",
+          "name": "Usuarios",
+          "slug": "app-ecommerce-dashboard"
+        },
+        {
+          "url": "/boxes",
+          "name": "Boxes",
+          "slug": "app-ecommerce-dashboard"
+        },
+        {
+          "url": "/especialidades",
+          "name": "Especialidades",
+          "slug": "app-ecommerce-dashboard"
+        }
+      ]
+    },
+    {
+      "idRol": 1,
+      "idCompany": 0,
+      "name": "---",
+      "icon": "menu-icon tf-icons mdi mdi-account-outline",
+      "slug": "dashboard",
+      "submenu": [
+        {
+          "url": "/medicos",
+          "name": "Medicos",
+          "slug": "app-ecommerce-dashboard"
+        },
+        {
+          "url": "/paciente",
+          "name": "Pacientes",
+          "slug": "app-ecommerce-dashboard"
+        }
+      ]
+    },
+    {
+      "idRol": 1,
+      "idCompany": 0,
+      "name": "Modulos",
+      "icon": "menu-icon tf-icons mdi mdi-account-outline",
+      "slug": "dashboard",
+      "submenu": [
+        {
+          "url": "/examenes",
+          "name": "Examenes",
+          "slug": "app-ecommerce-dashboard"
+        },
+        {
+          "url": "/urgencias",
+          "name": "Urgencias",
+          "slug": "app-ecommerce-dashboard"
+        },
+        {
+          "url": "/hospitalizaciones",
+          "name": "Hospitalizaciones",
+          "slug": "app-ecommerce-dashboard"
+        }
+      ]
+    }
+  ]
+}
