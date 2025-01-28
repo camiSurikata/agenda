@@ -13,6 +13,7 @@ use App\Http\Controllers\BoxController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\PacienteController;
+use App\Http\Controllers\ConvenioController;
 use App\Models\Cita;
 
 // LOGIN
@@ -106,8 +107,8 @@ Route::get('/encuesta/enviar', [EncuestaController::class, 'enviar'])->name('enc
 
 
 
-
-
+//Convenio
+Route::resource('convenios', ConvenioController::class);
 
 
 // Route::post('/medicos', [MedicoController::class, 'store'])->name('medicos.store');
