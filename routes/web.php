@@ -14,6 +14,7 @@ use App\Http\Controllers\CitaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\PacienteController;
 use App\Models\Cita;
+use App\Http\Controllers\EspecialidadController;
 
 // LOGIN
 Route::get('/', [LoginController::class, 'indexLogin'])->name('login');
@@ -67,6 +68,8 @@ Route::get('/api/citas', function () {
 });
 
 
+//ESPECIALIDAD
+Route::resource('especialidades', EspecialidadController::class);
 
 
 // Mostrar bloqueos por médico
