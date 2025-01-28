@@ -4,7 +4,6 @@
 @section('content')
 
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-
     <h1>Lista de Usuarios</h1>
 
     <a class="btn btn-primary mb-3" href="{{ route('users.create') }}">Crear Usuario</a>
@@ -67,6 +66,10 @@
 
     jQuery(document).ready(function($) {
         console.log('jQuery está cargado correctamente');
-        $('.datatables-basic').DataTable();
+        $('.datatables-basic').DataTable({
+            language:{
+                url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
+            }
+        });
     });
 </script>
