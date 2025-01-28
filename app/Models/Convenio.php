@@ -10,12 +10,8 @@ class Convenio extends Model
     use HasFactory;
 
     
+    public $timestamps = false;
+    
     protected $fillable = ['convenio', 'fecha_afiliacion', 'tipo', 'porcentaje_descuento', 'estado'];
 
-    
-    public function getNombreAttribute()
-    {
-        return $this->attributes['convenio'];
-    }
-    
 }

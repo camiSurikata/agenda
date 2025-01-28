@@ -13,10 +13,12 @@ class ConvenioController extends Controller
     public function index()
     {
         // Obtener todos los convenios desde la base de datos
-        $convenios = Convenio::all();
+        $convenios = Convenio::where('estado', '!=', 3)->get();
 
         // Retornar la vista con los convenios
         return view('content.convenios.index', compact('convenios'));
+
+
     }
 
     /**
@@ -35,7 +37,7 @@ class ConvenioController extends Controller
     {
         // Validar los datos del formulario
         $request->validate([
-            'nombre' => 'required|string|max:255',
+            'convenio' => 'required|string|max:255',
             'fecha_afiliacion' => 'required|date',
             'tipo' => 'required|in:Isapre,Convenio',
             'porcentaje_descuento' => 'required|integer|min:0|max:100',
@@ -74,7 +76,7 @@ class ConvenioController extends Controller
     {
         // Validar los datos del formulario
         $request->validate([
-            'nombre' => 'required|string|max:255',
+            'convenio' => 'required|string|max:255',
             'fecha_afiliacion' => 'required|date',
             'tipo' => 'required|in:Isapre,Convenio',
             'porcentaje_descuento' => 'required|integer|min:0|max:100',
