@@ -15,6 +15,7 @@ use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\PacienteController;
 use App\Models\Cita;
 use App\Http\Controllers\EspecialidadController;
+use App\Models\Especialidad;
 
 // LOGIN
 Route::get('/', [LoginController::class, 'indexLogin'])->name('login');
@@ -70,6 +71,9 @@ Route::get('/api/citas', function () {
 
 //ESPECIALIDAD
 Route::resource('especialidades', EspecialidadController::class);
+Route::post('/especialidades/{id}/especialidades', [EspecialidadController::class, 'store']);
+Route::post('/especialidades', [EspecialidadController::class, 'store'])->name('especialidades.store');
+Route::put('especialidades/{id}', [EspecialidadController::class, 'update'])->name('especialidades.update');
 
 
 // Mostrar bloqueos por médico

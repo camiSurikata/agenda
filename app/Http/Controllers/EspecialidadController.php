@@ -29,9 +29,15 @@ class EspecialidadController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate(['nombre' => 'required|unique:especialidads']);
-        Especialidad::create($request->all());
-        return redirect()->route('content.especialidades.index')->with('success', 'Especialidad creada correctamente');
+        $request->validate([
+            'nombre' => 'required|unique:especialidades',
+            'status' => 'required|boolean',
+        ]);
+        Especialidad::create([
+            'nombre' => $request->nombre,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('especialidades.index')->with('success', 'Especialidad creada correctamente');
     }
 
     /**
@@ -68,4 +74,12 @@ class EspecialidadController extends Controller
         $especialidad->delete();
         return redirect()->route('content.especialidades.index')->with('success', 'Especialidad eliminada correctamente');
     }
+
+    public function activate(Especialidad $especialidad)
+  {
+    $especialidad->update(['status' => 1]); // Cambiar el estado a activo (1)
+    return redirect()->route('content.especialidad.index')->with('success', 'Usuario activado correctamente.');
+  }
+
+    
 }
