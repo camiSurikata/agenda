@@ -13,15 +13,15 @@
                 <div class="form-floating form-floating-outline mb-3">
                     <input type="text" class="form-control" id="nombre" name="nombre" required
                         placeholder="Ingrese nombre de la especialidad" autofocus>
-                    <label for="username">Nombre de la especialidad</label>
+                    <label for="nombre">Nombre de la especialidad</label>
                 </div>
 
-                <div class="input-field">
-                    <select name="status" id="status">
+                <div class="form-floating form-floating-outline mb-3">
+                    <select name="status" id="form-repeater-1-2" class="form-select">
                         <option value="1" selected>Habilitado</option>
                         <option value="0">Inhabilitado</option>
                     </select>
-                    <label for="status">Estado</label>
+                    <label for="form-repeater-1-2">Estado</label>
                 </div>
 
                 <button  class="btn btn-primary d-grid w-100" type="submit">Registrar</button>

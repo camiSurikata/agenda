@@ -41,14 +41,7 @@
     </style>
 
     <body>
-        <div class="container">
-            <h4 class="center">Próximos 28 días</h4>
-            <p class="center">Haz clic en una fecha para ver el detalle</p>
-            <div id="weeksContainer"></div>
-            <div class="row center">
-                <h5 id="selectedDate">Selecciona un día para más detalles</h5>
-            </div>
-        </div>
+
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <div class="container mt-5">
@@ -94,322 +87,289 @@
             </form>
 
             <!-- Botón para abrir el modal manualmente si es necesario -->
-            <button id="abrirModal" type="button" class="btn btn-info d-none" data-bs-toggle="modal"
-                data-bs-target="#modalHorarios">
+            <button id="abrirModal" type="button" class="btn btn-info">
                 Ver Horarios Disponibles
             </button>
         </div>
 
-        <!-- Modal para mostrar los horarios -->
+        <!-- Modal de Horarios con Pestañas -->
         <div class="modal fade" id="modalHorarios" tabindex="-1" aria-labelledby="modalHorariosLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="horariosModalLabel">Horarios Disponibles</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <div id="horariosContainer">
+                        <!-- Pestañas para los días disponibles -->
+                        <ul class="nav nav-tabs" id="horariosTabs" role="tablist"></ul>
 
-                        </div>
+                        <!-- Contenedor de contenido de pestañas -->
+                        <div class="tab-content mt-3" id="horariosTabContent"></div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                            id="cerrarModal">Cerrar</button>
                     </div>
                 </div>
             </div>
         </div>
 
+
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
         <script>
-            const sucursalSelect = document.getElementById('sucursal');
-            const especialidadSelect = document.getElementById('especialidad');
-            const medicoSelect = document.getElementById('medico');
-            const modalHorarios = new bootstrap.Modal(document.getElementById('modalHorarios'));
+            document.addEventListener('DOMContentLoaded', function() {
+                const sucursalSelect = document.getElementById('sucursal');
+                const especialidadSelect = document.getElementById('especialidad');
+                const medicoSelect = document.getElementById('medico');
 
-            // Listeners para los selects
-            sucursalSelect.addEventListener('change', cargarHorarios);
-            console.log('2');
-            especialidadSelect.addEventListener('change', cargarHorarios);
-            medicoSelect.addEventListener('change', cargarHorarios);
+                sucursalSelect.addEventListener('change', cargarHorarios);
+                especialidadSelect.addEventListener('change', cargarHorarios);
+                medicoSelect.addEventListener('change', cargarHorarios);
 
-            function cargarHorarios() {
-                const sucursalId = document.getElementById('sucursal').value;
-                const especialidadId = document.getElementById('especialidad').value;
-                const medicoId = document.getElementById('medico').value;
+                function cargarHorarios() {
+                    const sucursalId = sucursalSelect.value;
+                    const especialidadId = especialidadSelect.value;
+                    const medicoId = medicoSelect.value;
 
-                console.log("Sucursal ID:", sucursalId);
-                console.log("Especialidad ID:", especialidadId);
-                console.log("Medico ID:", medicoId);
+                    if (sucursalId && especialidadId && medicoId) {
+                        axios.post('{{ route('horarios.disponibles') }}', {
+                                sucursal_id: sucursalId,
+                                especialidad_id: especialidadId,
+                                medico_id: medicoId,
+                                _token: '{{ csrf_token() }}'
+                            })
+                            .then(response => {
+                                const horarios = response.data.horarios;
+                                if (horarios.length > 0) {
+                                    generarPestañasHorarios(horarios);
+                                    const modalHorarios = new bootstrap.Modal(document.getElementById(
+                                        'modalHorarios'));
+                                    modalHorarios.show();
+                                } else {
+                                    alert("No hay horarios disponibles.");
+                                }
+                            })
+                            .catch(error => console.error("Error al cargar los horarios:", error));
+                    } else {
+                        console.error("Faltan datos para cargar los horarios");
+                    }
+                }
 
-                if (sucursalId && especialidadId && medicoId) {
-                    axios.post('{{ route('horarios.disponibles') }}', {
-                            sucursal_id: sucursalId,
-                            especialidad_id: especialidadId,
-                            medico_id: medicoId,
-                            _token: '{{ csrf_token() }}'
-                        })
-                        .then(response => {
-                            console.log("Horarios disponibles:", response.data.horarios);
-                            // Aquí puedes actualizar el modal con los horarios
-                            const horarios = response.data.horarios;
-                            const horariosContainer = document.getElementById('horariosContainer');
+                function generarPestañasHorarios(horarios) {
+                    const horariosTabs = document.getElementById('horariosTabs');
+                    const horariosTabContent = document.getElementById('horariosTabContent');
 
-                            if (horarios && horarios.length > 0) {
-                                // Limpiar contenido previo
-                                horariosContainer.innerHTML = '';
+                    horariosTabs.innerHTML = ''; // Limpiar pestañas
+                    horariosTabContent.innerHTML = ''; // Limpiar contenido
 
-                                // Crear una lista de horarios
-                                const list = document.createElement('ul');
-                                list.className = 'list-group';
+                    const diasDisponibles = {};
 
-                                horarios.forEach(horario => {
-                                    const listItem = document.createElement('li');
-                                    listItem.className = 'list-group-item';
+                    // Agrupar horarios por día
+                    horarios.forEach(horario => {
+                        const fechaCompleta = obtenerProximoDia(horario.dia_semana);
+                        if (!diasDisponibles[fechaCompleta]) {
+                            diasDisponibles[fechaCompleta] = [];
+                        }
+                        diasDisponibles[fechaCompleta].push(horario);
+                    });
 
-                                    const intervalos = generarIntervalos(horario.hora_inicio, horario.hora_termino,
-                                        horario.descanso_inicio, horario.descanso_termino);
-                                    const intervalosText = intervalos.map(i => `<div>${i}</div>`).join('');
+                    // Crear pestañas y contenido
+                    let primeraPestaña = true;
 
-                                    listItem.innerHTML = `<strong>${obtenerProximoDia(horario.dia_semana)}</strong> -
-            <strong>${horario.sucursal}</strong> - ${horario.medico.nombre}
-            <div class="mt-2">
-                ${intervalosText}
-            </div>
-        `;
+                    Object.keys(diasDisponibles).forEach((dia, index) => {
+                        // Crear pestaña
+                        const tabItem = document.createElement('li');
+                        tabItem.className = 'nav-item';
+                        tabItem.innerHTML = `
+                <button class="nav-link ${primeraPestaña ? 'active' : ''}" id="tab-${index}" data-bs-toggle="tab" data-bs-target="#content-${index}" type="button" role="tab">
+                    ${dia}
+                </button>
+            `;
+                        horariosTabs.appendChild(tabItem);
 
-                                    list.appendChild(listItem);
-                                });
+                        // Crear contenido de pestaña
+                        const tabContent = document.createElement('div');
+                        tabContent.className = `tab-pane fade ${primeraPestaña ? 'show active' : ''}`;
+                        tabContent.id = `content-${index}`;
+                        tabContent.innerHTML = generarBotonesHorarios(diasDisponibles[dia]);
+                        horariosTabContent.appendChild(tabContent);
 
-                                horariosContainer.appendChild(list);
-                            } else {
-                                // Si no hay horarios disponibles
-                                horariosContainer.innerHTML = '<p>No hay horarios disponibles.</p>';
-                            }
+                        primeraPestaña = false;
+                    });
+                }
 
-                            // Mostrar el modal
-                            // const horariosModal = new bootstrap.Modal(document.getElementById('horariosModal'));
-                            modalHorarios.show();
-                        })
-                        .catch(error => {
-                            console.error("Error:", error);
-
-                        })
-                        .catch(error => {
-                            if (error.response) {
-                                console.error("Error al cargar los horarios (response):", error.response.data);
-                            } else if (error.request) {
-                                console.error("Error al cargar los horarios (request):", error.request);
-                            } else {
-                                console.error("Error al cargar los horarios (message):", error.message);
-                            }
+                function generarBotonesHorarios(horarios) {
+                    let botonesHTML = '<div class="d-flex flex-wrap gap-2">';
+                    horarios.forEach(horario => {
+                        const intervalos = generarIntervalos(horario.hora_inicio, horario.hora_termino, horario
+                            .descanso_inicio, horario.descanso_termino);
+                        intervalos.forEach(intervalo => {
+                            botonesHTML += `
+                    <button class="btn btn-primary btn-sm" onclick="seleccionarHorario('${intervalo}')">
+                        ${intervalo}
+                    </button>
+                `;
                         });
-                } else {
-                    console.error("Faltan datos para cargar los horarios");
-                }
-            }
-
-            function obtenerProximoDia(diaBuscado) {
-                const diasSemana = [
-                    "domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"
-                ];
-
-                // Convertir el día buscado a minúsculas para evitar problemas de mayúsculas/minúsculas
-                diaBuscado = diaBuscado.toLowerCase();
-
-                // Validar que el día buscado exista
-                if (!diasSemana.includes(diaBuscado)) {
-                    return "Día inválido";
+                    });
+                    botonesHTML += '</div>';
+                    return botonesHTML;
                 }
 
-                // Obtener el índice del día buscado
-                const indiceDiaBuscado = diasSemana.indexOf(diaBuscado);
-
-                // Fecha actual
-                const hoy = new Date();
-
-                // Índice del día actual
-                const indiceHoy = hoy.getDay();
-
-                // Calcular los días restantes hasta el día buscado
-                const diasRestantes =
-                    (indiceDiaBuscado - indiceHoy + 7) % 7 || 7; // Asegura que siempre sea el siguiente día
-
-                // Calcular la fecha del próximo día
-                const proximaFecha = new Date();
-                proximaFecha.setDate(hoy.getDate() + diasRestantes);
-
-                // Formatear la fecha
-                const meses = [
-                    "enero", "febrero", "marzo", "abril", "mayo", "junio",
-                    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-                ];
-
-                const diaSemana = diasSemana[proximaFecha.getDay()];
-                const dia = proximaFecha.getDate();
-                const mes = meses[proximaFecha.getMonth()];
-                const anio = proximaFecha.getFullYear();
-
-                return `Próximo ${diaSemana} ${dia} de ${mes} del ${anio}`;
-            }
-
-            // Ejemplo de uso
-            console.log(obtenerProximoDia("lunes")); // "Próximo lunes 20 de enero del 2025" (si hoy fuera 13 de enero de 2025)
-            console.log(obtenerProximoDia("viernes")); // "Próximo viernes 17 de enero del 2025"
-
-            function formatearFechaChile(fechaStr) {
-                const fecha = new Date(`${fechaStr}T00:00:00-03:00`); // Chile Continental en horario estándar UTC-3
-
-                // Verificar que la fecha sea válida
-                if (isNaN(fecha.getTime())) {
-                    return "Fecha inválida";
+                function seleccionarHorario(horario) {
+                    alert(`Has seleccionado el horario: ${horario}`);
+                    const modalHorarios = bootstrap.Modal.getInstance(document.getElementById('modalHorarios'));
+                    modalHorarios.hide();
                 }
 
-                const formato = new Intl.DateTimeFormat('es-CL', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    timeZone: 'America/Santiago', // Asegura el huso horario de Chile
-                });
+                function obtenerProximoDia(diaSemana) {
+                    const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+                    const hoy = new Date();
+                    const diaActual = hoy.getDay();
+                    const indiceDia = dias.indexOf(diaSemana.toLowerCase());
+                    let diferencia = indiceDia - diaActual;
+                    if (diferencia <= 0) {
+                        diferencia += 7;
+                    }
+                    hoy.setDate(hoy.getDate() + diferencia);
+                    return `${dias[hoy.getDay()]} ${hoy.getDate()}/${hoy.getMonth() + 1}/${hoy.getFullYear()}`;
+                }
 
-                return formato.format(fecha);
-            }
+                function generarIntervalos(horaInicio, horaTermino, descansoInicio, descansoTermino) {
+                    const intervalos = [];
+                    let [hInicio, mInicio] = horaInicio.split(':').map(Number);
+                    let [hFin, mFin] = horaTermino.split(':').map(Number);
 
-            function generarIntervalos(horaInicio, horaTermino, descansoInicio, descansoTermino) {
-                const intervalos = [];
-                const [startHour, startMinutes] = horaInicio.split(':').map(Number);
-                const [endHour, endMinutes] = horaTermino.split(':').map(Number);
+                    let descansoInicioHora = descansoInicio ? descansoInicio.split(':').map(Number) : null;
+                    let descansoFinHora = descansoTermino ? descansoTermino.split(':').map(Number) : null;
 
-                const [breakStartHour, breakStartMinutes] = descansoInicio ? descansoInicio.split(':').map(Number) : [null,
-                    null
-                ];
-                const [breakEndHour, breakEndMinutes] = descansoTermino ? descansoTermino.split(':').map(Number) : [null, null];
+                    while (hInicio < hFin || (hInicio === hFin && mInicio < mFin)) {
+                        let siguienteMinutos = (mInicio + 30) % 60;
+                        let siguienteHora = mInicio + 30 >= 60 ? hInicio + 1 : hInicio;
 
-                let currentHour = startHour;
-                let currentMinutes = startMinutes;
+                        let enDescanso = descansoInicioHora && descansoFinHora &&
+                            ((hInicio > descansoInicioHora[0] || (hInicio === descansoInicioHora[0] && mInicio >=
+                                    descansoInicioHora[1])) &&
+                                (hInicio < descansoFinHora[0] || (hInicio === descansoFinHora[0] && mInicio <
+                                    descansoFinHora[1])));
 
-                while (currentHour < endHour || (currentHour === endHour && currentMinutes < endMinutes)) {
-                    const nextMinutes = (currentMinutes + 30) % 60;
-                    const nextHour = currentMinutes + 30 >= 60 ? currentHour + 1 : currentHour;
+                        if (!enDescanso) {
+                            intervalos.push(
+                                `${String(hInicio).padStart(2, '0')}:${String(mInicio).padStart(2, '0')} - ${String(siguienteHora).padStart(2, '0')}:${String(siguienteMinutos).padStart(2, '0')}`
+                            );
+                        }
 
-                    // Validar si el intervalo está dentro del rango del descanso
-                    const isInBreak =
-                        breakStartHour !== null &&
-                        breakEndHour !== null &&
-                        (
-                            (currentHour > breakStartHour || (currentHour === breakStartHour && currentMinutes >=
-                                breakStartMinutes)) &&
-                            (currentHour < breakEndHour || (currentHour === breakEndHour && currentMinutes < breakEndMinutes))
-                        );
-
-                    if (!isInBreak) {
-                        intervalos.push(
-                            `${String(currentHour).padStart(2, '0')}:${String(currentMinutes).padStart(2, '0')} - ${String(nextHour).padStart(2, '0')}:${String(nextMinutes).padStart(2, '0')}`
-                        );
+                        hInicio = siguienteHora;
+                        mInicio = siguienteMinutos;
                     }
 
-                    currentHour = nextHour;
-                    currentMinutes = nextMinutes;
+                    return intervalos;
                 }
+            });
+        </script>
 
-                return intervalos;
-            }
+        <script>
+            // Listener para el botón de abrir el modal
+            document.getElementById('abrirModal').addEventListener('click', function(event) {
+                // Reemplaza 'campo1' y 'campo2' con los IDs de tus campos necesarios
+                var campo1 = document.getElementById('sucursal').value;
+                var campo2 = document.getElementById('especialidad').value;
+                var campo3 = document.getElementById('medico').value;
 
-
-            function mostrarHorarios(horarios) {
-                const listaHorarios = document.getElementById('lista-horarios');
-                listaHorarios.innerHTML = ''; // Limpiar lista antes de agregar nuevos datos
-
-                if (horarios.length > 0) {
-                    horarios.forEach(horario => {
-                        const listItem = document.createElement('li');
-                        listItem.classList.add('list-group-item');
-                        listItem.textContent = `Fecha: ${horario.fecha} - Hora: ${horario.hora}`;
-                        listaHorarios.appendChild(listItem);
-                    });
+                if (!campo1 || !campo2 || !campo3) {
+                    event.preventDefault(); // Prevenir el comportamiento predeterminado del botón
+                    alert('Por favor, rellena todos los campos necesarios.');
                 } else {
-                    const listItem = document.createElement('li');
-                    listItem.classList.add('list-group-item', 'text-danger');
-                    listItem.textContent = 'No hay horarios disponibles.';
-                    listaHorarios.appendChild(listItem);
+                    // Si los campos están completos, abre el modal
+                    var modal = new bootstrap.Modal(document.getElementById('modalHorarios'));
+                    modal.show();
                 }
+            });
+        </script>
 
-                modalHorarios.show(); // Mostrar el modal automáticamente
-            }
+        <script>
+            //
+            document.getElementById('cerrarModal').addEventListener('click', function() {
+                location.reload(); // Recargar la página
+            });
         </script>
 
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-                const meses = [
-                    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-                ];
-                const weeksContainer = document.getElementById("weeksContainer");
-                const selectedDate = document.getElementById("selectedDate");
+            // generador de botones con dias de la semana
+            /*
+                                        document.addEventListener("DOMContentLoaded", function() {
+                                            const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+                                            const meses = [
+                                                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                                                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                                            ];
+                                            const weeksContainer = document.getElementById("weeksContainer");
+                                            const selectedDate = document.getElementById("selectedDate");
 
-                // Generar los próximos 28 días
-                function generarFechas() {
-                    const hoy = new Date();
-                    let dias = [];
+                                            // Generar los próximos 28 días
+                                            function generarFechas() {
+                                                const hoy = new Date();
+                                                let dias = [];
 
-                    // Generar fechas desde hoy hasta 28 días después
-                    for (let i = 0; i < 28; i++) {
-                        const nuevaFecha = new Date(hoy);
-                        nuevaFecha.setDate(hoy.getDate() + i);
-                        dias.push(nuevaFecha);
-                    }
+                                                // Generar fechas desde hoy hasta 28 días después
+                                                for (let i = 0; i < 28; i++) {
+                                                    const nuevaFecha = new Date(hoy);
+                                                    nuevaFecha.setDate(hoy.getDate() + i);
+                                                    dias.push(nuevaFecha);
+                                                }
 
-                    // Dividir las fechas en semanas (grupos de 7 días)
-                    const semanas = [];
-                    for (let i = 0; i < dias.length; i += 7) {
-                        semanas.push(dias.slice(i, i + 7));
-                    }
+                                                // Dividir las fechas en semanas (grupos de 7 días)
+                                                const semanas = [];
+                                                for (let i = 0; i < dias.length; i += 7) {
+                                                    semanas.push(dias.slice(i, i + 7));
+                                                }
 
-                    return semanas;
-                }
+                                                return semanas;
+                                            }
+                                            
+                                            // Renderizar las semanas en el contenedor
+                                            function renderizarSemanas(semanas) {
+                                                weeksContainer.innerHTML = "";
+                                                semanas.forEach((semana, index) => {
+                                                    const weekRow = document.createElement("div");
+                                                    weekRow.className = "row";
 
-                // Renderizar las semanas en el contenedor
-                function renderizarSemanas(semanas) {
-                    weeksContainer.innerHTML = "";
-                    semanas.forEach((semana, index) => {
-                        const weekRow = document.createElement("div");
-                        weekRow.className = "row";
+                                                    semana.forEach((fecha) => {
+                                                        const dayBox = document.createElement("div");
+                                                        dayBox.className = "col s12 m2 day-box";
 
-                        semana.forEach((fecha) => {
-                            const dayBox = document.createElement("div");
-                            dayBox.className = "col s12 m2 day-box";
+                                                        const diaSemana = diasSemana[fecha.getDay()];
+                                                        const dia = fecha.getDate();
+                                                        const mes = meses[fecha.getMonth()];
+                                                        const anio = fecha.getFullYear();
 
-                            const diaSemana = diasSemana[fecha.getDay()];
-                            const dia = fecha.getDate();
-                            const mes = meses[fecha.getMonth()];
-                            const anio = fecha.getFullYear();
+                                                        dayBox.innerHTML = `
+          <strong>${diaSemana}</strong><br>
+          ${dia} de ${mes} ${anio}
+      `;
 
-                            dayBox.innerHTML = `
-                              <strong>${diaSemana}</strong><br>
-                              ${dia} de ${mes} ${anio}
-                          `;
+                                                        // Evento al hacer clic
+                                                        dayBox.addEventListener("click", () => {
+                                                            selectedDate.innerText =
+                                                                `Seleccionaste: ${diaSemana}, ${dia} de ${mes} del ${anio}`;
+                                                        });
 
-                            // Evento al hacer clic
-                            dayBox.addEventListener("click", () => {
-                                selectedDate.innerText =
-                                    `Seleccionaste: ${diaSemana}, ${dia} de ${mes} del ${anio}`;
-                            });
+                                                        weekRow.appendChild(dayBox);
+                                                    });
 
-                            weekRow.appendChild(dayBox);
-                        });
+                                                    weeksContainer.appendChild(weekRow);
+                                                });
+                                            }
 
-                        weeksContainer.appendChild(weekRow);
-                    });
-                }
-
-                // Inicializar
-                const semanas = generarFechas();
-                renderizarSemanas(semanas);
-            });
+                                            // Inicializar
+                                            const semanas = generarFechas();
+                                            renderizarSemanas(semanas);
+                                        });*/
         </script>
