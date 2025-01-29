@@ -51,7 +51,7 @@ Route::delete('paciente/{paciente}', [PacienteController::class, 'destroy'])->na
 // CITAS
 Route::resource('cita', CitaController::class);
 Route::get('/citas', [CitaController::class, 'index']);
-Route::get('/citas/{cita}', [CitaController::class, 'show']);
+Route::get('/citas/{cita}', [CitaController::class, 'show'])->name('cita.show');;
 // Ruta para crear una nueva cita
 Route::post('/api/citas', [CitaController::class, 'store']);
 // Route::middleware('api')->group(function () {

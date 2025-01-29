@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Paciente;
+use App\Models\Convenio;
+use App\Models\Cita;
 use Illuminate\Http\Request;
 
 class PacienteController extends Controller
@@ -41,13 +43,14 @@ class PacienteController extends Controller
 
   public function index()
   {
-    $pacientes = Paciente::all();
+    $pacientes = Paciente::with('previsionConvenio')->get(); 
     return view('content.paciente.index', compact('pacientes'));
   }
 
   public function create()
   {
-    return view('content.paciente.create');
+    $convenios = Convenio::all();
+    return view('content.paciente.create', compact('convenios'));
   }
 
   public function store(Request $request)
@@ -62,19 +65,29 @@ class PacienteController extends Controller
       'fecha_nacimiento' => 'required|date',
       'rut' => 'required|unique:pacientes,rut',
     ]);
-
     Paciente::create($request->all());
     return redirect()->route('paciente.index')->with('success', 'Paciente creado correctamente.');
   }
 
-  public function show(Paciente $paciente)
-  {
-    return view('content.paciente.show', compact('paciente'));
+  public function show($id){
+    // Verificar que el ID recibido es válido
+    $paciente = Paciente::where('idpaciente', $id)->firstOrFail();
+
+    // Obtener las citas del paciente
+    $citas = Cita::where('paciente_id', $paciente->idpaciente)->get();
+
+    // Mostrar en consola si hay citas
+    logger($citas);
+
+    // Enviar los datos a la vista
+    return view('content.paciente.show', compact('paciente', 'citas'));
   }
+
 
   public function edit(Paciente $paciente)
   {
-    return view('content.paciente.edit', compact('paciente'));
+    $convenios = Convenio::all();
+    return view('content.paciente.edit', compact('paciente','convenios'));
   }
 
   public function update(Request $request, Paciente $paciente)
@@ -82,7 +95,7 @@ class PacienteController extends Controller
     $request->validate([
       'nombre' => 'required',
       'apellido' => 'required',
-      'prevision' => 'required',
+      'prevision' => 'required|integer|exists:convenios,id',
       'sexo' => 'required|in:1,2',
       'fecha_nacimiento' => 'required|date',
       'rut' => 'required|unique:pacientes,rut,' . $paciente->idpaciente . ',idpaciente',

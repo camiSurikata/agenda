@@ -66,7 +66,7 @@ class ConvenioController extends Controller
     public function edit(Convenio $convenio)
     {
         // Retornar la vista para editar un convenio existente
-        return view('convenios.edit', compact('convenio'));
+        return view('content.convenios.edit', compact('convenio'));
     }
 
     /**

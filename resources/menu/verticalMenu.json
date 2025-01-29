@@ -25,6 +25,11 @@
           "url": "/especialidades",
           "name": "Especialidades",
           "slug": "app-ecommerce-dashboard"
+        },
+        {
+          "url": "/paciente",
+          "name": "Pacientes",
+          "slug": "app-ecommerce-dashboard"
         }
       ]
     },
