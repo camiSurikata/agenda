@@ -27,8 +27,8 @@
           "slug": "app-ecommerce-dashboard"
         },
         {
-          "url": "/paciente",
-          "name": "Pacientes",
+          "url": "/convenios",
+          "name": "Convenios",
           "slug": "app-ecommerce-dashboard"
         }
       ]
