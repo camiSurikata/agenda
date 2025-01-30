@@ -1,138 +1,184 @@
 @component('layouts/sections/navbar/navbar-agenda')
-@endcomponent
-@component('content')
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
+    @extends('layouts/layoutMaster')
 
-        .step-header {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 30px;
-        }
+    @section('title', 'Reserva de Citas')
 
-        .step {
-            text-align: center;
-        }
+@section('vendor-style')
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/bs-stepper/bs-stepper.css') }}" />
+@endsection
 
-        .step.active {
-            color: #007bff;
-            font-weight: bold;
-        }
-    </style>
+@section('vendor-script')
+    <script src="{{ asset('assets/vendor/libs/bs-stepper/bs-stepper.js') }}"></script>
+@endsection
 
-    <body>
-        <div class="container mt-5">
-            <!-- Header -->
-            <div class="step-header">
-                <div class="step active" id="iden">1. Identificación</div>
-                <div class="step" id="sele">2. Selección del profesional</div>
-                <div class="step" id="dispo">3. Búsqueda de disponibilidad</div>
-                <div class="step" id="confirm">4. Confirmación</div>
-            </div>
+@section('page-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var stepper = new Stepper(document.querySelector('.bs-stepper'));
 
-            <!-- Formulario -->
-            <div class="text-center" id="identificacion">
-                {{-- <h2>Averclaro - Reserva de Citas Online</h2> --}}
-                <form id="rutForm" class="mt-4">
-                    <div class="form-group">
-                        <input type="text" id="rut" name="rut" class="form-control text-center"
-                            placeholder="RUT Paciente (Ej: 17608512-2)" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Ingresar</button>
-                </form>
-                <p id="resultado" class="mt-3 text-center"></p>
-            </div>
+            document.getElementById('rutForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                stepper.next(); // Avanza al siguiente paso
+            });
+        });
+    </script>
+@endsection
 
+@section('content')
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">Reserva de Citas /</span> Identificación
+    </h4>
+
+    <div class="row">
+        <div class="col-12">
+            <h5>Proceso de Identificación</h5>
         </div>
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script>
-            // Función para validar RUT
-            function validarRUT(rut) {
-                rut = rut.replace(/\./g, '').replace('-', '');
-                const cuerpo = rut.slice(0, -1);
-                const digitoVerificador = rut.slice(-1).toUpperCase();
 
-                if (cuerpo.length < 7) return false;
+        <!-- Stepper -->
+        <div class="col-12 mb-4">
+            <div class="bs-stepper wizard-numbered mt-2">
+                <div class="bs-stepper-header">
+                    <!-- Paso 1: Identificación -->
+                    <div class="step active" data-target="#identificacion">
+                        <button type="button" class="step-trigger">
+                            <span class="bs-stepper-circle"><i class="mdi mdi-account"></i></span>
+                            <span class="bs-stepper-label">
+                                <span class="bs-stepper-number">01</span>
+                                <span class="bs-stepper-title">Identificación</span>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="line"></div>
 
-                let suma = 0;
-                let multiplo = 2;
+                    <!-- Paso 2: Confirmación -->
+                    <div class="step" data-target="#confirmacion">
+                        <button type="button" class="step-trigger">
+                            <span class="bs-stepper-circle"><i class="mdi mdi-check"></i></span>
+                            <span class="bs-stepper-label">
+                                <span class="bs-stepper-number">02</span>
+                                <span class="bs-stepper-title">Confirmación</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
 
-                for (let i = 1; i <= cuerpo.length; i++) {
-                    const index = multiplo * rut.charAt(cuerpo.length - i);
-                    suma += index;
-                    multiplo = multiplo < 7 ? multiplo + 1 : 2;
-                }
+                <div class="bs-stepper-content">
+                    <!-- Formulario de Identificación -->
+                    <div id="identificacion" class="content active">
+                        <form id="rutForm" class="mt-4">
+                            <div class="form-group">
+                                <input type="text" id="rut" name="rut" class="form-control text-center"
+                                    placeholder="RUT Paciente (Ej: 17608512-2)" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">Ingresar</button>
+                        </form>
+                    </div>
 
-                const dvEsperado = 11 - (suma % 11);
-                const dv = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : dvEsperado.toString();
+                    <!-- Paso de Confirmación -->
+                    <div id="confirmacion" class="content">
+                        <h5 class="text-center mt-4">¡RUT validado con éxito!</h5>
+                        <p class="text-center">Puede continuar con la reserva de cita.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
 
-                return dv === digitoVerificador;
-            }
-            $(document).ready(function() {
-                $('#rutForm').on('submit', function(e) {
-                    e.preventDefault();
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Función para validar RUT
+    function validarRUT(rut) {
+        rut = rut.replace(/\./g, '').replace('-', '');
+        const cuerpo = rut.slice(0, -1);
+        const digitoVerificador = rut.slice(-1).toUpperCase();
 
-                    const rut = $('#rut').val();
-                    const esValido = validarRUT(rut);
+        if (cuerpo.length < 7) return false;
 
-                    const resultado = $('#resultado');
-                    if (esValido) {
-                        // Enviar el RUT al backend para verificar si está registrado
-                        $.ajax({
-                            url: '/agenda/validar-paciente',
-                            type: 'POST',
-                            data: {
-                                rut: rut,
-                                _token: '{{ csrf_token() }}' // Agregar token CSRF para seguridad
-                            },
-                            success: function(response) {
-                                if (response.registrado) {
-                                    resultado.text('✅ RUT válido. Usuario registrado.')
-                                        .addClass('text-success')
-                                        .removeClass('text-danger');
+        let suma = 0;
+        let multiplo = 2;
 
-                                    // Ocultar sección de identificación
-                                    // $('#identificacion').css('display', 'none');
+        for (let i = 1; i <= cuerpo.length; i++) {
+            const index = multiplo * rut.charAt(cuerpo.length - i);
+            suma += index;
+            multiplo = multiplo < 7 ? multiplo + 1 : 2;
+        }
 
-                                    // Mostrar sección de selección del profesional
-                                    // $('#seleccion').css('display', 'block');
+        const dvEsperado = 11 - (suma % 11);
+        const dv = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : dvEsperado.toString();
 
-                                    // Cambiar el paso activo en el encabezado
-                                    // $('#iden').removeClass('active');
-                                    // $('#sele').addClass('active');
-                                    // Redirigir al formulario de registro
-                                    setTimeout(function() {
-                                        window.location.href =
-                                            '/reservar-cita?rut=' +
-                                            rut;
-                                    }, 2000);
-                                } else {
-                                    resultado.text(
-                                            '✅ RUT válido. Usuario no registrado. Redirigiendo a registro...'
-                                        )
-                                        .addClass('text-warning')
-                                        .removeClass('text-danger text-success');
+        return dv === digitoVerificador;
+    }
+    $(document).ready(function() {
+        $('#rutForm').on('submit', function(e) {
+            e.preventDefault();
 
-                                    // Redirigir al formulario de registro
-                                    setTimeout(function() {
-                                        window.location.href =
-                                            '/registro-paciente?rut=' +
-                                            rut;
-                                    }, 2000);
-                                }
-                            },
-                            error: function() {
-                                resultado.text('❌ Error al validar el usuario.')
-                                    .addClass('text-danger')
-                                    .removeClass('text-success');
+            const rut = $('#rut').val();
+            const esValido = validarRUT(rut);
 
-                            }
-                        });
-                    } else {
-                        resultado.text('❌ RUT inválido.').addClass('text-danger').removeClass('text-success');
+            const resultado = $('#resultado');
+            if (esValido) {
+                // Enviar el RUT al backend para verificar si está registrado
+                $.ajax({
+                    url: '/agenda/validar-paciente',
+                    type: 'POST',
+                    data: {
+                        rut: rut,
+                        _token: '{{ csrf_token() }}' // Agregar token CSRF para seguridad
+                    },
+                    success: function(response) {
+                        if (response.registrado) {
+                            resultado.text('✅ RUT válido. Usuario registrado.')
+                                .addClass('text-success')
+                                .removeClass('text-danger');
+
+                            // Ocultar sección de identificación
+                            // $('#identificacion').css('display', 'none');
+
+                            // Mostrar sección de selección del profesional
+                            // $('#seleccion').css('display', 'block');
+
+                            // Cambiar el paso activo en el encabezado
+                            // $('#iden').removeClass('active');
+                            // $('#sele').addClass('active');
+                            // Redirigir al formulario de registro
+                            setTimeout(function() {
+                                window.location.href =
+                                    '/reservar-cita?rut=' +
+                                    rut;
+                            }, 2000);
+                        } else {
+                            resultado.text(
+                                    '✅ RUT válido. Usuario no registrado. Redirigiendo a registro...'
+                                )
+                                .addClass('text-warning')
+                                .removeClass('text-danger text-success');
+
+                            // Redirigir al formulario de registro
+                            setTimeout(function() {
+                                window.location.href =
+                                    '/registro-paciente?rut=' +
+                                    rut;
+                            }, 2000);
+                        }
+                    },
+                    error: function() {
+                        resultado.text('❌ Error al validar el usuario.')
+                            .addClass('text-danger')
+                            .removeClass('text-success');
+
                     }
                 });
-            });
-        </script>
+            } else {
+                resultado.text('❌ RUT inválido.').addClass('text-danger').removeClass('text-success');
+            }
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+  var stepper = new Stepper(document.querySelector('.bs-stepper'));
+  stepper.to(2); // Mueve automáticamente al paso 2
+});
+</script>
