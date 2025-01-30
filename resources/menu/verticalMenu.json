@@ -25,6 +25,11 @@
           "url": "/especialidades",
           "name": "Especialidades",
           "slug": "app-ecommerce-dashboard"
+        },
+        {
+          "url": "/convenios",
+          "name": "Convenios",
+          "slug": "app-ecommerce-dashboard"
         }
       ]
     },

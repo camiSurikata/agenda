@@ -21,4 +21,10 @@ class Paciente extends Model
     'fecha_nacimiento',
     'rut',
   ];
+
+  // Modelo Paciente
+  public function previsionConvenio(){
+    return $this->belongsTo(Convenio::class, 'prevision', 'id');
+  }
+
 }

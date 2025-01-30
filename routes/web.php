@@ -13,6 +13,7 @@ use App\Http\Controllers\BoxController;
 use App\Http\Controllers\CitaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\PacienteController;
+use App\Http\Controllers\ConvenioController;
 use App\Models\Cita;
 use App\Http\Controllers\EspecialidadController;
 use App\Models\Especialidad;
@@ -52,7 +53,7 @@ Route::delete('paciente/{paciente}', [PacienteController::class, 'destroy'])->na
 // CITAS
 Route::resource('cita', CitaController::class);
 Route::get('/citas', [CitaController::class, 'index']);
-Route::get('/citas/{cita}', [CitaController::class, 'show']);
+Route::get('/citas/{cita}', [CitaController::class, 'show'])->name('cita.show');;
 // Ruta para crear una nueva cita
 Route::post('/api/citas', [CitaController::class, 'store']);
 // Route::middleware('api')->group(function () {
@@ -113,8 +114,8 @@ Route::get('/encuesta/enviar', [EncuestaController::class, 'enviar'])->name('enc
 
 
 
-
-
+//Convenio
+Route::resource('convenios', ConvenioController::class);
 
 
 // Route::post('/medicos', [MedicoController::class, 'store'])->name('medicos.store');
