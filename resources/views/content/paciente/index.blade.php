@@ -12,46 +12,35 @@
             </div>
         @endif
 
-        <div class="col-12 col-lg-6 mb-4 mb-xl-0 d-flex justify-content-center align-items-center">
-            <div class="demo-inline-spacing mt-3">
-                <div class="list-group d-flex flex-column align-items-center justify-content-center">
-                    @foreach ($pacientes as $paciente)
-                        <div class="col-12 col-lg-12 mb-4 mb-xl-0">
-                            <div class="demo-inline-spacing mt-3">
-                                <div class="list-group" style="max-height: 80vh; overflow-y: auto; padding: 15px; margin-bottom: 0;">
-                                    <div class="list-group-item list-group-item-action d-flex align-items-center cursor-pointer" style="padding: 20px;  border-radius: 10px;">
-                                        <img src="{{ asset('assets/img/avatars/' . $paciente->idpaciente . '.png') }}" alt="User Image" class="rounded-circle me-3" style="height: 100px; width: 100px;">
-                                        <div class="w-100">
-                                            <div class="d-flex justify-content-between">
-                                                <div class="user-info">
-                                                    <h6 class="mb-1" style="font-size: 22px; font-weight: bold;">{{ $paciente->nombre }} {{ $paciente->apellido }}</h6>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="user-status me-2 d-flex align-items-center">
-                                                            <small style="font-size: 16px;">Sexo: {{ $paciente->sexo == 2 ? 'Masculino' : 'Femenino' }}</small>
-                                                            <small style="font-size: 16px;">Rut: {{ $paciente->rut}}</small>
-                                                        </div>
-                                                        
-                                                    </div>
-                                                </div>
-                                                <div class="add-btn">
-                                                    <a href="{{ route('paciente.show', $paciente->idpaciente) }}" class="btn btn-info btn-sm">Ver</a>
-                                                    <a href="{{ route('paciente.edit', $paciente->idpaciente) }}" class="btn btn-warning btn-sm">Editar</a>
-                                                    <form action="{{ route('paciente.destroy', $paciente) }}" method="POST" style="display:inline;" id="delete-form-{{ $paciente->idpaciente }}">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $paciente->idpaciente }})">Eliminar</button>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </div>
+        <div class="list-group" style="max-height: 80vh; overflow-y: auto; padding: 15px; margin-bottom: 0; display: flex; flex-wrap: wrap; justify-content: space-between;">
+            @foreach ($pacientes as $paciente)
+                <div class="list-group-item list-group-item-action d-flex align-items-center cursor-pointer" style="padding: 20px; border-radius: 10px; flex: 0 0 48%; margin-bottom: 20px;">
+                    <img src="{{ asset('assets/img/avatars/' . $paciente->idpaciente . '.png') }}" alt="User Image" class="rounded-circle me-3" style="height: 100px; width: 100px;">
+                    <div class="w-100">
+                        <div class="d-flex justify-content-between">
+                            <div class="user-info">
+                                <h6 class="mb-1" style="font-size: 22px; font-weight: bold;">{{ $paciente->nombre }} {{ $paciente->apellido }}</h6>
+                                <div class="d-flex flex-column align-items-start">
+                                    <div class="d-flex justify-content-start">
+                                        <small style="font-size: 16px; margin-right: 10px;">Sexo: {{ $paciente->sexo == 2 ? 'Masculino' : 'Femenino' }}</small>
+                                        <small style="font-size: 16px;">Rut: {{ $paciente->rut }}</small>
                                     </div>
                                 </div>
                             </div>
+                            <div class="add-btn">
+                                <a href="{{ route('paciente.show', $paciente->idpaciente) }}" class="btn btn-info btn-sm">Ver</a>
+                                <a href="{{ route('paciente.edit', $paciente->idpaciente) }}" class="btn btn-warning btn-sm">Editar</a>
+                                <form action="{{ route('paciente.destroy', $paciente) }}" method="POST" style="display:inline;" id="delete-form-{{ $paciente->idpaciente }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $paciente->idpaciente }})">Eliminar</button>
+                                </form>
+                            </div>
                         </div>
-                    @endforeach
+                    </div>
                 </div>
-            </div>
-        </div>
+            @endforeach
+        </div>                  
     </div>
 @endsection
 
@@ -59,6 +48,7 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    
     $(document).ready(function() {
         $('#pacienteTable').DataTable({
             language: {
@@ -66,6 +56,8 @@
             }
         });
     });
+    
+    
 
     function confirmDelete(pacienteId) {
         Swal.fire({

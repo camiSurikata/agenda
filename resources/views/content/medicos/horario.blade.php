@@ -31,7 +31,7 @@
                         @php
                             $horario = $medico->horarios->firstWhere('dia_semana', $dia);
                         @endphp
-                        <tr>
+                        <tr id="fila-{{ $dia }}">
                             <td>{{ $dia }}</td>
                             <td>
                                 <input type="time" name="horarios[{{ $dia }}][hora_inicio]"
@@ -48,12 +48,16 @@
                                     value="{{ $horario->descanso_termino ?? '' }}" class="form-control mt-2">
                             </td>
                             <td>
-                                <input type="text" name="horarios[{{ $dia }}][box_atencion]"
-                                    value="{{ $horario->box_atencion ?? '' }}" class="form-control">
+                                <select name="recurso" id="recurso" class="form-control">
+                                    <option value="">Seleccione un box</option>
+                                    @foreach($boxes as $box)
+                                        <option value="{{ $box->nombre }}">{{ $box->nombre }}</option>
+                                    @endforeach
+                                </select>
                             </td>
                             <td>
-                                <input type="checkbox" name="horarios[{{ $dia }}][no_atiende]" value="1"
-                                    {{ $horario->no_atiende ? 'checked' : '' }}>
+                                <input type="checkbox" name="horarios[{{ $dia }}][no_atiende]" value="1" 
+                                {{ $horario->no_atiende ? 'checked' : '' }} class="no-atiende-checkbox">
                             </td>
                         </tr>
                     @endforeach
@@ -69,8 +73,9 @@
         + Crear un nuevo bloqueo programado
     </button>
     <br>
-    <div class="row">
-        <table id="bloqueosTable">
+    
+    <div class="card-datatable table-responsive pt-0">
+        <table class="dt-responsive table table" id="bloqueosTable">
             <thead>
                 <tr>
                     <th>Sucursal</th>
@@ -104,7 +109,13 @@
                     <form>
                         <div class="form-group">
                             <label for="sucursal">Sucursal:</label>
-                            <input type="text" class="form-control" name="sucursal" id="sucursal" required>
+                            <select name="sucursal" id="sucursal" class="form-control">
+                                <option value="">Seleccione una sucursal</option>
+                                @foreach($sucursales as $sucursal)
+                                    <option value="{{ $sucursal->nombre }}">{{ $sucursal->nombre }}</option>
+                                @endforeach
+                            </select>
+
                         </div>
                         <div class="form-group">
                             <label for="fecha">Fecha:</label>
@@ -117,6 +128,15 @@
                         <div class="form-group">
                             <label for="hora_termino">Hora Término:</label>
                             <input type="time" class="form-control" name="hora_termino" id="hora_termino" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="recurso">Box</label>
+                            <select name="recurso" id="recurso" class="form-control">
+                                <option value="">Seleccione un box</option>
+                                @foreach($boxes as $box)
+                                    <option value="{{ $box->nombre }}">{{ $box->nombre }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <button type="button" id="bloqueoForm" class="btn btn-primary">Guardar</button>
                     </form>
@@ -143,7 +163,7 @@
                 fecha: $('#fecha').val(),
                 hora_inicio: $('#hora_inicio').val(),
                 hora_termino: $('#hora_termino').val(),
-                recurso: 1,
+                recurso: $('#recurso').val(),
                 creado_por: 'Usuario Actual', // Cambiar según tu lógica
             };
 
@@ -227,5 +247,28 @@
                 },
             });
         }
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // Función para deshabilitar/activar la fila completa
+        $('.no-atiende-checkbox').change(function() {
+            var fila = $(this).closest('tr');  // Obtiene la fila correspondiente
+            if ($(this).is(':checked')) {
+                // Si el checkbox está marcado, deshabilitar todos los inputs y selects de la fila, excepto el checkbox
+                fila.find('input[type="time"], select').prop('disabled', true);
+            } else {
+                // Si el checkbox no está marcado, habilitar todos los inputs y selects de la fila
+                fila.find('input[type="time"], select').prop('disabled', false);
+            }
+        });
+
+        // Inicialización para marcar las filas ya deshabilitadas según la condición
+        $('.no-atiende-checkbox').each(function() {
+            if ($(this).is(':checked')) {
+                $(this).closest('tr').find('input[type="time"], select').prop('disabled', true);
+            }
+        });
     });
 </script>
