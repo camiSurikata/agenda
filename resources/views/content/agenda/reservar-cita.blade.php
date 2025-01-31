@@ -111,7 +111,8 @@
                             </div>
 
                             <button type="button" id="siguientePaso" class="btn btn-primary mt-3">Siguiente</button>
-                            <button id="abrirModal" type="button" class="btn btn-info mt-3">Ver Horarios Disponibles</button>
+                            <button id="abrirModal" type="button" class="btn btn-info mt-3">Ver Horarios
+                                Disponibles</button>
 
                         </form>
                     </div>
@@ -204,28 +205,40 @@
             horariosTabContent.innerHTML = ''; // Limpiar contenido
 
             const diasDisponibles = {};
+            const semanasExtra = 2; // Puedes ajustar esto para mostrar más semanas
 
-            // Agrupar horarios por día
+            // Agrupar horarios por día, incluyendo semanas adicionales
             horarios.forEach(horario => {
-                const fechaCompleta = obtenerProximoDia(horario.dia_semana);
-                if (!diasDisponibles[fechaCompleta]) {
-                    diasDisponibles[fechaCompleta] = [];
+                for (let i = 0; i <= semanasExtra; i++) {
+                    const fechaCompleta = obtenerProximoDia(horario.dia_semana, i);
+                    if (!diasDisponibles[fechaCompleta]) {
+                        diasDisponibles[fechaCompleta] = [];
+                    }
+                    diasDisponibles[fechaCompleta].push(horario);
                 }
-                diasDisponibles[fechaCompleta].push(horario);
             });
 
             // Crear pestañas y contenido
             let primeraPestaña = true;
 
-            Object.keys(diasDisponibles).forEach((dia, index) => {
+            // Ordenar las fechas en orden cronológico
+            const fechasOrdenadas = Object.keys(diasDisponibles).sort((a, b) => {
+                const fechaA = new Date(a.split(' ')[1].split('/').reverse().join('-'));
+                const fechaB = new Date(b.split(' ')[1].split('/').reverse().join('-'));
+                return fechaA - fechaB;
+            });
+
+            // Crear pestañas y contenido en orden
+            fechasOrdenadas.forEach((dia, index) => {
                 // Crear pestaña
                 const tabItem = document.createElement('li');
                 tabItem.className = 'nav-item';
                 tabItem.innerHTML = `
-                <button class="nav-link ${primeraPestaña ? 'active' : ''}" id="tab-${index}" data-bs-toggle="tab" data-bs-target="#content-${index}" type="button" role="tab">
-                    ${dia}
-                </button>
-            `;
+            <button class="nav-link ${primeraPestaña ? 'active' : ''}" id="tab-${index}" 
+                data-bs-toggle="tab" data-bs-target="#content-${index}" type="button" role="tab">
+                ${dia}
+            </button>
+        `;
                 horariosTabs.appendChild(tabItem);
 
                 // Crear contenido de pestaña
@@ -262,16 +275,19 @@
             modalHorarios.hide();
         }
 
-        function obtenerProximoDia(diaSemana) {
+        function obtenerProximoDia(diaSemana, semanasExtra = 0) {
             const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
             const hoy = new Date();
             const diaActual = hoy.getDay();
             const indiceDia = dias.indexOf(diaSemana.toLowerCase());
+
             let diferencia = indiceDia - diaActual;
             if (diferencia <= 0) {
                 diferencia += 7;
             }
-            hoy.setDate(hoy.getDate() + diferencia);
+
+            hoy.setDate(hoy.getDate() + diferencia + (semanasExtra * 7));
+
             return `${dias[hoy.getDay()]} ${hoy.getDate()}/${hoy.getMonth() + 1}/${hoy.getFullYear()}`;
         }
 
@@ -329,17 +345,18 @@
 
 
 
+<!-- Script para cerrar el modal y recargar la página -->
+<!-- Este script solo refresca la pagina, pero se tiene que ocupar algo como .reset() que por ABC motivo no funciona -->
 <script>
-    document.getElementById('cerrarModal').addEventListener('click', function() {
-        // Obtener y restablecer los formularios dentro del modal
-        var modal = document.getElementById('modalHorarios');
-        if (modal) {
-            modal.querySelectorAll('input, select').forEach(function(field) {
-                field.value = '';
+    document.addEventListener('DOMContentLoaded', function() {
+        var cerrarModalBtn = document.getElementById('cerrarModal');
+        if (cerrarModalBtn) {
+            cerrarModalBtn.addEventListener('click', function() {
+                // Recargar la página
+                location.reload();
             });
         }
     });
 </script>
-
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>

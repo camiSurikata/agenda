@@ -25,6 +25,10 @@
 @endsection
 
 @section('content')
+
+    <!-- Hay dos pasos restantes que hay agregar he implementar, una vez implementado se le aplicaran los estilos correspondientes -->
+    <!-- Los pasos restantes son 3.Busqueda de disponibilidad y 4.Confirmacion -->
+
     <h4 class="py-3 mb-4">
         <span class="text-muted fw-light">Reserva de Citas /</span> Identificación
     </h4>
