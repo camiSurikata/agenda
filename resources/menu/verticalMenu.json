@@ -30,6 +30,11 @@
           "url": "/paciente",
           "name": "Pacientes",
           "slug": "app-ecommerce-dashboard"
+        },
+        {
+          "url": "/convenios",
+          "name": "Convenios",
+          "slug": "app-ecommerce-dashboard"
         }
       ]
     },

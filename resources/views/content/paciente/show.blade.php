@@ -23,7 +23,7 @@
             </div>
             <div class="user-profile-header d-flex flex-column flex-sm-row text-sm-start text-center mb-4">
                 <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-                    <img src="{{ asset('assets/img/avatars/1.png') }}" alt="user image" class="d-block h-auto ms-0 ms-sm-4 rounded user-profile-img">
+                    <img src="{{ asset('assets/img/avatars/' . $paciente->idpaciente . '.png') }}" alt="user image" class="d-block h-auto ms-0 ms-sm-4 rounded user-profile-img">
                 </div>
                 <div class="flex-grow-1 mt-3 mt-sm-5">
                     <div class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-4 flex-md-row flex-column gap-4">
@@ -66,17 +66,30 @@
                                 <th>Especialidad</th>
                                 <th>Fecha</th>
                                 <th>Estado</th>
+                                <th>Box</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($citas as $cita)
                                 <tr>
                                     <tr>
-                                        <td>{{ $cita->sucursal_id}}</td>
+                                        <td>{{ $cita->sucursal->nombre ?? 'Sucursal no encontrada' }}</td>
                                         <td>{{ $cita->title }}</td>
                                         <td>{{ $cita->start }}</td>
-                                        <td>{{ $cita->estado }}</td>
-                                        <td>{{ $cita->box_ID }}</td>
+                                        <td>
+                                            @if ($cita->estado == 1)
+                                                <span class="badge rounded-pill bg-label-danger">Atendiendose</span>
+                                            @elseif($cita->estado == 2)
+                                                <span class="badge rounded-pill bg-label-primary">Atendido</span>
+                                            @elseif($cita->estado == 3)
+                                                <span class="badge rounded-pill bg-label-warning">No Asiste</span>
+                                            @elseif($cita->estado == 4)
+                                                <span class="badge rounded-pill bg-label-success">Confirmado</span>
+                                            @elseif($cita->estado == 5)
+                                                <span class="badge rounded-pill bg-label-info">Espera</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $cita->box_id }}</td>
                                     </tr>
                                 </tr>
                             @endforeach

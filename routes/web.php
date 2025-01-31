@@ -109,6 +109,10 @@ Route::get('/encuesta/enviar', [EncuestaController::class, 'enviar'])->name('enc
 
 //Convenio
 Route::resource('convenios', ConvenioController::class);
+Route::put('/convenios/{id}/toggle', [ConvenioController::class, 'toggleState'])->name('convenios.toggle');
+
+
+
 
 
 // Route::post('/medicos', [MedicoController::class, 'store'])->name('medicos.store');

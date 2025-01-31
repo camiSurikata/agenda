@@ -15,4 +15,7 @@ class Sucursal extends Model
   {
     return $this->hasMany(HorariosMedico::class, 'id_sucursal');
   }
+
+  
+
 }

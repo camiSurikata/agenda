@@ -131,7 +131,6 @@
 <script>
     $(document).ready(function() {
         const medicoId = {{ $medico->id }};
-        alert();
         cargarBloqueos();
 
         // Agregar nuevo bloqueo
