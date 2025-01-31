@@ -1,415 +1,362 @@
 @component('layouts/sections/navbar/navbar-agenda')
-@endcomponent
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
-<!-- Materialize Icons -->
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-<style>
-    .day-box {
-        padding: 10px;
-        text-align: center;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        margin: 5px;
-    }
-
-    .day-box:hover {
-        background-color: #f0f0f0;
-    }
-</style>
-@component('content')
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        .step-header {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 30px;
-        }
-
-        .step {
-            text-align: center;
-        }
-
-        .step.active {
-            color: #007bff;
-            font-weight: bold;
-        }
-    </style>
-
-    <body>
-        <div class="container">
-            <h4 class="center">Próximos 28 días</h4>
-            <p class="center">Haz clic en una fecha para ver el detalle</p>
-            <div id="weeksContainer"></div>
-            <div class="row center">
-                <h5 id="selectedDate">Selecciona un día para más detalles</h5>
-            </div>
-        </div>
-        <meta name="csrf-token" content="{{ csrf_token() }}">
-
-        <div class="container mt-5">
-            <h2>Buscar Cita</h2>
-            <form id="form-reserva">
-                @csrf
-
-                <div class="form-group">
-                    <label for="nombre">Paciente</label>
-                    <input type="text" id="nombre" class="form-control"
-                        value="{{ $paciente->nombre }} {{ $paciente->apellido }}" readonly>
-                    <input type="hidden" name="paciente_id" value="{{ $paciente->id }}">
-                </div>
-
-                <div class="form-group">
-                    <label for="sucursal">Sucursal</label>
-                    <select id="sucursal" name="sucursal_id" class="form-control" required>
-                        <option value="">Seleccione una sucursal</option>
-                        @foreach ($sucursales as $sucursal)
-                            <option value="{{ $sucursal->id }}">{{ $sucursal->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="especialidad">Especialidad</label>
-                    <select id="especialidad" name="especialidad_id" class="form-control" required>
-                        <option value="">Seleccione una especialidad</option>
-                        @foreach ($especialidades as $especialidad)
-                            <option value="{{ $especialidad->id }}">{{ $especialidad->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="medico">Medico</label>
-                    <select id="medico" name="medico_id" class="form-control" required>
-                        <option value="">Seleccione un médico</option>
-                        @foreach ($medicos as $medico)
-                            <option value="{{ $medico->id }}">{{ $medico->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </form>
-
-            <!-- Botón para abrir el modal manualmente si es necesario -->
-            <button id="abrirModal" type="button" class="btn btn-info d-none" data-bs-toggle="modal"
-                data-bs-target="#modalHorarios">
-                Ver Horarios Disponibles
-            </button>
-        </div>
-
-        <!-- Modal para mostrar los horarios -->
-        <div class="modal fade" id="modalHorarios" tabindex="-1" aria-labelledby="modalHorariosLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="horariosModalLabel">Horarios Disponibles</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div id="horariosContainer">
-
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-        <script>
-            const sucursalSelect = document.getElementById('sucursal');
-            const especialidadSelect = document.getElementById('especialidad');
-            const medicoSelect = document.getElementById('medico');
-            const modalHorarios = new bootstrap.Modal(document.getElementById('modalHorarios'));
-
-            // Listeners para los selects
-            sucursalSelect.addEventListener('change', cargarHorarios);
-            console.log('2');
-            especialidadSelect.addEventListener('change', cargarHorarios);
-            medicoSelect.addEventListener('change', cargarHorarios);
-
-            function cargarHorarios() {
-                const sucursalId = document.getElementById('sucursal').value;
-                const especialidadId = document.getElementById('especialidad').value;
-                const medicoId = document.getElementById('medico').value;
-
-                console.log("Sucursal ID:", sucursalId);
-                console.log("Especialidad ID:", especialidadId);
-                console.log("Medico ID:", medicoId);
-
-                if (sucursalId && especialidadId && medicoId) {
-                    axios.post('{{ route('horarios.disponibles') }}', {
-                            sucursal_id: sucursalId,
-                            especialidad_id: especialidadId,
-                            medico_id: medicoId,
-                            _token: '{{ csrf_token() }}'
-                        })
-                        .then(response => {
-                            console.log("Horarios disponibles:", response.data.horarios);
-                            // Aquí puedes actualizar el modal con los horarios
-                            const horarios = response.data.horarios;
-                            const horariosContainer = document.getElementById('horariosContainer');
-
-                            if (horarios && horarios.length > 0) {
-                                // Limpiar contenido previo
-                                horariosContainer.innerHTML = '';
-
-                                // Crear una lista de horarios
-                                const list = document.createElement('ul');
-                                list.className = 'list-group';
-
-                                horarios.forEach(horario => {
-                                    const listItem = document.createElement('li');
-                                    listItem.className = 'list-group-item';
-
-                                    const intervalos = generarIntervalos(horario.hora_inicio, horario.hora_termino,
-                                        horario.descanso_inicio, horario.descanso_termino);
-                                    const intervalosText = intervalos.map(i => `<div>${i}</div>`).join('');
-
-                                    listItem.innerHTML = `<strong>${obtenerProximoDia(horario.dia_semana)}</strong> -
-            <strong>${horario.sucursal}</strong> - ${horario.medico.nombre}
-            <div class="mt-2">
-                ${intervalosText}
-            </div>
-        `;
-
-                                    list.appendChild(listItem);
-                                });
-
-                                horariosContainer.appendChild(list);
-                            } else {
-                                // Si no hay horarios disponibles
-                                horariosContainer.innerHTML = '<p>No hay horarios disponibles.</p>';
-                            }
-
-                            // Mostrar el modal
-                            // const horariosModal = new bootstrap.Modal(document.getElementById('horariosModal'));
-                            modalHorarios.show();
-                        })
-                        .catch(error => {
-                            console.error("Error:", error);
-
-                        })
-                        .catch(error => {
-                            if (error.response) {
-                                console.error("Error al cargar los horarios (response):", error.response.data);
-                            } else if (error.request) {
-                                console.error("Error al cargar los horarios (request):", error.request);
-                            } else {
-                                console.error("Error al cargar los horarios (message):", error.message);
-                            }
-                        });
-                } else {
-                    console.error("Faltan datos para cargar los horarios");
-                }
-            }
-
-            function obtenerProximoDia(diaBuscado) {
-                const diasSemana = [
-                    "domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"
-                ];
-
-                // Convertir el día buscado a minúsculas para evitar problemas de mayúsculas/minúsculas
-                diaBuscado = diaBuscado.toLowerCase();
-
-                // Validar que el día buscado exista
-                if (!diasSemana.includes(diaBuscado)) {
-                    return "Día inválido";
-                }
-
-                // Obtener el índice del día buscado
-                const indiceDiaBuscado = diasSemana.indexOf(diaBuscado);
-
-                // Fecha actual
-                const hoy = new Date();
-
-                // Índice del día actual
-                const indiceHoy = hoy.getDay();
-
-                // Calcular los días restantes hasta el día buscado
-                const diasRestantes =
-                    (indiceDiaBuscado - indiceHoy + 7) % 7 || 7; // Asegura que siempre sea el siguiente día
-
-                // Calcular la fecha del próximo día
-                const proximaFecha = new Date();
-                proximaFecha.setDate(hoy.getDate() + diasRestantes);
-
-                // Formatear la fecha
-                const meses = [
-                    "enero", "febrero", "marzo", "abril", "mayo", "junio",
-                    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-                ];
-
-                const diaSemana = diasSemana[proximaFecha.getDay()];
-                const dia = proximaFecha.getDate();
-                const mes = meses[proximaFecha.getMonth()];
-                const anio = proximaFecha.getFullYear();
-
-                return `Próximo ${diaSemana} ${dia} de ${mes} del ${anio}`;
-            }
-
-            // Ejemplo de uso
-            console.log(obtenerProximoDia("lunes")); // "Próximo lunes 20 de enero del 2025" (si hoy fuera 13 de enero de 2025)
-            console.log(obtenerProximoDia("viernes")); // "Próximo viernes 17 de enero del 2025"
-
-            function formatearFechaChile(fechaStr) {
-                const fecha = new Date(`${fechaStr}T00:00:00-03:00`); // Chile Continental en horario estándar UTC-3
-
-                // Verificar que la fecha sea válida
-                if (isNaN(fecha.getTime())) {
-                    return "Fecha inválida";
-                }
-
-                const formato = new Intl.DateTimeFormat('es-CL', {
-                    weekday: 'long',
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric',
-                    timeZone: 'America/Santiago', // Asegura el huso horario de Chile
-                });
-
-                return formato.format(fecha);
-            }
-
-            function generarIntervalos(horaInicio, horaTermino, descansoInicio, descansoTermino) {
-                const intervalos = [];
-                const [startHour, startMinutes] = horaInicio.split(':').map(Number);
-                const [endHour, endMinutes] = horaTermino.split(':').map(Number);
-
-                const [breakStartHour, breakStartMinutes] = descansoInicio ? descansoInicio.split(':').map(Number) : [null,
-                    null
-                ];
-                const [breakEndHour, breakEndMinutes] = descansoTermino ? descansoTermino.split(':').map(Number) : [null, null];
-
-                let currentHour = startHour;
-                let currentMinutes = startMinutes;
-
-                while (currentHour < endHour || (currentHour === endHour && currentMinutes < endMinutes)) {
-                    const nextMinutes = (currentMinutes + 30) % 60;
-                    const nextHour = currentMinutes + 30 >= 60 ? currentHour + 1 : currentHour;
-
-                    // Validar si el intervalo está dentro del rango del descanso
-                    const isInBreak =
-                        breakStartHour !== null &&
-                        breakEndHour !== null &&
-                        (
-                            (currentHour > breakStartHour || (currentHour === breakStartHour && currentMinutes >=
-                                breakStartMinutes)) &&
-                            (currentHour < breakEndHour || (currentHour === breakEndHour && currentMinutes < breakEndMinutes))
-                        );
-
-                    if (!isInBreak) {
-                        intervalos.push(
-                            `${String(currentHour).padStart(2, '0')}:${String(currentMinutes).padStart(2, '0')} - ${String(nextHour).padStart(2, '0')}:${String(nextMinutes).padStart(2, '0')}`
-                        );
-                    }
-
-                    currentHour = nextHour;
-                    currentMinutes = nextMinutes;
-                }
-
-                return intervalos;
-            }
-
-
-            function mostrarHorarios(horarios) {
-                const listaHorarios = document.getElementById('lista-horarios');
-                listaHorarios.innerHTML = ''; // Limpiar lista antes de agregar nuevos datos
-
-                if (horarios.length > 0) {
-                    horarios.forEach(horario => {
-                        const listItem = document.createElement('li');
-                        listItem.classList.add('list-group-item');
-                        listItem.textContent = `Fecha: ${horario.fecha} - Hora: ${horario.hora}`;
-                        listaHorarios.appendChild(listItem);
-                    });
-                } else {
-                    const listItem = document.createElement('li');
-                    listItem.classList.add('list-group-item', 'text-danger');
-                    listItem.textContent = 'No hay horarios disponibles.';
-                    listaHorarios.appendChild(listItem);
-                }
-
-                modalHorarios.show(); // Mostrar el modal automáticamente
-            }
-        </script>
-
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
-                const meses = [
-                    "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-                ];
-                const weeksContainer = document.getElementById("weeksContainer");
-                const selectedDate = document.getElementById("selectedDate");
-
-                // Generar los próximos 28 días
-                function generarFechas() {
-                    const hoy = new Date();
-                    let dias = [];
-
-                    // Generar fechas desde hoy hasta 28 días después
-                    for (let i = 0; i < 28; i++) {
-                        const nuevaFecha = new Date(hoy);
-                        nuevaFecha.setDate(hoy.getDate() + i);
-                        dias.push(nuevaFecha);
-                    }
-
-                    // Dividir las fechas en semanas (grupos de 7 días)
-                    const semanas = [];
-                    for (let i = 0; i < dias.length; i += 7) {
-                        semanas.push(dias.slice(i, i + 7));
-                    }
-
-                    return semanas;
-                }
-
-                // Renderizar las semanas en el contenedor
-                function renderizarSemanas(semanas) {
-                    weeksContainer.innerHTML = "";
-                    semanas.forEach((semana, index) => {
-                        const weekRow = document.createElement("div");
-                        weekRow.className = "row";
-
-                        semana.forEach((fecha) => {
-                            const dayBox = document.createElement("div");
-                            dayBox.className = "col s12 m2 day-box";
-
-                            const diaSemana = diasSemana[fecha.getDay()];
-                            const dia = fecha.getDate();
-                            const mes = meses[fecha.getMonth()];
-                            const anio = fecha.getFullYear();
-
-                            dayBox.innerHTML = `
-                              <strong>${diaSemana}</strong><br>
-                              ${dia} de ${mes} ${anio}
-                          `;
-
-                            // Evento al hacer clic
-                            dayBox.addEventListener("click", () => {
-                                selectedDate.innerText =
-                                    `Seleccionaste: ${diaSemana}, ${dia} de ${mes} del ${anio}`;
-                            });
-
-                            weekRow.appendChild(dayBox);
-                        });
-
-                        weeksContainer.appendChild(weekRow);
-                    });
-                }
-
-                // Inicializar
-                const semanas = generarFechas();
-                renderizarSemanas(semanas);
+    @extends('layouts/layoutMaster')
+
+    @section('title', 'Reserva de Citas')
+
+@section('vendor-style')
+    <link rel="stylesheet" href="{{ asset('assets/vendor/libs/bs-stepper/bs-stepper.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+@endsection
+
+@section('vendor-script')
+    <script src="{{ asset('assets/vendor/libs/bs-stepper/bs-stepper.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+@endsection
+
+@section('page-script')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var stepper = new Stepper(document.querySelector('.bs-stepper'));
+
+            document.getElementById('siguientePaso').addEventListener('click', function() {
+                stepper.next(); // Avanza al siguiente paso
             });
-        </script>
+
+            document.getElementById('abrirModal').addEventListener('click', function() {
+                var modal = new bootstrap.Modal(document.getElementById('modalHorarios'));
+                modal.show();
+            });
+        });
+    </script>
+@endsection
+
+@section('content')
+    <h4 class="py-3 mb-4">
+        <span class="text-muted fw-light">Reserva de Citas /</span> Paso a Paso
+    </h4>
+
+    <div class="row">
+        <div class="col-12">
+            <h5>Proceso de Reserva</h5>
+        </div>
+
+        <!-- Stepper -->
+        <div class="col-12 mb-4">
+            <div class="bs-stepper wizard-numbered mt-2">
+                <div class="bs-stepper-header">
+                    <!-- Paso 1: Selección de Datos -->
+                    <div class="step" data-target="#seleccion-datos">
+                        <button type="button" class="step-trigger">
+                            <span class="bs-stepper-circle"><i class="mdi mdi-account"></i></span>
+                            <span class="bs-stepper-label">
+                                <span class="bs-stepper-number">01</span>
+                                <span class="bs-stepper-title">Datos del Paciente</span>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="line"></div>
+
+                    <!-- Paso 2: Selección de Horarios -->
+                    <div class="step active" data-target="#seleccion-horarios">
+                        <button type="button" class="step-trigger">
+                            <span class="bs-stepper-circle"><i class="mdi mdi-clock"></i></span>
+                            <span class="bs-stepper-label">
+                                <span class="bs-stepper-number">02</span>
+                                <span class="bs-stepper-title">Seleccionar Horario</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bs-stepper-content">
+                    <!-- Paso 1: Selección de Datos -->
+                    <div id="seleccion-datos" class="content active">
+                        <form id="form-reserva" class="mt-4">
+                            @csrf
+                            <div class="form-group">
+                                <label for="nombre">Paciente</label>
+                                <input type="text" id="nombre" class="form-control"
+                                    value="{{ $paciente->nombre }} {{ $paciente->apellido }}" readonly>
+                                <input type="hidden" name="paciente_id" value="{{ $paciente->id }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="sucursal">Sucursal</label>
+                                <select id="sucursal" name="sucursal_id" class="form-control" required>
+                                    <option value="">Seleccione una sucursal</option>
+                                    @foreach ($sucursales as $sucursal)
+                                        <option value="{{ $sucursal->id }}">{{ $sucursal->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="especialidad">Especialidad</label>
+                                <select id="especialidad" name="especialidad_id" class="form-control" required>
+                                    <option value="">Seleccione una especialidad</option>
+                                    @foreach ($especialidades as $especialidad)
+                                        <option value="{{ $especialidad->id }}">{{ $especialidad->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="medico">Médico</label>
+                                <select id="medico" name="medico_id" class="form-control" required>
+                                    <option value="">Seleccione un médico</option>
+                                    @foreach ($medicos as $medico)
+                                        <option value="{{ $medico->id }}">{{ $medico->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <button type="button" id="siguientePaso" class="btn btn-primary mt-3">Siguiente</button>
+                            <button id="abrirModal" type="button" class="btn btn-info mt-3">Ver Horarios
+                                Disponibles</button>
+
+                        </form>
+                    </div>
+
+                    <!-- Paso 2: Selección de Horarios -->
+                    <div id="seleccion-horarios" class="content">
+                        <h5 class="text-center mt-4">Seleccione un horario disponible</h5>
+                        <button id="abrirModal" type="button" class="btn btn-info mt-3">Ver Horarios Disponibles</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Horarios con Pestañas -->
+    <div class="modal fade" id="modalHorarios" tabindex="-1" aria-labelledby="modalHorariosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="horariosModalLabel">Horarios Disponibles</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Pestañas para los días disponibles -->
+                    <ul class="nav nav-tabs" id="horariosTabs" role="tablist"></ul>
+
+                    <!-- Contenedor de contenido de pestañas -->
+                    <div class="tab-content mt-3" id="horariosTabContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        id="cerrarModal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sucursalSelect = document.getElementById('sucursal');
+        const especialidadSelect = document.getElementById('especialidad');
+        const medicoSelect = document.getElementById('medico');
+
+        sucursalSelect.addEventListener('change', cargarHorarios);
+        especialidadSelect.addEventListener('change', cargarHorarios);
+        medicoSelect.addEventListener('change', cargarHorarios);
+
+        function cargarHorarios() {
+            const sucursalId = sucursalSelect.value;
+            const especialidadId = especialidadSelect.value;
+            const medicoId = medicoSelect.value;
+
+            if (sucursalId && especialidadId && medicoId) {
+                axios.post('{{ route('horarios.disponibles') }}', {
+                        sucursal_id: sucursalId,
+                        especialidad_id: especialidadId,
+                        medico_id: medicoId,
+                        _token: '{{ csrf_token() }}'
+                    })
+                    .then(response => {
+                        const horarios = response.data.horarios;
+                        if (horarios.length > 0) {
+                            generarPestañasHorarios(horarios);
+                            const modalHorarios = new bootstrap.Modal(document.getElementById(
+                                'modalHorarios'));
+                            modalHorarios.show();
+                        } else {
+                            alert("No hay horarios disponibles.");
+                        }
+                    })
+                    .catch(error => console.error("Error al cargar los horarios:", error));
+            } else {
+                console.error("Faltan datos para cargar los horarios");
+            }
+        }
+
+        function generarPestañasHorarios(horarios) {
+            const horariosTabs = document.getElementById('horariosTabs');
+            const horariosTabContent = document.getElementById('horariosTabContent');
+
+            horariosTabs.innerHTML = ''; // Limpiar pestañas
+            horariosTabContent.innerHTML = ''; // Limpiar contenido
+
+            const diasDisponibles = {};
+            const semanasExtra = 2; // Puedes ajustar esto para mostrar más semanas
+
+            // Agrupar horarios por día, incluyendo semanas adicionales
+            horarios.forEach(horario => {
+                for (let i = 0; i <= semanasExtra; i++) {
+                    const fechaCompleta = obtenerProximoDia(horario.dia_semana, i);
+                    if (!diasDisponibles[fechaCompleta]) {
+                        diasDisponibles[fechaCompleta] = [];
+                    }
+                    diasDisponibles[fechaCompleta].push(horario);
+                }
+            });
+
+            // Crear pestañas y contenido
+            let primeraPestaña = true;
+
+            // Ordenar las fechas en orden cronológico
+            const fechasOrdenadas = Object.keys(diasDisponibles).sort((a, b) => {
+                const fechaA = new Date(a.split(' ')[1].split('/').reverse().join('-'));
+                const fechaB = new Date(b.split(' ')[1].split('/').reverse().join('-'));
+                return fechaA - fechaB;
+            });
+
+            // Crear pestañas y contenido en orden
+            fechasOrdenadas.forEach((dia, index) => {
+                // Crear pestaña
+                const tabItem = document.createElement('li');
+                tabItem.className = 'nav-item';
+                tabItem.innerHTML = `
+            <button class="nav-link ${primeraPestaña ? 'active' : ''}" id="tab-${index}" 
+                data-bs-toggle="tab" data-bs-target="#content-${index}" type="button" role="tab">
+                ${dia}
+            </button>
+        `;
+                horariosTabs.appendChild(tabItem);
+
+                // Crear contenido de pestaña
+                const tabContent = document.createElement('div');
+                tabContent.className = `tab-pane fade ${primeraPestaña ? 'show active' : ''}`;
+                tabContent.id = `content-${index}`;
+                tabContent.innerHTML = generarBotonesHorarios(diasDisponibles[dia]);
+                horariosTabContent.appendChild(tabContent);
+
+                primeraPestaña = false;
+            });
+        }
+
+        function generarBotonesHorarios(horarios) {
+            let botonesHTML = '<div class="d-flex flex-wrap gap-2">';
+            horarios.forEach(horario => {
+                const intervalos = generarIntervalos(horario.hora_inicio, horario.hora_termino, horario
+                    .descanso_inicio, horario.descanso_termino);
+                intervalos.forEach(intervalo => {
+                    botonesHTML += `
+                    <button class="btn btn-primary btn-sm" onclick="seleccionarHorario('${intervalo}')">
+                        ${intervalo}
+                    </button>
+                `;
+                });
+            });
+            botonesHTML += '</div>';
+            return botonesHTML;
+        }
+
+        function seleccionarHorario(horario) {
+            alert(`Has seleccionado el horario: ${horario}`);
+            const modalHorarios = bootstrap.Modal.getInstance(document.getElementById('modalHorarios'));
+            modalHorarios.hide();
+        }
+
+        function obtenerProximoDia(diaSemana, semanasExtra = 0) {
+            const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+            const hoy = new Date();
+            const diaActual = hoy.getDay();
+            const indiceDia = dias.indexOf(diaSemana.toLowerCase());
+
+            let diferencia = indiceDia - diaActual;
+            if (diferencia <= 0) {
+                diferencia += 7;
+            }
+
+            hoy.setDate(hoy.getDate() + diferencia + (semanasExtra * 7));
+
+            return `${dias[hoy.getDay()]} ${hoy.getDate()}/${hoy.getMonth() + 1}/${hoy.getFullYear()}`;
+        }
+
+        function generarIntervalos(horaInicio, horaTermino, descansoInicio, descansoTermino) {
+            const intervalos = [];
+            let [hInicio, mInicio] = horaInicio.split(':').map(Number);
+            let [hFin, mFin] = horaTermino.split(':').map(Number);
+
+            let descansoInicioHora = descansoInicio ? descansoInicio.split(':').map(Number) : null;
+            let descansoFinHora = descansoTermino ? descansoTermino.split(':').map(Number) : null;
+
+            while (hInicio < hFin || (hInicio === hFin && mInicio < mFin)) {
+                let siguienteMinutos = (mInicio + 30) % 60;
+                let siguienteHora = mInicio + 30 >= 60 ? hInicio + 1 : hInicio;
+
+                let enDescanso = descansoInicioHora && descansoFinHora &&
+                    ((hInicio > descansoInicioHora[0] || (hInicio === descansoInicioHora[0] && mInicio >=
+                            descansoInicioHora[1])) &&
+                        (hInicio < descansoFinHora[0] || (hInicio === descansoFinHora[0] && mInicio <
+                            descansoFinHora[1])));
+
+                if (!enDescanso) {
+                    intervalos.push(
+                        `${String(hInicio).padStart(2, '0')}:${String(mInicio).padStart(2, '0')} - ${String(siguienteHora).padStart(2, '0')}:${String(siguienteMinutos).padStart(2, '0')}`
+                    );
+                }
+
+                hInicio = siguienteHora;
+                mInicio = siguienteMinutos;
+            }
+
+            return intervalos;
+        }
+    });
+</script>
+
+<script>
+    // Listener para el botón de abrir el modal
+    document.getElementById('abrirModal').addEventListener('click', function(event) {
+        // Reemplaza 'campo1' y 'campo2' con los IDs de tus campos necesarios
+        var campo1 = document.getElementById('sucursal').value;
+        var campo2 = document.getElementById('especialidad').value;
+        var campo3 = document.getElementById('medico').value;
+
+        if (!campo1 || !campo2 || !campo3) {
+            event.preventDefault(); // Prevenir el comportamiento predeterminado del botón
+            alert('Por favor, rellena todos los campos necesarios.');
+        } else {
+            // Si los campos están completos, abre el modal
+            var modal = new bootstrap.Modal(document.getElementById('modalHorarios'));
+            modal.show();
+        }
+    });
+</script>
+
+
+
+<!-- Script para cerrar el modal y recargar la página -->
+<!-- Este script solo refresca la pagina, pero se tiene que ocupar algo como .reset() que por ABC motivo no funciona -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var cerrarModalBtn = document.getElementById('cerrarModal');
+        if (cerrarModalBtn) {
+            cerrarModalBtn.addEventListener('click', function() {
+                // Recargar la página
+                location.reload();
+            });
+        }
+    });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
