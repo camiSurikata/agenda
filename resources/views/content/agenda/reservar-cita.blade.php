@@ -1,7 +1,6 @@
-@component('layouts/sections/navbar/navbar-agenda')
-    @extends('layouts/layoutMaster')
+@extends('layouts/layoutMaster')
 
-    @section('title', 'Reserva de Citas')
+@section('title', 'Reserva de Citas')
 
 @section('vendor-style')
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/bs-stepper/bs-stepper.css') }}" />
@@ -21,65 +20,65 @@
             document.getElementById('siguientePaso').addEventListener('click', function() {
                 stepper.next(); // Avanza al siguiente paso
             });
-
-            document.getElementById('abrirModal').addEventListener('click', function() {
-                var modal = new bootstrap.Modal(document.getElementById('modalHorarios'));
-                modal.show();
-            });
         });
     </script>
+
 @endsection
 
 @section('content')
     <h4 class="py-3 mb-4">
-        <span class="text-muted fw-light">Reserva de Citas /</span> Paso a Paso
+        <span class="text-muted fw-light">Reserva de Citas /</span> Agendar
     </h4>
 
     <div class="row">
         <div class="col-12">
-            <h5>Proceso de Reserva</h5>
+            <h5>Agendar Hora</h5>
         </div>
-
         <!-- Stepper -->
         <div class="col-12 mb-4">
             <div class="bs-stepper wizard-numbered mt-2">
                 <div class="bs-stepper-header">
-                    <!-- Paso 1: Selección de Datos -->
-                    <div class="step" data-target="#seleccion-datos">
+                    <!-- Paso 2: Selección de Médico -->
+                    <div class="step active" data-target="#seleccion-medico">
                         <button type="button" class="step-trigger">
-                            <span class="bs-stepper-circle"><i class="mdi mdi-account"></i></span>
+                            <span class="bs-stepper-circle"><i class="mdi mdi-hospital"></i></span>
                             <span class="bs-stepper-label">
                                 <span class="bs-stepper-number">01</span>
-                                <span class="bs-stepper-title">Datos del Paciente</span>
+                                <span class="bs-stepper-title">Seleccionar Médico</span>
                             </span>
                         </button>
                     </div>
                     <div class="line"></div>
 
-                    <!-- Paso 2: Selección de Horarios -->
-                    <div class="step active" data-target="#seleccion-horarios">
+                    <!-- Paso 3: Ver Horarios Disponibles -->
+                    <div class="step" data-target="#seleccion-horarios">
                         <button type="button" class="step-trigger">
                             <span class="bs-stepper-circle"><i class="mdi mdi-clock"></i></span>
                             <span class="bs-stepper-label">
                                 <span class="bs-stepper-number">02</span>
-                                <span class="bs-stepper-title">Seleccionar Horario</span>
+                                <span class="bs-stepper-title">Ver Horarios</span>
+                            </span>
+                        </button>
+                    </div>
+                    <div class="line"></div>
+
+                    <!-- Paso 4: Confirmar Reserva -->
+                    <div class="step" data-target="#confirmar-reserva">
+                        <button type="button" class="step-trigger">
+                            <span class="bs-stepper-circle"><i class="mdi mdi-check-circle"></i></span>
+                            <span class="bs-stepper-label">
+                                <span class="bs-stepper-number">03</span>
+                                <span class="bs-stepper-title">Confirmar Reserva</span>
                             </span>
                         </button>
                     </div>
                 </div>
 
                 <div class="bs-stepper-content">
-                    <!-- Paso 1: Selección de Datos -->
-                    <div id="seleccion-datos" class="content active">
+                    <!-- Paso 2: Selección de Médico -->
+                    <div id="seleccion-medico" class="content active">
                         <form id="form-reserva" class="mt-4">
                             @csrf
-                            <div class="form-group">
-                                <label for="nombre">Paciente</label>
-                                <input type="text" id="nombre" class="form-control"
-                                    value="{{ $paciente->nombre }} {{ $paciente->apellido }}" readonly>
-                                <input type="hidden" name="paciente_id" value="{{ $paciente->id }}">
-                            </div>
-
                             <div class="form-group">
                                 <label for="sucursal">Sucursal</label>
                                 <select id="sucursal" name="sucursal_id" class="form-control" required>
@@ -89,7 +88,6 @@
                                     @endforeach
                                 </select>
                             </div>
-
                             <div class="form-group">
                                 <label for="especialidad">Especialidad</label>
                                 <select id="especialidad" name="especialidad_id" class="form-control" required>
@@ -99,7 +97,6 @@
                                     @endforeach
                                 </select>
                             </div>
-
                             <div class="form-group">
                                 <label for="medico">Médico</label>
                                 <select id="medico" name="medico_id" class="form-control" required>
@@ -109,254 +106,287 @@
                                     @endforeach
                                 </select>
                             </div>
-
                             <button type="button" id="siguientePaso" class="btn btn-primary mt-3">Siguiente</button>
-                            <button id="abrirModal" type="button" class="btn btn-info mt-3">Ver Horarios
-                                Disponibles</button>
-
                         </form>
                     </div>
 
-                    <!-- Paso 2: Selección de Horarios -->
+                    <!-- Paso 3: Ver Horarios Disponibles -->
                     <div id="seleccion-horarios" class="content">
                         <h5 class="text-center mt-4">Seleccione un horario disponible</h5>
-                        <button id="abrirModal" type="button" class="btn btn-info mt-3">Ver Horarios Disponibles</button>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="button" id="prevDay" class="btn btn-secondary">&laquo;</button>
+                            <ul class="nav nav-tabs flex-grow-1" id="horariosTabs" role="tablist"></ul>
+                            <button type="button" id="nextDay" class="btn btn-secondary">&raquo;</button>
+                        </div>
+                        <div class="tab-content mt-3" id="horariosTabContent"></div>
+                        <!--<button type="button" id="siguientePaso" class="btn btn-primary mt-3">Siguiente</button> -->
+                    </div>
+
+                    <!-- Paso 4: Confirmar Reserva -->
+                    <div id="confirmar-reserva" class="content">
+                        <h5 class="text-center mt-4">Confirmar Reserva</h5>
+                        <p>Por favor, revise la información antes de confirmar.</p>
+                        <ul>
+                            <li><strong>Sucursal:</strong> <span id="resumenSucursal"></span></li>
+                            <li><strong>Especialidad:</strong> <span id="resumenEspecialidad"></span></li>
+                            <li><strong>Médico:</strong> <span id="resumenMedico"></span></li>
+                            <li><strong>Horario:</strong> <span id="resumenHorario"></span></li>
+                        </ul>
+                        <button type="submit" class="btn btn-success">Confirmar Reserva</button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal de Horarios con Pestañas -->
-    <div class="modal fade" id="modalHorarios" tabindex="-1" aria-labelledby="modalHorariosLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="horariosModalLabel">Horarios Disponibles</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Pestañas para los días disponibles -->
-                    <ul class="nav nav-tabs" id="horariosTabs" role="tablist"></ul>
-
-                    <!-- Contenedor de contenido de pestañas -->
-                    <div class="tab-content mt-3" id="horariosTabContent"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                        id="cerrarModal">Cerrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-@endsection
+    @endsection
 
 
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sucursalSelect = document.getElementById('sucursal');
+            const especialidadSelect = document.getElementById('especialidad');
+            const medicoSelect = document.getElementById('medico');
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const sucursalSelect = document.getElementById('sucursal');
-        const especialidadSelect = document.getElementById('especialidad');
-        const medicoSelect = document.getElementById('medico');
+            const stepperElement = document.querySelector('.bs-stepper');
+            const stepper = new Stepper(stepperElement);
 
-        sucursalSelect.addEventListener('change', cargarHorarios);
-        especialidadSelect.addEventListener('change', cargarHorarios);
-        medicoSelect.addEventListener('change', cargarHorarios);
+            sucursalSelect.addEventListener('change', cargarHorarios);
+            especialidadSelect.addEventListener('change', cargarHorarios);
+            medicoSelect.addEventListener('change', cargarHorarios);
 
-        function cargarHorarios() {
-            const sucursalId = sucursalSelect.value;
-            const especialidadId = especialidadSelect.value;
-            const medicoId = medicoSelect.value;
 
-            if (sucursalId && especialidadId && medicoId) {
-                axios.post('{{ route('horarios.disponibles') }}', {
-                        sucursal_id: sucursalId,
-                        especialidad_id: especialidadId,
-                        medico_id: medicoId,
-                        _token: '{{ csrf_token() }}'
-                    })
-                    .then(response => {
-                        const horarios = response.data.horarios;
-                        if (horarios.length > 0) {
-                            generarPestañasHorarios(horarios);
-                            const modalHorarios = new bootstrap.Modal(document.getElementById(
-                                'modalHorarios'));
-                            modalHorarios.show();
-                        } else {
-                            alert("No hay horarios disponibles.");
-                        }
-                    })
-                    .catch(error => console.error("Error al cargar los horarios:", error));
-            } else {
-                console.error("Faltan datos para cargar los horarios");
-            }
-        }
+            function cargarHorarios() {
+                const sucursalId = sucursalSelect.value;
+                const especialidadId = especialidadSelect.value;
+                const medicoId = medicoSelect.value;
 
-        function generarPestañasHorarios(horarios) {
-            const horariosTabs = document.getElementById('horariosTabs');
-            const horariosTabContent = document.getElementById('horariosTabContent');
+                if (sucursalId && especialidadId && medicoId) {
+                    Promise.all([
+                            axios.post('{{ route('horarios.disponibles') }}', {
+                                sucursal_id: sucursalId,
+                                especialidad_id: especialidadId,
+                                medico_id: medicoId,
+                                _token: '{{ csrf_token() }}'
+                            }),
+                            axios.get(
+                                `{{ url('medicos') }}/${medicoId}/bloqueos`) // Se pasa medicoId en la URL
+                        ])
+                        .then(([horariosResponse, bloqueoResponse]) => {
+                            const horarios = horariosResponse.data.horarios || [];
+                            const horariosBloqueados = bloqueoResponse.data.bloqueos || [];
 
-            horariosTabs.innerHTML = ''; // Limpiar pestañas
-            horariosTabContent.innerHTML = ''; // Limpiar contenido
+                            if (horarios.length > 0) {
+                                const horariosDisponibles = horarios.filter(horario => {
+                                    return !horariosBloqueados.some(bloqueo =>
+                                        bloqueo.dia_semana === horario.dia_semana &&
+                                        bloqueo.hora_inicio === horario.hora_inicio &&
+                                        bloqueo.hora_termino === horario.hora_termino
+                                    );
+                                });
 
-            const diasDisponibles = {};
-            const semanasExtra = 2; // Puedes ajustar esto para mostrar más semanas
-
-            // Agrupar horarios por día, incluyendo semanas adicionales
-            horarios.forEach(horario => {
-                for (let i = 0; i <= semanasExtra; i++) {
-                    const fechaCompleta = obtenerProximoDia(horario.dia_semana, i);
-                    if (!diasDisponibles[fechaCompleta]) {
-                        diasDisponibles[fechaCompleta] = [];
-                    }
-                    diasDisponibles[fechaCompleta].push(horario);
+                                if (horariosDisponibles.length > 0) {
+                                    generarPestañasHorarios(horariosDisponibles);
+                                    // new bootstrap.Modal(document.getElementById('modalHorarios')).show(); // Línea comentada ya que no se usa la modal
+                                } else {
+                                    alert("No hay horarios disponibles después del bloqueo.");
+                                }
+                            } else {
+                                alert("No hay horarios disponibles.");
+                            }
+                        })
+                        .catch(error => console.error("Error al cargar los horarios:", error));
+                } else {
+                    console.error("Faltan datos para cargar los horarios");
                 }
-            });
+            }
 
-            // Crear pestañas y contenido
-            let primeraPestaña = true;
+            function generarPestañasHorarios(horarios) {
+                const horariosTabs = document.getElementById('horariosTabs');
+                const horariosTabContent = document.getElementById('horariosTabContent');
+                const prevDayButton = document.getElementById('prevDay');
+                const nextDayButton = document.getElementById('nextDay');
 
-            // Ordenar las fechas en orden cronológico
-            const fechasOrdenadas = Object.keys(diasDisponibles).sort((a, b) => {
-                const fechaA = new Date(a.split(' ')[1].split('/').reverse().join('-'));
-                const fechaB = new Date(b.split(' ')[1].split('/').reverse().join('-'));
-                return fechaA - fechaB;
-            });
+                horariosTabs.innerHTML = ''; // Limpiar pestañas
+                horariosTabContent.innerHTML = ''; // Limpiar contenido
 
-            // Crear pestañas y contenido en orden
-            fechasOrdenadas.forEach((dia, index) => {
-                // Crear pestaña
-                const tabItem = document.createElement('li');
-                tabItem.className = 'nav-item';
-                tabItem.innerHTML = `
-            <button class="nav-link ${primeraPestaña ? 'active' : ''}" id="tab-${index}" 
-                data-bs-toggle="tab" data-bs-target="#content-${index}" type="button" role="tab">
-                ${dia}
-            </button>
-        `;
-                horariosTabs.appendChild(tabItem);
+                const diasDisponibles = {};
+                const semanasExtra = 2; // Puedes ajustar esto para mostrar más semanas
 
-                // Crear contenido de pestaña
-                const tabContent = document.createElement('div');
-                tabContent.className = `tab-pane fade ${primeraPestaña ? 'show active' : ''}`;
-                tabContent.id = `content-${index}`;
-                tabContent.innerHTML = generarBotonesHorarios(diasDisponibles[dia]);
-                horariosTabContent.appendChild(tabContent);
+                // Agrupar horarios por día, incluyendo semanas adicionales
+                horarios.forEach(horario => {
+                    for (let i = 0; i <= semanasExtra; i++) {
+                        const fechaCompleta = obtenerProximoDia(horario.dia_semana, i);
+                        if (!diasDisponibles[fechaCompleta]) {
+                            diasDisponibles[fechaCompleta] = [];
+                        }
+                        diasDisponibles[fechaCompleta].push(horario);
+                    }
+                });
 
-                primeraPestaña = false;
-            });
-        }
+                // Ordenar las fechas en orden cronológico
+                const fechasOrdenadas = Object.keys(diasDisponibles).sort((a, b) => {
+                    const fechaA = new Date(a.split(' ')[1].split('/').reverse().join('-'));
+                    const fechaB = new Date(b.split(' ')[1].split('/').reverse().join('-'));
+                    return fechaA - fechaB;
+                });
 
-        function generarBotonesHorarios(horarios) {
-            let botonesHTML = '<div class="d-flex flex-wrap gap-2">';
-            horarios.forEach(horario => {
-                const intervalos = generarIntervalos(horario.hora_inicio, horario.hora_termino, horario
-                    .descanso_inicio, horario.descanso_termino);
-                intervalos.forEach(intervalo => {
-                    botonesHTML += `
-                    <button class="btn btn-primary btn-sm" onclick="seleccionarHorario('${intervalo}')">
+                let currentStartIndex = 0;
+                const daysToShow = 6; // Number of days to show at once
+
+                function updateTabs() {
+                    // Clear current tabs and content
+                    horariosTabs.innerHTML = '';
+                    horariosTabContent.innerHTML = '';
+
+                    // Add new tabs and content based on currentStartIndex
+                    for (let i = currentStartIndex; i < currentStartIndex + daysToShow && i < fechasOrdenadas
+                        .length; i++) {
+                        const dia = fechasOrdenadas[i];
+
+                        // Crear pestaña
+                        const tabItem = document.createElement('li');
+                        tabItem.className = 'nav-item';
+                        tabItem.innerHTML = `
+                            <button class="nav-link ${i === currentStartIndex ? 'active' : ''}" id="tab-${i}" 
+                                data-bs-toggle="tab" data-bs-target="#content-${i}" type="button" role="tab">
+                                ${dia}
+                            </button>
+                        `;
+                        horariosTabs.appendChild(tabItem);
+
+                        // Crear contenido de pestaña
+                        const tabContent = document.createElement('div');
+                        tabContent.className = `tab-pane fade ${i === currentStartIndex ? 'show active' : ''}`;
+                        tabContent.id = `content-${i}`;
+                        tabContent.innerHTML = generarBotonesHorarios(diasDisponibles[dia]);
+                        horariosTabContent.appendChild(tabContent);
+
+                        // Asociar eventos click a los botones generados
+                        const intervalos = diasDisponibles[dia].flatMap(horario =>
+                            generarIntervalos(horario.hora_inicio, horario.hora_termino, horario
+                                .descanso_inicio, horario.descanso_termino)
+                        );
+                        intervalos.forEach(intervalo => {
+                            const buttonId = `btn-${intervalo.replace(/[:\s]/g, '-')}`;
+                            document.getElementById(buttonId).addEventListener('click', () =>
+                                seleccionarHorario(intervalo));
+                        });
+                    }
+                }
+
+                prevDayButton.addEventListener('click', function() {
+                    if (currentStartIndex > 0) {
+                        currentStartIndex -= daysToShow;
+                        updateTabs();
+                    }
+                });
+
+                nextDayButton.addEventListener('click', function() {
+                    if (currentStartIndex + daysToShow < fechasOrdenadas.length) {
+                        currentStartIndex += daysToShow;
+                        updateTabs();
+                    }
+                });
+
+                // Initialize tabs
+                updateTabs();
+            }
+
+            function generarBotonesHorarios(horarios) {
+                let botonesHTML = '<div class="d-flex flex-wrap gap-2">';
+                horarios.forEach(horario => {
+                    const intervalos = generarIntervalos(horario.hora_inicio, horario.hora_termino, horario
+                        .descanso_inicio, horario.descanso_termino);
+                    intervalos.forEach(intervalo => {
+                        const buttonId = `btn-${intervalo.replace(/[:\s]/g, '-')}`;
+                        botonesHTML += `
+                    <button id="${buttonId}" class="btn btn-primary btn-sm">
                         ${intervalo}
                     </button>
                 `;
+                    });
                 });
-            });
-            botonesHTML += '</div>';
-            return botonesHTML;
-        }
+                botonesHTML += '</div>';
+                return botonesHTML;
+            }
+            
 
-        function seleccionarHorario(horario) {
-            alert(`Has seleccionado el horario: ${horario}`);
-            const modalHorarios = bootstrap.Modal.getInstance(document.getElementById('modalHorarios'));
-            modalHorarios.hide();
-        }
+            let horarioSeleccionado;
 
-        function obtenerProximoDia(diaSemana, semanasExtra = 0) {
-            const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
-            const hoy = new Date();
-            const diaActual = hoy.getDay();
-            const indiceDia = dias.indexOf(diaSemana.toLowerCase());
+            function seleccionarHorario(horario) {
+                horarioSeleccionado = horario;
+                console.log("Horario seleccionado:", horario);
 
-            let diferencia = indiceDia - diaActual;
-            if (diferencia <= 0) {
-                diferencia += 7;
+                // Actualizar resumen de reserva
+                document.getElementById('resumenSucursal').textContent = sucursalSelect.options[sucursalSelect
+                    .selectedIndex].text;
+                document.getElementById('resumenEspecialidad').textContent = especialidadSelect.options[
+                    especialidadSelect.selectedIndex].text;
+                document.getElementById('resumenMedico').textContent = medicoSelect.options[medicoSelect
+                    .selectedIndex].text;
+                document.getElementById('resumenHorario').textContent = horario;
+
+                stepper.next(); // Avanza al siguiente paso
             }
 
-            hoy.setDate(hoy.getDate() + diferencia + (semanasExtra * 7));
+            function obtenerProximoDia(diaSemana, semanasExtra = 0) {
+                const dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+                const hoy = new Date();
+                const diaActual = hoy.getDay();
+                const indiceDia = dias.indexOf(diaSemana.toLowerCase());
 
-            return `${dias[hoy.getDay()]} ${hoy.getDate()}/${hoy.getMonth() + 1}/${hoy.getFullYear()}`;
-        }
-
-        function generarIntervalos(horaInicio, horaTermino, descansoInicio, descansoTermino) {
-            const intervalos = [];
-            let [hInicio, mInicio] = horaInicio.split(':').map(Number);
-            let [hFin, mFin] = horaTermino.split(':').map(Number);
-
-            let descansoInicioHora = descansoInicio ? descansoInicio.split(':').map(Number) : null;
-            let descansoFinHora = descansoTermino ? descansoTermino.split(':').map(Number) : null;
-
-            while (hInicio < hFin || (hInicio === hFin && mInicio < mFin)) {
-                let siguienteMinutos = (mInicio + 30) % 60;
-                let siguienteHora = mInicio + 30 >= 60 ? hInicio + 1 : hInicio;
-
-                let enDescanso = descansoInicioHora && descansoFinHora &&
-                    ((hInicio > descansoInicioHora[0] || (hInicio === descansoInicioHora[0] && mInicio >=
-                            descansoInicioHora[1])) &&
-                        (hInicio < descansoFinHora[0] || (hInicio === descansoFinHora[0] && mInicio <
-                            descansoFinHora[1])));
-
-                if (!enDescanso) {
-                    intervalos.push(
-                        `${String(hInicio).padStart(2, '0')}:${String(mInicio).padStart(2, '0')} - ${String(siguienteHora).padStart(2, '0')}:${String(siguienteMinutos).padStart(2, '0')}`
-                    );
+                let diferencia = indiceDia - diaActual;
+                if (diferencia <= 0) {
+                    diferencia += 7;
                 }
 
-                hInicio = siguienteHora;
-                mInicio = siguienteMinutos;
+                hoy.setDate(hoy.getDate() + diferencia + (semanasExtra * 7));
+
+                return `${dias[hoy.getDay()]} ${hoy.getDate()}/${hoy.getMonth() + 1}/${hoy.getFullYear()}`;
             }
 
-            return intervalos;
-        }
-    });
-</script>
+            function generarIntervalos(horaInicio, horaTermino, descansoInicio, descansoTermino) {
+                const intervalos = [];
+                let [hInicio, mInicio] = horaInicio.split(':').map(Number);
+                let [hFin, mFin] = horaTermino.split(':').map(Number);
 
-<script>
-    // Listener para el botón de abrir el modal
-    document.getElementById('abrirModal').addEventListener('click', function(event) {
-        // Reemplaza 'campo1' y 'campo2' con los IDs de tus campos necesarios
-        var campo1 = document.getElementById('sucursal').value;
-        var campo2 = document.getElementById('especialidad').value;
-        var campo3 = document.getElementById('medico').value;
+                let descansoInicioHora = descansoInicio ? descansoInicio.split(':').map(Number) : null;
+                let descansoFinHora = descansoTermino ? descansoTermino.split(':').map(Number) : null;
 
-        if (!campo1 || !campo2 || !campo3) {
-            event.preventDefault(); // Prevenir el comportamiento predeterminado del botón
-            alert('Por favor, rellena todos los campos necesarios.');
-        } else {
-            // Si los campos están completos, abre el modal
-            var modal = new bootstrap.Modal(document.getElementById('modalHorarios'));
-            modal.show();
-        }
-    });
-</script>
+                while (hInicio < hFin || (hInicio === hFin && mInicio < mFin)) {
+                    let siguienteMinutos = (mInicio + 30) % 60;
+                    let siguienteHora = mInicio + 30 >= 60 ? hInicio + 1 : hInicio;
+
+                    let enDescanso = descansoInicioHora && descansoFinHora &&
+                        ((hInicio > descansoInicioHora[0] || (hInicio === descansoInicioHora[0] && mInicio >=
+                                descansoInicioHora[1])) &&
+                            (hInicio < descansoFinHora[0] || (hInicio === descansoFinHora[0] && mInicio <
+                                descansoFinHora[1])));
+
+                    if (!enDescanso) {
+                        intervalos.push(
+                            `${String(hInicio).padStart(2, '0')}:${String(mInicio).padStart(2, '0')} - ${String(siguienteHora).padStart(2, '0')}:${String(siguienteMinutos).padStart(2, '0')}`
+                        );
+                    }
+
+                    hInicio = siguienteHora;
+                    mInicio = siguienteMinutos;
+                }
+
+                return intervalos;
+            }
 
 
-
-<!-- Script para cerrar el modal y recargar la página -->
-<!-- Este script solo refresca la pagina, pero se tiene que ocupar algo como .reset() que por ABC motivo no funciona -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var cerrarModalBtn = document.getElementById('cerrarModal');
-        if (cerrarModalBtn) {
-            cerrarModalBtn.addEventListener('click', function() {
-                // Recargar la página
-                location.reload();
+            // Event listener para el botón "Siguiente" en el paso 3
+            document.getElementById('siguientePaso').addEventListener('click', function() {
+                stepper.next(); // Avanza al siguiente paso
             });
-        }
-    });
-</script>
+        });
+    </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>

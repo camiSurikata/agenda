@@ -78,7 +78,7 @@ Route::put('especialidades/{id}', [EspecialidadController::class, 'update'])->na
 
 
 // Mostrar bloqueos por médico
-Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index']);
+Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index'])->name('bloqueo.index');
 // Guardar nuevo bloqueo
 Route::post('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'store']);
 // Eliminar bloqueo

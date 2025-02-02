@@ -47,7 +47,6 @@
                         <button type="button" class="step-trigger">
                             <span class="bs-stepper-circle"><i class="mdi mdi-account"></i></span>
                             <span class="bs-stepper-label">
-                                <span class="bs-stepper-number">01</span>
                                 <span class="bs-stepper-title">Identificación</span>
                             </span>
                         </button>
@@ -59,8 +58,7 @@
                         <button type="button" class="step-trigger">
                             <span class="bs-stepper-circle"><i class="mdi mdi-check"></i></span>
                             <span class="bs-stepper-label">
-                                <span class="bs-stepper-number">02</span>
-                                <span class="bs-stepper-title">Confirmación</span>
+                                <span class="bs-stepper-title">Validación</span>
                             </span>
                         </button>
                     </div>
