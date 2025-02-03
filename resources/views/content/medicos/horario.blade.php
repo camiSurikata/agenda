@@ -48,7 +48,7 @@
                                     value="{{ $horario->descanso_termino ?? '' }}" class="form-control mt-2">
                             </td>
                             <td>
-                                <select name="recurso" id="recurso" class="form-control">
+                                <select name="box" id="box" class="form-control">
                                     <option value="">Seleccione un box</option>
                                     @foreach($boxes as $box)
                                         <option value="{{ $box->nombre }}">{{ $box->nombre }}</option>

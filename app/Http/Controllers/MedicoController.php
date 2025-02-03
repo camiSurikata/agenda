@@ -89,15 +89,19 @@ class MedicoController extends Controller
     return response()->json($bloqueos);
   }
 
+  
+
   public function storeBloqueo(Request $request, $id)
   {
-    dd($request);
+    
     $request->validate([
       'sucursal' => 'required|string|max:255', // Se valida como string
       'fecha' => 'required|date',
       'hora_inicio' => 'required',
       'hora_termino' => 'required',
+      'recurso' => 'required|string|max:255'
   ]);
+  
   
     BloqueoProgramado::create([
         'medico_id' => $id,
@@ -105,7 +109,7 @@ class MedicoController extends Controller
         'fecha' => $request->fecha,
         'hora_inicio' => $request->hora_inicio,
         'hora_termino' => $request->hora_termino,
-        'creado_por' => auth()->user()->name,
+        'creado_por' => $request->creado_por,
         'recurso' => $request->recurso
     ]);
   

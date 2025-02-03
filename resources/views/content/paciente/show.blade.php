@@ -102,8 +102,50 @@
                                 <tr id="detalleCita{{ $cita->id }}" class="collapse">
                                     <td colspan="6">
                                         <div class="p-3 border rounded">
-                                            <strong>Médico: </strong> {{ $cita->medico->nombre ?? 'No registrado' }} <br>
-                                            <strong>Descripción: </strong> {{ $cita->description ?? 'Sin descripción' }}
+                                            <strong>Médico Tratante: </strong> 
+                                            <div class="d-flex flex-column ">
+                                                <!-- Imagen del médico -->
+                                                @if($cita->medico && $cita->medico->id)
+                                                    <img src="{{ asset('assets/img/avatars/' . $cita->medico->id . '.png') }}" alt="Foto del médico" class="circle responsive-img" width="200" height="200">
+                                                @else
+                                                    <img src="{{ asset('assets/img/avatars/default.png') }}" alt="Foto del médico" class="circle responsive-img" width="80" height="80">
+                                                @endif
+                                                <!-- Nombre del médico debajo de la imagen -->
+                                                <span class="fw-medium mt-2"> <strong>Nombre:</strong> {{ $cita->medico->nombre ?? 'No registrado' }}</span>
+                                            </div>
+                                        
+                                            <!-- Información adicional del médico -->
+                                            <strong>Especialidad: </strong> {{ $cita->medico->especialidad ?? 'No registrada' }} <br>
+                                            <strong>Teléfono: </strong> {{ $cita->medico->telefono ?? 'No disponible' }} <br>
+                                            <strong>Email: </strong> {{ $cita->medico->email ?? 'No disponible' }} <br>
+                                            <strong>Descripciónde la consulta: </strong> {{ $cita->description ?? 'Sin descripción' }} <br>
+                                            <div class="accordion" id="accordionExample">
+                                                <div class="accordion-item active">
+                                                  <h2 class="accordion-header" id="headingOne">
+                                                    <button type="button" class="accordion-button" data-bs-toggle="collapse" data-bs-target="#accordionOne" aria-expanded="true" aria-controls="accordionOne" role="tabpanel">
+                                                      Motivo
+                                                    </button>
+                                                  </h2>
+                                              
+                                                  <div id="accordionOne" class="accordion-collapse collapse " data-bs-parent="#accordionExample">
+                                                    <div class="accordion-body">
+                                                        {{ $cita->motivo ?? 'No disponible' }}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                                <div class="accordion-item">
+                                                  <h2 class="accordion-header" id="headingTwo">
+                                                    <button type="button" class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#accordionTwo" aria-expanded="false" aria-controls="accordionTwo" role="tabpanel">
+                                                      Comentario
+                                                    </button>
+                                                  </h2>
+                                                  <div id="accordionTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                                    <div class="accordion-body">
+                                                        {{ $cita->comentarios ?? 'No disponible' }}
+                                                    </div>
+                                                  </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>
