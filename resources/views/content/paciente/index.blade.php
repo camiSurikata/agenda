@@ -12,22 +12,29 @@
             </div>
         @endif
 
-        <div class="list-group" style="max-height: 80vh; overflow-y: auto; padding: 15px; margin-bottom: 0; display: flex; flex-wrap: wrap; justify-content: space-between;">
-            @foreach ($pacientes as $paciente)
-                <div class="list-group-item list-group-item-action d-flex align-items-center cursor-pointer" style="padding: 20px; border-radius: 10px; flex: 0 0 48%; margin-bottom: 20px;">
-                    <img src="{{ asset('assets/img/avatars/' . $paciente->idpaciente . '.png') }}" alt="User Image" class="rounded-circle me-3" style="height: 100px; width: 100px;">
-                    <div class="w-100">
-                        <div class="d-flex justify-content-between">
-                            <div class="user-info">
-                                <h6 class="mb-1" style="font-size: 22px; font-weight: bold;">{{ $paciente->nombre }} {{ $paciente->apellido }}</h6>
-                                <div class="d-flex flex-column align-items-start">
-                                    <div class="d-flex justify-content-start">
-                                        <small style="font-size: 16px; margin-right: 10px;">Sexo: {{ $paciente->sexo == 2 ? 'Masculino' : 'Femenino' }}</small>
-                                        <small style="font-size: 16px;">Rut: {{ $paciente->rut }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="add-btn">
+        <div class="card-datatable table-responsive pt-0">
+            <table class="datatables-basic table responsive" >
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Sexo</th>
+                        <th>RUT</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($pacientes as $paciente)
+                        <tr>
+                            <td>
+                                <img src="{{ asset('assets/img/avatars/' . $paciente->idpaciente . '.png') }}" alt="User Image" class="rounded-circle" style="height: 100px; width: 100px;">
+                            </td>
+                            <td>{{ $paciente->idpaciente }}</td>
+                            <td>{{ $paciente->nombre }} {{ $paciente->apellido }}</td>
+                            <td>{{ $paciente->sexo == 2 ? 'Masculino' : 'Femenino' }}</td>
+                            <td>{{ $paciente->rut }}</td>
+                            <td>
                                 <a href="{{ route('paciente.show', $paciente->idpaciente) }}" class="btn btn-info btn-sm">Ver</a>
                                 <a href="{{ route('paciente.edit', $paciente->idpaciente) }}" class="btn btn-warning btn-sm">Editar</a>
                                 <form action="{{ route('paciente.destroy', $paciente) }}" method="POST" style="display:inline;" id="delete-form-{{ $paciente->idpaciente }}">
@@ -35,12 +42,12 @@
                                     @method('DELETE')
                                     <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $paciente->idpaciente }})">Eliminar</button>
                                 </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>                  
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 @endsection
 
@@ -48,17 +55,15 @@
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    
-    $(document).ready(function() {
-        $('#pacienteTable').DataTable({
+    jQuery(document).ready(function($) {
+        $('.datatables-basic').DataTable({
             language: {
                 url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
             }
         });
     });
-    
-    
-
+</script>
+<script>
     function confirmDelete(pacienteId) {
         Swal.fire({
             title: "¿Estás seguro?",

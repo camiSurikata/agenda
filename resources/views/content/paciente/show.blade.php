@@ -17,7 +17,7 @@
         <h1>Detalles del Paciente</h1>
         <a href="{{ route('paciente.index') }}" class="btn btn-secondary mb-3">Volver</a>
 
-        <div class="card mb-4">
+        <div class="card mb-4" >
             <div class="user-profile-header-banner">
                 <img src="{{ asset('assets/img/pages/profile-banner.png') }}" alt="Banner image" class="rounded-top">
             </div>
@@ -89,7 +89,7 @@
                                                 <span class="badge rounded-pill bg-label-info">Espera</span>
                                             @endif
                                         </td>
-                                        <td>{{ $cita->box_id }}</td>
+                                        <td>{{ $cita->box->nombre ?? 'No asignado' }}</td>
                                     </tr>
                                 </tr>
                             @endforeach
