@@ -67,6 +67,7 @@
                                 <th>Fecha</th>
                                 <th>Estado</th>
                                 <th>Box</th>
+                                <th>Desglose de la Cita</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -90,7 +91,21 @@
                                             @endif
                                         </td>
                                         <td>{{ $cita->box->nombre ?? 'No asignado' }}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#detalleCita{{ $cita->id }}" aria-expanded="false">
+                                                Ver detalles
+                                            </button>
+                                        </td>
                                     </tr>
+                                </tr>
+                                <!-- Fila oculta con los detalles -->
+                                <tr id="detalleCita{{ $cita->id }}" class="collapse">
+                                    <td colspan="6">
+                                        <div class="p-3 border rounded">
+                                            <strong>Médico: </strong> {{ $cita->medico->nombre ?? 'No registrado' }} <br>
+                                            <strong>Descripción: </strong> {{ $cita->description ?? 'Sin descripción' }}
+                                        </div>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
