@@ -173,25 +173,25 @@
                                 medico_id: medicoId,
                                 _token: '{{ csrf_token() }}'
                             }),
-                            axios.get(
-                                `{{ url('medicos') }}/${medicoId}/bloqueos`) // Se pasa medicoId en la URL
+                            axios.get(`{{ url('medicos') }}/${medicoId}/bloqueos`) // Obtener bloqueos
                         ])
                         .then(([horariosResponse, bloqueoResponse]) => {
                             const horarios = horariosResponse.data.horarios || [];
-                            const horariosBloqueados = bloqueoResponse.data.bloqueos || [];
+                            horariosBloqueados = bloqueoResponse.data.bloqueos ||
+                        []; // Guardar bloqueos en variable global
+
+                            console.log("Horarios Disponibles:", horarios);
+                            console.log("Horarios Bloqueados:", horariosBloqueados);
 
                             if (horarios.length > 0) {
                                 const horariosDisponibles = horarios.filter(horario => {
                                     return !horariosBloqueados.some(bloqueo =>
-                                        bloqueo.dia_semana === horario.dia_semana &&
-                                        bloqueo.hora_inicio === horario.hora_inicio &&
-                                        bloqueo.hora_termino === horario.hora_termino
+                                        bloqueo.dia_semana === horario.dia_semana
                                     );
                                 });
 
                                 if (horariosDisponibles.length > 0) {
                                     generarPestañasHorarios(horariosDisponibles);
-                                    // new bootstrap.Modal(document.getElementById('modalHorarios')).show(); // Línea comentada ya que no se usa la modal
                                 } else {
                                     alert("No hay horarios disponibles después del bloqueo.");
                                 }
@@ -297,24 +297,45 @@
                 updateTabs();
             }
 
+            let horariosBloqueados = []; // Define as global variable
+
             function generarBotonesHorarios(horarios) {
                 let botonesHTML = '<div class="d-flex flex-wrap gap-2">';
+
                 horarios.forEach(horario => {
                     const intervalos = generarIntervalos(horario.hora_inicio, horario.hora_termino, horario
                         .descanso_inicio, horario.descanso_termino);
+
                     intervalos.forEach(intervalo => {
-                        const buttonId = `btn-${intervalo.replace(/[:\s]/g, '-')}`;
-                        botonesHTML += `
-                    <button id="${buttonId}" class="btn btn-primary btn-sm">
-                        ${intervalo}
-                    </button>
-                `;
+                        const [inicio, fin] = intervalo.split(' - ');
+
+                        // Verificar si el intervalo está bloqueado
+                        const bloqueado = horariosBloqueados.some(bloqueo =>
+                            bloqueo.fecha === horario.fecha &&
+                            // Comparar fecha en lugar de dia_semana
+                            bloqueo.hora_inicio === inicio &&
+                            bloqueo.hora_termino === fin
+                        );
+
+                        console.log(`Intervalo: ${intervalo} - Bloqueado: ${bloqueado}`);
+
+                        if (!bloqueado) {
+                            const buttonId = `btn-${intervalo.replace(/[:\s]/g, '-')}`;
+                            botonesHTML += `
+                                <button id="${buttonId}" class="btn btn-primary btn-sm">
+                                    ${intervalo}
+                                </button>
+                            `;
+                        }
                     });
                 });
+
                 botonesHTML += '</div>';
                 return botonesHTML;
             }
-            
+
+
+
 
             let horarioSeleccionado;
 

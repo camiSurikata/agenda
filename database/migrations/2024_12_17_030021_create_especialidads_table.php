@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre')->unique();
             $table->timestamps();
-            $table->boolean('status');
+            $table->enum('status', [0, 1, 3])->default(1);
         });
     }
 
