@@ -128,6 +128,21 @@ class MedicoController extends Controller
     return redirect()->back()->with('success', 'Horarios actualizados.');
   }
 
+  public function getMedicos($idEspecialidad)
+  {
+    $medicos = Medico::where('idEspecialidades', $idEspecialidad)->get();
+
+    if ($medicos->isEmpty()) {
+      return response()->json([
+        'error' => 'No se encontraron médicos para esta especialidad',
+        'idEspecialidad' => $idEspecialidad
+      ], 404);
+    }
+
+    return response()->json($medicos);
+  }
+
+
   // public function storeBloqueo(Request $request, $medicoId)
   // {
   //   $medico = Medico::findOrFail($medicoId);

@@ -42,6 +42,11 @@ Route::put('/medicos/{medico}/horario', [MedicoController::class, 'updateHorario
 Route::get('/medicos/{medico}/bloqueos', [MedicoController::class, 'getBloqueos'])->name('medicos.bloqueos');
 // Route::post('/medicos/{medico}/bloqueos', [MedicoController::class, 'storeBloqueo'])->name('medicos.bloqueos.store');
 // Route::post('/bloqueos_programados', [BloqueoController::class, 'store'])->name('bloqueos.store');
+//Medicos por especialidad
+Route::get('/especialidad/{idEspecialidad}/medicos', [MedicoController::class, 'getMedicos'])->name('medicos.especialidad');
+
+
+
 
 // PACIENTE
 Route::resource('paciente', PacienteController::class);

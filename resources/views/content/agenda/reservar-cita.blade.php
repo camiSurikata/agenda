@@ -402,6 +402,31 @@
                 return intervalos;
             }
 
+            //EventListener para cargar médicos al seleccionar una especialidad
+
+            document.getElementById('especialidad').addEventListener('change', function() {
+                let idEspecialidad = this.value; // Obtiene el ID de la especialidad seleccionada
+
+                if (idEspecialidad) {
+                    axios.get(`/especialidad/${idEspecialidad}/medicos`)
+                        .then(response => {
+                            let selectMedico = document.getElementById('medico');
+                            selectMedico.innerHTML =
+                            '<option value="">Seleccione un médico</option>'; // Limpia el select
+
+                            response.data.forEach(medico => {
+                                let option = document.createElement('option');
+                                option.value = medico.id; // Asegúrate de que 'id' es el campo correcto en la base de datos
+                                option.textContent = medico.nombre; // Asegúrate de que 'nombre' es el campo correcto
+                                selectMedico.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error al cargar médicos:', error);
+                        });
+                }
+            });
+
 
             // Event listener para el botón "Siguiente" en el paso 3
             document.getElementById('siguientePaso').addEventListener('click', function() {
