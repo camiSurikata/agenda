@@ -147,6 +147,9 @@
 
 @endsection
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 
 <script>
     $(document).ready(function() {
@@ -157,6 +160,7 @@
         $('#bloqueoForm').on('click', function(e) { // Cambié 'onClick' por 'click'
             e.preventDefault();
             console.log('BloqueoForm button clicked'); // Para verificar que el evento se activa
+            window.userId = {{ auth()->user()->id }};
 
             const formData = {
                 sucursal: $('#sucursal').val(),
@@ -164,7 +168,7 @@
                 hora_inicio: $('#hora_inicio').val(),
                 hora_termino: $('#hora_termino').val(),
                 recurso: $('#recurso').val(),
-                creado_por: 'Usuario Actual', // Cambiar según tu lógica
+                creado_por: window.userId, // Cambiar según tu lógica
             };
 
             console.log('Form data:', formData);
@@ -178,7 +182,6 @@
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                 },
                 success: function(response) {
-                    alert('Bloqueo guardado correctamente.');
                     $('#bloqueoModal').modal('hide'); // Cerrar el modal
                     // cargarBloqueos(); // Actualizar la tabla
                 },
@@ -205,7 +208,7 @@
                             <td>${bloqueo.fecha}</td>
                             <td>${bloqueo.hora_inicio}</td>
                             <td>${bloqueo.hora_termino}</td>
-                            <td>${bloqueo.creado_por}</td>
+                            <td>${bloqueo.name}</td>
                             <td>${bloqueo.recurso}</td>
                             <td>
                                 <button class="btn btn-danger btn-sm delete-btn" data-id="${bloqueo.id}">
@@ -231,22 +234,44 @@
 
         // Eliminar bloqueo
         function eliminarBloqueo(id) {
-            $.ajax({
-                url: `/bloqueos/${id}`,
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
-                },
-                success: function() {
-                    alert('Bloqueo eliminado correctamente.');
-                    cargarBloqueos();
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    alert('Error al eliminar el bloqueo.');
-                },
+            Swal.fire({
+                title: "¿Estás seguro?",
+                text: "¡No podrás revertir esta acción!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, eliminarlo",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/bloqueos/${id}`,
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        },
+                        success: function() {
+                            Swal.fire({
+                                title: "Eliminado!",
+                                text: "El bloqueo ha sido eliminado correctamente.",
+                                icon: "success"
+                            });
+                            cargarBloqueos();
+                        },
+                        error: function(xhr) {
+                            console.error(xhr.responseText);
+                            Swal.fire({
+                                title: "Error",
+                                text: "Hubo un problema al eliminar el bloqueo.",
+                                icon: "error"
+                            });
+                        },
+                    });
+                }
             });
         }
+
     });
 </script>
 

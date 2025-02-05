@@ -133,11 +133,9 @@ class CitaController extends Controller
   }
 
   // Eliminar una cita
-  public function destroy($id)
+  public function destroy(Cita $cita)
   {
-    $cita = Cita::findOrFail($id);
     $cita->delete();
-
-    return response()->json(['message' => 'Cita eliminada correctamente']);
+    return redirect()->route('cita.index')->with('success', 'cita eliminado correctamente.');
   }
 }

@@ -85,7 +85,10 @@ class MedicoController extends Controller
 
   public function getBloqueos($id)
   {
-    $bloqueos = BloqueoProgramado::where('medico_id', $id)->get();
+    $bloqueos = BloqueoProgramado::join('users', 'bloqueos_programados.creado_por', '=', 'users.id')
+      ->where('bloqueos_programados.medico_id', $id)
+      ->select('bloqueos_programados.*', 'users.name')
+      ->get();
     return response()->json($bloqueos);
   }
 
