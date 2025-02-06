@@ -11,7 +11,7 @@
         <table class="datatables-basic table table-responsive">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <!--<th>ID</th>-->
                     <th>Nombre</th>
                     <th>Estado</th>
                     <th>Acciones</th>
@@ -20,7 +20,7 @@
             <tbody>
                 @foreach ($especialidades as $especialidad)
                     <tr>
-                        <td>{{ $especialidad->id }}</td>
+                        <!--<td>{{ $especialidad->id }}</td>-->
                         <td>{{ $especialidad->nombre }}</td>
                         <td>
                             @if ($especialidad->status == 1)
@@ -30,7 +30,7 @@
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('especialidades.edit', $especialidad->id) }}" class="btn btn-primary btn-sm">Editar</a>
+                            <a href="{{ route('especialidades.edit', $especialidad) }}" class="btn btn-primary btn-sm">Editar</a>
                             <form id="delete-form-{{ $especialidad->id }}"
                                 action="{{ route('especialidades.destroy', $especialidad->id) }}" method="POST"
                                 style="display: inline-block;">

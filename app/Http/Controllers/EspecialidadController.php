@@ -51,21 +51,21 @@ class EspecialidadController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Especialidad $especialidad)
+    public function edit(Especialidad $especialidade)
     {
-        return view('content.especialidades.edit', compact('especialidad'));
+        
+        return view('content.especialidades.edit', compact('especialidade'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Especialidad $especialidad)
+    public function update(Request $request, Especialidad $especialidade)
     {
-        $request->validate([
-            'nombre' => 'required|unique:especialidades,nombre',
-            'status' => 'required|in:0,1,3',
-        ]);
-        $especialidad->update($request->all());
+        
+   
+        $especialidade->update($request->all()); 
+ 
         return redirect()->route('especialidades.index')->with('success', 'Especialidad actualizada correctamente');
     }
 

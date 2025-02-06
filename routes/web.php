@@ -79,7 +79,7 @@ Route::get('/api/citas', function () {
 Route::resource('especialidades', EspecialidadController::class);
 Route::post('/especialidades/{id}/especialidades', [EspecialidadController::class, 'store']);
 Route::post('/especialidades', [EspecialidadController::class, 'store'])->name('especialidades.store');
-Route::put('especialidades/{id}', [EspecialidadController::class, 'update'])->name('especialidades.update');
+//Route::put('/especialidades/{especialidad}/edit', [EspecialidadController::class, 'update'])->name('especialidades.update');
 Route::delete('/especialidades/{id}', [EspecialidadController::class, 'destroy'])->name('especialidades.destroy');
 
 
