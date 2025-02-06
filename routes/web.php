@@ -15,6 +15,8 @@ use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\ConvenioController;
 use App\Models\Cita;
+use App\Http\Controllers\EspecialidadController;
+use App\Models\Especialidad;
 
 // LOGIN
 Route::get('/', [LoginController::class, 'indexLogin'])->name('login');
@@ -40,6 +42,11 @@ Route::put('/medicos/{medico}/horario', [MedicoController::class, 'updateHorario
 Route::get('/medicos/{medico}/bloqueos', [MedicoController::class, 'getBloqueos'])->name('medicos.bloqueos');
 // Route::post('/medicos/{medico}/bloqueos', [MedicoController::class, 'storeBloqueo'])->name('medicos.bloqueos.store');
 // Route::post('/bloqueos_programados', [BloqueoController::class, 'store'])->name('bloqueos.store');
+//Medicos por especialidad
+Route::get('/especialidad/{idEspecialidad}/medicos', [MedicoController::class, 'getMedicos'])->name('medicos.especialidad');
+
+
+
 
 // PACIENTE
 Route::resource('paciente', PacienteController::class);
@@ -68,10 +75,17 @@ Route::get('/api/citas', function () {
 });
 
 
+//ESPECIALIDAD
+Route::resource('especialidades', EspecialidadController::class);
+Route::post('/especialidades/{id}/especialidades', [EspecialidadController::class, 'store']);
+Route::post('/especialidades', [EspecialidadController::class, 'store'])->name('especialidades.store');
+//Route::put('/especialidades/{especialidad}/edit', [EspecialidadController::class, 'update'])->name('especialidades.update');
+Route::delete('/especialidades/{id}', [EspecialidadController::class, 'destroy'])->name('especialidades.destroy');
+
 
 
 // Mostrar bloqueos por médico
-Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index']);
+Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index'])->name('bloqueo.index');
 // Guardar nuevo bloqueo
 Route::post('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'store']);
 // Eliminar bloqueo
