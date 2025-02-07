@@ -80,8 +80,50 @@ class CitaController extends Controller
     }
   }
 
+  public function obtenerHorariosDisponiblesFecha(Request $request)
+  {
+    $request->validate([
+      'sucursal_id' => 'required|integer',
+      'especialidad_id' => 'required|integer',
+      'medico_id' => 'required|integer',
+      'start' => 'required|date',
+      'end' => 'required|date',
+    ]);
 
+    $sucursalId = $request->input('sucursal_id');
+    $especialidadId = $request->input('especialidad_id');
+    $medicoId = $request->input('medico_id');
+    $start = $request->input('start');
+    $end = $request->input('end');
 
+    $horarios = HorariosMedico::with(['medico', 'sucursal'])
+        ->where('id_sucursal', $sucursalId)
+        ->where('especialidad_id', $especialidadId)
+        ->where('medico_id', $medicoId)
+        ->whereBetween('fecha', [$start, $end])
+        ->where('no_atiende', 0)
+        ->get();
+
+    return response()->json([
+      'horarios' => $horarios,
+    ]);
+  }
+
+  public function obtenerDiasDisponibles(Request $request)
+  {
+    $request->validate([
+        'medico_id' => 'required|exists:medicos,id',
+    ]);
+
+    $medicoId = $request->input('medico_id');
+    // Aquí puedes agregar tu lógica para obtener los días disponibles del médico
+    // Por ejemplo:
+    $diasDisponibles = $this->buscarDiasDisponiblesPorMedico($medicoId);
+
+    return response()->json([
+        'dias' => $diasDisponibles,
+    ]);
+  }
 
   public function index()
   {

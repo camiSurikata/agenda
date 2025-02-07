@@ -67,8 +67,8 @@ Route::get('/api/citas', function () {
   return Cita::all(); // Puedes agregar filtros o relaciones si es necesario
 });
 
-
-
+// Obtener días disponibles para un médico específico
+Route::post('/dias-disponibles', [CitaController::class, 'obtenerDiasDisponibles'])->name('dias.disponibles');
 
 // Mostrar bloqueos por médico
 Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index']);
@@ -88,6 +88,8 @@ Route::get('/reservar-cita', [CitaController::class, 'mostrarFormularioReserva']
 Route::post('/guardar-reserva', [CitaController::class, 'guardarReserva'])->name('guardar-reserva');
 // Obtener horarios disponibles
 Route::post('/horarios-disponibles', [CitaController::class, 'obtenerHorariosDisponibles'])->name('horarios.disponibles');
+// Obtener horarios disponibles para una fecha específica
+Route::post('/horarios-disponibles-fecha', [CitaController::class, 'obtenerHorariosDisponiblesFecha'])->name('horarios.disponibles.fecha');
 
 
 //Agenda-Pacientes
