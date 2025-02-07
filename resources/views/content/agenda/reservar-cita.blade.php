@@ -31,7 +31,14 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const medicoId = 1; // ID fijo del médico
+            document.querySelector("#medico").addEventListener("change", function() {
+                let selectedOption = this.options[this.selectedIndex]; // Obtiene la opción seleccionada
+                let medicoNombre = selectedOption.text; // Obtiene el texto del médico seleccionado
+                
+                // Actualiza el contenido del h5 con la nueva selección
+                document.querySelector("h5.mt-2").innerText = medicoNombre;
+            });
+
             const horariosContainer = document.getElementById("horarios");
             const calendar = document.getElementById("calendar");
             const monthYear = document.getElementById("monthYear");
@@ -341,7 +348,7 @@
                                                 <div class="text-center">
                                                     <img src="{{ asset('images/default-doctor.png') }}" alt="Doctor" class="rounded-circle"
                                                         width="80">
-                                                    <h5 class="mt-2">Dr. Gabriel Enrique Figueroa Benavides</h5>
+                                                    <h5 class="mt-2"></h5>
                                                     <p>Cima Salud - Gran Avenida 4564</p>
                                                 </div>
                             
