@@ -33,7 +33,7 @@
 
             <!-- Logo -->
             <div class="text-center mb-4">
-                <img src="{{ asset('img/averclaro.png') }}" alt="Logo" style="max-width: 450px;">
+                <img src="{{ asset('img/averclaro.png') }}" alt="Logo" style="max-width: 400px;">
             </div>
 
 
@@ -138,7 +138,7 @@
                                             </div>
                                             <div class="p-4">
                                                 <!-- Calendario Flatpickr -->
-                                                <div class="inline-calendar"></div>
+                                                <div class="inline-calendar mx-auto"></div>
                                             </div>
                                         </div>
 
@@ -164,6 +164,11 @@
                                                         </tr>
                                                     </tbody>
                                                 </table>
+                                                <nav>
+                                                    <ul class="pagination justify-content-center" id="pagination">
+                                                        <!-- Paginación generada dinámicamente -->
+                                                    </ul>
+                                                </nav>
                                             </div>
                                         </div>
                                     </div>
@@ -200,36 +205,60 @@
 
         const stepperElement = document.querySelector('.bs-stepper');
         const stepper = new Stepper(stepperElement);
-        flatpickr(".inline-calendar", {
-                inline: true,
-                dateFormat: "Y-m-d",
-                locale: "es",
-                minDate: "today",
-                onChange: function(selectedDates, dateStr) {
-                    console.log("Fecha seleccionada:", dateStr);
-                    loadHorarios(dateStr); // Cargar los horarios de la fecha seleccionada
-                }
-            });
+        const itemsPerPage = 5; // Número de horarios por página
 
-        //Flatpickr
-        function loadHorarios(fecha) {
+        flatpickr(".inline-calendar", {
+            inline: true,
+            dateFormat: "Y-m-d",
+            locale: "es",
+            minDate: "today",
+            onChange: function(selectedDates, dateStr) {
+                console.log("Fecha seleccionada:", dateStr);
+                loadHorarios(dateStr, 1); // Cargar los horarios de la fecha seleccionada
+            }
+        });
+
+        function loadHorarios(fecha, page) {
             let horariosContainer = document.getElementById("horarios");
+            let paginationContainer = document.getElementById("pagination");
             let horarios = generateHorarios(fecha);
 
             horariosContainer.innerHTML = "";
+            paginationContainer.innerHTML = "";
+
             if (horarios.length === 0) {
                 horariosContainer.innerHTML =
                     `<tr><td colspan="4" class="text-center">No hay horarios disponibles.</td></tr>`;
                 return;
             }
 
-            horarios.forEach(hora => {
+            let start = (page - 1) * itemsPerPage;
+            let end = start + itemsPerPage;
+            let paginatedHorarios = horarios.slice(start, end);
+
+            paginatedHorarios.forEach(hora => {
                 horariosContainer.innerHTML += `
                 <tr>
                     <td>${hora}</td>
                     <td>15 minutos</td>
                     <td><button class="btn btn-success">Reservar hora</button></td>
                 </tr>`;
+            });
+
+            let totalPages = Math.ceil(horarios.length / itemsPerPage);
+            for (let i = 1; i <= totalPages; i++) {
+                paginationContainer.innerHTML += `
+                <li class="page-item ${i === page ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>`;
+            }
+
+            document.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let page = parseInt(this.getAttribute('data-page'));
+                    loadHorarios(fecha, page);
+                });
             });
         }
 
@@ -262,8 +291,6 @@
 
             return horarios;
         }
-
-        
 
         //EventListener para cargar médicos al seleccionar una especialidad
 
