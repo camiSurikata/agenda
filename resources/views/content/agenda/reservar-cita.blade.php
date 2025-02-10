@@ -6,6 +6,24 @@
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/bs-stepper/bs-stepper.css') }}" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/flatpickr/flatpickr.css') }}" />
+
+    <style>
+        @media (max-width: 768px) {
+
+            .table th:nth-child(2),
+            .table td:nth-child(2) {
+                display: none;
+            }
+
+            .inline-calendar {
+                width: 100%;
+            }
+        }
+
+        .inline-calendar {
+            max-width: 100%;
+        }
+    </style>
 @endsection
 
 @section('vendor-script')
@@ -32,19 +50,14 @@
         <div class="w-100" style="max-width: 1000px;">
 
             <!-- Logo -->
-            <div class="text-center mb-4">
-                <img src="{{ asset('img/averclaro.png') }}" alt="Logo" style="max-width: 400px;">
+            <div class="d-flex align-items-center mb-4">
+                <img src="{{ asset('img/averclaro.png') }}" alt="Logo" style="max-width: 350px; margin-right: 10px;">
+                <h4 class="py-3 mb-0 ms-auto text-truncate" style="max-width: calc(100% - 110px);">
+                    <span class="text-muted fw-light">Reserva de Citas /</span> Agendar Hora
+                </h4>
             </div>
 
-
-            <h4 class="py-3 mb-4 text-center">
-                <span class="text-muted fw-light">Reserva de Citas /</span> Agendar
-            </h4>
-
             <div class="row">
-                <div class="col-12">
-                    <h5 class="text-center">Agendar Hora</h5>
-                </div>
                 <!-- Stepper -->
                 <div class="col-12 mb-4">
                     <div class="bs-stepper wizard-numbered mt-2">
@@ -125,54 +138,54 @@
 
                             <!-- Paso 3: Ver Horarios Disponibles -->
                             <div id="seleccion-horarios" class="content">
-                                <h5 class="text-center mt-4">Seleccione un horario disponible</h5>
-                                <div class="card app-calendar-wrapper p-3">
-                                    <div class="row g-0">
-                                        <!-- Sidebar del Calendario -->
-                                        <div class="col-md-4 app-calendar-sidebar border-end">
-                                            <div class="text-center p-3">
-                                                <img src="{{ asset('images/default-doctor.png') }}" alt="Doctor"
-                                                    class="rounded-circle" width="80">
-                                                <h5 class="mt-2">Dr. Gabriel Enrique Figueroa Benavides</h5>
-                                                <p>Cima Salud - Gran Avenida 4564</p>
-                                            </div>
-                                            <div class="p-4">
-                                                <!-- Calendario Flatpickr -->
-                                                <div class="inline-calendar mx-auto"></div>
-                                            </div>
-                                        </div>
 
-                                        <!-- Contenido del Calendario y Horarios -->
-                                        <div class="col-md-8 app-calendar-content">
-                                            <div class="card-body">
-                                                <!-- FullCalendar -->
-                                                <div id="calendar"></div>
-                                            </div>
-                                            <div class="table-responsive p-3">
-                                                <table class="table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Hora</th>
-                                                            <th>Duración</th>
-                                                            <th></th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="horarios">
-                                                        <tr>
-                                                            <td colspan="4" class="text-center">Seleccione un día para
-                                                                ver horarios.</td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                                <nav>
-                                                    <ul class="pagination justify-content-center" id="pagination">
-                                                        <!-- Paginación generada dinámicamente -->
-                                                    </ul>
-                                                </nav>
-                                            </div>
+                                <div class="row g-0">
+                                    <!-- Sidebar del Calendario -->
+                                    <div class="col-md-4 app-calendar-sidebar border-end">
+                                        <div class="text-center p-3">
+                                            <img src="{{ asset('images/default-doctor.png') }}" alt="Doctor"
+                                                class="rounded-circle" width="80">
+                                            <h5 class="mt-2">Dr. Gabriel Enrique Figueroa Benavides</h5>
+                                            <p>Cima Salud - Gran Avenida 4564</p>
+                                        </div>
+                                        <div class="p-4">
+                                            <!-- Calendario Flatpickr -->
+                                            <div class="inline-calendar mx-auto"></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Contenido del Calendario y Horarios -->
+                                    <div class="col-md-8 app-calendar-content">
+                                        <div class="card-body">
+                                            <!-- FullCalendar -->
+                                            <div id="calendar"></div>
+                                        </div>
+                                        <h5 class="text-center mt-1">Seleccione un horario disponible</h5>
+                                        <div class="table-responsive p-3">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Hora</th>
+                                                        <th>Duración</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="horarios">
+                                                    <tr>
+                                                        <td colspan="4" class="text-center">Seleccione un día para
+                                                            ver horarios.</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                            <nav>
+                                                <ul class="pagination justify-content-center" id="pagination">
+                                                    <!-- Paginación generada dinámicamente -->
+                                                </ul>
+                                            </nav>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
 
                             <!-- Paso 4: Confirmar Reserva -->
