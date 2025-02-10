@@ -180,4 +180,14 @@ class CitaController extends Controller
     $cita->delete();
     return redirect()->route('cita.index')->with('success', 'cita eliminado correctamente.');
   }
+
+  public function obtenerHorarios($medico_id)
+  {
+      $horarios = HorariosMedico::where('medico_id', $medico_id)
+                  ->where('no_atiende', 0) // Filtra solo los días en que atiende
+                  ->get(['dia_semana', 'hora_inicio', 'hora_termino']);
+
+      return response()->json($horarios);
+  }
+
 }

@@ -49,6 +49,7 @@ Route::delete('paciente/{paciente}', [PacienteController::class, 'destroy'])->na
 
 
 // CITAS
+Route::get('/obtener-horarios/{medico_id}', [CitaController::class, 'obtenerHorarios']);
 Route::resource('cita', CitaController::class);
 Route::get('/citas', [CitaController::class, 'index']);
 Route::get('/citas/{cita}', [CitaController::class, 'show'])->name('cita.show');;

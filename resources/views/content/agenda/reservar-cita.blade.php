@@ -323,12 +323,14 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="medico">Médico</label>
-                                        <select id="medico" name="medico_id" class="form-control" required>
+                                        <select id="medico_id" name="medico_id" class="form-control" onchange="obtenerHorarios()">
                                             <option value="">Seleccione un médico</option>
-                                            @foreach ($medicos as $medico)
+                                            @foreach($medicos as $medico)
                                                 <option value="{{ $medico->id }}">{{ $medico->nombre }}</option>
                                             @endforeach
                                         </select>
+                                        
+                                        <div id="horarios-disponibles"></div> <!-- Aquí se mostrarán los horarios -->
                                     </div>
                                     <button type="button" id="siguientePaso"
                                         class="btn btn-primary mt-3">Siguiente</button>
@@ -703,3 +705,24 @@
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script>
+    function obtenerHorarios() {
+        var medicoId = document.getElementById('medico_id').value;
+    
+        if (medicoId) {
+            fetch(`/obtener-horarios/${medicoId}`)
+            .then(response => response.json())
+            .then(data => {
+                let horariosHtml = "<ul>";
+                data.forEach(horario => {
+                    horariosHtml += `<li>${horario.dia_semana}: ${horario.hora_inicio} - ${horario.hora_termino}</li>`;
+                });
+                horariosHtml += "</ul>";
+                document.getElementById('horarios-disponibles').innerHTML = horariosHtml;
+            })
+            .catch(error => console.error("Error obteniendo horarios:", error));
+        }
+    }
+    </script>
+    
