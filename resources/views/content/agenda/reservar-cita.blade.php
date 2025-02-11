@@ -215,14 +215,14 @@
             minDate: "today",
             onChange: function(selectedDates, dateStr) {
                 console.log("Fecha seleccionada:", dateStr);
-                loadHorarios(dateStr, 1); // Cargar los horarios de la fecha seleccionada
+                loadHorarios(dateStr, 1, window.horariosMedico); // Pasar los horarios del médico
             }
         });
 
-        function loadHorarios(fecha, page) {
+        function loadHorarios(fecha, page, horariosMedico) {
             let horariosContainer = document.getElementById("horarios");
             let paginationContainer = document.getElementById("pagination");
-            let horarios = generateHorarios(fecha);
+            let horarios = generateHorarios(fecha, horariosMedico);
 
             horariosContainer.innerHTML = "";
             paginationContainer.innerHTML = "";
@@ -258,43 +258,39 @@
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
                     let page = parseInt(this.getAttribute('data-page'));
-                    loadHorarios(fecha, page);
+                    loadHorarios(fecha, page, horariosMedico);
                 });
             });
         }
 
-        function generateHorarios(fecha) {
-            const horarioMedico = {
-                horaInicio: "08:00",
-                horaTermino: "16:00",
-                descansoInicio: "12:00",
-                descansoTermino: "14:00",
-                duracionConsulta: 15 // Minutos
-            };
-
+        function generateHorarios(fecha, horariosMedico) {
             let horarios = [];
-            let startTime = new Date(`2025-01-01T${horarioMedico.horaInicio}`);
-            let endTime = new Date(`2025-01-01T${horarioMedico.horaTermino}`);
-            let descansoInicio = new Date(`2025-01-01T${horarioMedico.descansoInicio}`);
-            let descansoTermino = new Date(`2025-01-01T${horarioMedico.descansoTermino}`);
+            let startTime, endTime, descansoInicio, descansoTermino;
 
-            while (startTime < endTime) {
-                let timeStr = startTime.toTimeString().substring(0, 5);
+            horariosMedico.forEach(horario => {
+                startTime = new Date(`2025-01-01T${horario.hora_inicio}`);
+                endTime = new Date(`2025-01-01T${horario.hora_termino}`);
+                descansoInicio = new Date(`2025-01-01T${horario.descanso_inicio}`);
+                descansoTermino = new Date(`2025-01-01T${horario.descanso_termino}`);
 
-                if (startTime >= descansoInicio && startTime < descansoTermino) {
-                    startTime.setMinutes(startTime.getMinutes() + horarioMedico.duracionConsulta);
-                    continue;
+                while (startTime < endTime) {
+                    let timeStr = startTime.toTimeString().substring(0, 5);
+
+                    if (startTime >= descansoInicio && startTime < descansoTermino) {
+                        startTime.setMinutes(startTime.getMinutes() + horario.duracion_consulta);
+                        continue;
+                    }
+
+                    horarios.push(timeStr);
+                    startTime.setMinutes(startTime.getMinutes() + horario.duracion_consulta);
                 }
-
-                horarios.push(timeStr);
-                startTime.setMinutes(startTime.getMinutes() + horarioMedico.duracionConsulta);
-            }
+            });
 
             return horarios;
         }
 
         //EventListener para cargar médicos al seleccionar una especialidad
-
+        /*
         document.getElementById('especialidad').addEventListener('change', function() {
             let idEspecialidad = this.value; // Obtiene el ID de la especialidad seleccionada
 
@@ -319,7 +315,7 @@
                     });
             }
         });
-
+        */
 
         // Event listener para el botón "Siguiente" en el paso 3
         document.getElementById('siguientePaso').addEventListener('click', function() {
@@ -330,14 +326,10 @@
         //script de calendario nuevo
 
     });
-</script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-
-<script>
     function obtenerHorarios() {
         var medicoId = document.getElementById('medico').value;
-    
+
         if (medicoId) {
             fetch(`/obtener-horarios/${medicoId}`)
             .then(response => response.json())
@@ -348,9 +340,14 @@
                 });
                 horariosHtml += "</ul>";
                 document.getElementById('horarios-disponibles').innerHTML = horariosHtml;
+
+                // Guardar los horarios del médico en una variable global
+                window.horariosMedico = data;
             })
             .catch(error => console.error("Error obteniendo horarios:", error));
         }
     }
-    </script>
-    
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
