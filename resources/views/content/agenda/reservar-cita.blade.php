@@ -254,7 +254,7 @@
                 <tr>
                     <td>${hora}</td>
                     <td>15 minutos</td>
-                    <td><button class="btn btn-success">Reservar hora</button></td>
+                    <td><button class="btn btn-success" id="reservar">Reservar hora</button></td>
                 </tr>`;
             });
 
@@ -334,7 +334,7 @@
 
 
         // Event listener para el botón "Siguiente" en el paso 3
-        document.getElementById('siguientePaso').addEventListener('click', function() {
+        document.getElementById('reservar').addEventListener('click', function() {
             stepper.next(); // Avanza al siguiente paso
         });
 

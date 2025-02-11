@@ -30,7 +30,7 @@ class PacienteController extends Controller
   public function guardarPaciente(Request $request)
   {
     Paciente::create($request->all());
-    return redirect('/agenda/reservar-cita')->with('success', 'Paciente registrado correctamente.');
+    return redirect('/agenda/agendamiento')->with('success', 'Paciente registrado correctamente.');
   }
   public function mostrarFormularioRegistro(Request $request)
   {
