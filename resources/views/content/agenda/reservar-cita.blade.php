@@ -14,7 +14,7 @@
     <script src="{{ asset('assets/vendor/libs/flatpickr/flatpickr.js') }}"></script>
     <script src="{{ asset('assets/vendor/libs/flatpickr/l10n/es.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
-    
+
 @endsection
 
 @section('page-script')
@@ -113,7 +113,8 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="medico">Médico</label>
-                                        <select id="medico" name="medico_id" class="form-control" onchange="obtenerHorarios()" required>
+                                        <select id="medico" name="medico_id" class="form-control"
+                                            onchange="obtenerHorarios()" required>
                                             <option value="">Seleccione un médico</option>
                                             @foreach ($medicos as $medico)
                                                 <option value="{{ $medico->id }}">{{ $medico->nombre }}</option>
@@ -209,7 +210,6 @@
         const stepperElement = document.querySelector('.bs-stepper');
         const stepper = new Stepper(stepperElement);
         const itemsPerPage = 5; // Número de horarios por página
-
         flatpickr(".inline-calendar", {
             inline: true,
             dateFormat: "Y-m-d",
@@ -218,79 +218,13 @@
             onChange: function(selectedDates, dateStr) {
                 console.log("Fecha seleccionada:", dateStr);
                 let diaSemana = new Date(dateStr).getDay();
-                loadHorarios(dateStr, 1, window.horariosMedico,diaSemana); // Pasar los horarios del médico
+                console.log(diaSemana)
+                loadHorarios(dateStr, 1, window.horariosMedico,
+                    diaSemana); // Pasar los horarios del médico
             }
         });
 
-        function loadHorarios(fecha, page, horariosMedico) {
-            let horariosContainer = document.getElementById("horarios");
-            let paginationContainer = document.getElementById("pagination");
-            let horarios = generateHorarios(fecha, horariosMedico,);
 
-            horariosContainer.innerHTML = "";
-            paginationContainer.innerHTML = "";
-
-            if (horarios.length === 0) {
-                horariosContainer.innerHTML =
-                    `<tr><td colspan="4" class="text-center">No hay horarios disponibles.</td></tr>`;
-                return;
-            }
-
-            let start = (page - 1) * itemsPerPage;
-            let end = start + itemsPerPage;
-            let paginatedHorarios = horarios.slice(start, end);
-
-            paginatedHorarios.forEach(hora => {
-                horariosContainer.innerHTML += `
-                <tr>
-                    <td>${hora}</td>
-                    <td>15 minutos</td>
-                    <td><button class="btn btn-success">Reservar hora</button></td>
-                </tr>`;
-            });
-
-            let totalPages = Math.ceil(horarios.length / itemsPerPage);
-            for (let i = 1; i <= totalPages; i++) {
-                paginationContainer.innerHTML += `
-                <li class="page-item ${i === page ? 'active' : ''}">
-                    <a class="page-link" href="#" data-page="${i}">${i}</a>
-                </li>`;
-            }
-
-            document.querySelectorAll('.page-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    let page = parseInt(this.getAttribute('data-page'));
-                    loadHorarios(fecha, page, horariosMedico);
-                });
-            });
-        }
-
-        function generateHorarios(fecha, horariosMedico) {
-            let horarios = [];
-            let startTime, endTime, descansoInicio, descansoTermino;
-            let duracion_consulta = 15; // Duración de la consulta en minutos
-            horariosMedico.forEach(horario => {
-                startTime = new Date(`2025-01-01T${horario.hora_inicio}`);
-                endTime = new Date(`2025-01-01T${horario.hora_termino}`);
-                descansoInicio = new Date(`2025-01-01T${horario.descanso_inicio}`);
-                descansoTermino = new Date(`2025-01-01T${horario.descanso_termino}`);
-
-                while (startTime < endTime) {
-                    let timeStr = startTime.toTimeString().substring(0, 5);
-
-                    if (startTime >= descansoInicio && startTime < descansoTermino) {
-                        startTime.setMinutes(startTime.getMinutes() + duracion_consulta);
-                        continue;
-                    }
-
-                    horarios.push(timeStr);
-                    startTime.setMinutes(startTime.getMinutes() + duracion_consulta);
-                }
-            });
-
-            return horarios;
-        }
 
         //EventListener para cargar médicos al seleccionar una especialidad
         /*
@@ -330,27 +264,145 @@
 
     });
 
+    function generateHorarios(fecha, horariosMedico) {
+        let horarios = [];
+        let startTime, endTime, descansoInicio, descansoTermino;
+        let duracion_consulta = 15; // Duración de la consulta en minutos
+        horariosMedico.forEach(horario => {
+            startTime = new Date(`2025-01-01T${horario.hora_inicio}`);
+            endTime = new Date(`2025-01-01T${horario.hora_termino}`);
+            descansoInicio = new Date(`2025-01-01T${horario.descanso_inicio}`);
+            descansoTermino = new Date(`2025-01-01T${horario.descanso_termino}`);
+
+            while (startTime < endTime) {
+                let timeStr = startTime.toTimeString().substring(0, 5);
+
+                if (startTime >= descansoInicio && startTime < descansoTermino) {
+                    startTime.setMinutes(startTime.getMinutes() + duracion_consulta);
+                    continue;
+                }
+
+                horarios.push(timeStr);
+                startTime.setMinutes(startTime.getMinutes() + duracion_consulta);
+            }
+        });
+
+        return horarios;
+    }
+
+    function loadHorarios(fecha, page, horariosMedico) {
+        let horariosContainer = document.getElementById("horarios");
+        let paginationContainer = document.getElementById("pagination");
+        console.log(fecha, page, horariosMedico);
+        let horarios = generateHorarios(fecha, horariosMedico, );
+
+        horariosContainer.innerHTML = "";
+        paginationContainer.innerHTML = "";
+
+        if (horarios.length === 0) {
+            horariosContainer.innerHTML =
+                `<tr><td colspan="4" class="text-center">No hay horarios disponibles.</td></tr>`;
+            return;
+        }
+        const itemsPerPage = 5; // Número de horarios por página
+        let start = (page - 1) * itemsPerPage;
+        let end = start + itemsPerPage;
+        let paginatedHorarios = horarios.slice(start, end);
+
+        paginatedHorarios.forEach(hora => {
+            horariosContainer.innerHTML += `
+                <tr>
+                    <td>${hora}</td>
+                    <td>15 minutos</td>
+                    <td><button class="btn btn-success">Reservar hora</button></td>
+                </tr>`;
+        });
+
+        let totalPages = Math.ceil(horarios.length / itemsPerPage);
+        for (let i = 1; i <= totalPages; i++) {
+            paginationContainer.innerHTML += `
+                <li class="page-item ${i === page ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>`;
+        }
+
+        document.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                let page = parseInt(this.getAttribute('data-page'));
+                loadHorarios(fecha, page, horariosMedico);
+            });
+        });
+    }
+
+    function actualizarCalendario() {
+        flatpickr(".inline-calendar", {
+            inline: true,
+            dateFormat: "Y-m-d",
+            locale: "es",
+            minDate: "today",
+            disable: [
+                function(date) {
+                    let diaSemana = date.getDay(); // Obtener número del día (0=Domingo, ..., 6=Sábado)
+                    console.log("Día en calendario:", diaSemana);
+                    console.log("Días laborales:", window.diasLaborales);
+                    return !window.diasLaborales.has(
+                        diaSemana); // Bloquear si NO está en los días laborales
+                }
+            ],
+            onChange: function(selectedDates, dateStr) {
+                console.log("Fecha seleccionada:", dateStr);
+                let diaSemana = new Date(dateStr).getDay();
+                loadHorarios(dateStr, 1, window.horariosMedico, diaSemana);
+            }
+        });
+    }
+
+
     function obtenerHorarios() {
         var medicoId = document.getElementById('medico').value;
 
         if (medicoId) {
             fetch(`/obtener-horarios/${medicoId}`)
-            .then(response => response.json())
-            .then(data => {
-                let horariosHtml = "<ul>";
-                data.forEach(horario => {
-                    horariosHtml += `<li>${horario.dia_semana}: ${horario.hora_inicio} - ${horario.hora_termino}</li>`;
-                });
-                horariosHtml += "</ul>";
-                document.getElementById('horarios-disponibles').innerHTML = horariosHtml;
+                .then(response => response.json())
+                .then(data => {
+                    let horariosHtml = "<ul>";
+                    let diasLaborales = new Set();
 
-                // Guardar los horarios del médico en una variable global
-                window.horariosMedico = data;
-            })
-            .catch(error => console.error("Error obteniendo horarios:", error));
+                    // Mapeo de nombres de días a números
+                    const diasSemanaMap = {
+                        "Domingo": 0,
+                        "Lunes": 1,
+                        "Martes": 2,
+                        "Miércoles": 3,
+                        "Jueves": 4,
+                        "Viernes": 5,
+                        "Sábado": 6
+                    };
+
+                    data.forEach(horario => {
+                        horariosHtml +=
+                            `<li>${horario.dia_semana}: ${horario.hora_inicio} - ${horario.hora_termino}</li>`;
+
+                        // Convertir nombre de día a número
+                        let diaNumero = diasSemanaMap[horario.dia_semana];
+                        if (diaNumero !== undefined) {
+                            diasLaborales.add(diaNumero);
+                        }
+                    });
+
+                    horariosHtml += "</ul>";
+                    document.getElementById('horarios-disponibles').innerHTML = horariosHtml;
+
+                    // Guardar en variable global para Flatpickr
+                    window.horariosMedico = data;
+                    window.diasLaborales = diasLaborales;
+
+                    actualizarCalendario(); // Recargar calendario con restricciones correctas
+                })
+                .catch(error => console.error("Error obteniendo horarios:", error));
         }
     }
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-
