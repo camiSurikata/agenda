@@ -215,14 +215,15 @@
             minDate: "today",
             onChange: function(selectedDates, dateStr) {
                 console.log("Fecha seleccionada:", dateStr);
-                loadHorarios(dateStr, 1, window.horariosMedico); // Pasar los horarios del médico
+                let diaSemana = new Date(dateStr).getDay();
+                loadHorarios(dateStr, 1, window.horariosMedico,diaSemana); // Pasar los horarios del médico
             }
         });
 
         function loadHorarios(fecha, page, horariosMedico) {
             let horariosContainer = document.getElementById("horarios");
             let paginationContainer = document.getElementById("pagination");
-            let horarios = generateHorarios(fecha, horariosMedico);
+            let horarios = generateHorarios(fecha, horariosMedico,);
 
             horariosContainer.innerHTML = "";
             paginationContainer.innerHTML = "";
@@ -266,7 +267,7 @@
         function generateHorarios(fecha, horariosMedico) {
             let horarios = [];
             let startTime, endTime, descansoInicio, descansoTermino;
-
+            let duracion_consulta = 15; // Duración de la consulta en minutos
             horariosMedico.forEach(horario => {
                 startTime = new Date(`2025-01-01T${horario.hora_inicio}`);
                 endTime = new Date(`2025-01-01T${horario.hora_termino}`);
@@ -277,12 +278,12 @@
                     let timeStr = startTime.toTimeString().substring(0, 5);
 
                     if (startTime >= descansoInicio && startTime < descansoTermino) {
-                        startTime.setMinutes(startTime.getMinutes() + horario.duracion_consulta);
+                        startTime.setMinutes(startTime.getMinutes() + duracion_consulta);
                         continue;
                     }
 
                     horarios.push(timeStr);
-                    startTime.setMinutes(startTime.getMinutes() + horario.duracion_consulta);
+                    startTime.setMinutes(startTime.getMinutes() + duracion_consulta);
                 }
             });
 
