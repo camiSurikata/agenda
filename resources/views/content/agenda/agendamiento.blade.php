@@ -78,6 +78,9 @@
                                     </div>
                                     <button type="submit" class="btn btn-primary mt-3">Ingresar</button>
                                 </form>
+                                <div class="text-center mt-3">
+                                    <a href="/registro-paciente" class="text-primary">¿No tienes registro? Regístrate aquí!</a>
+                                </div>
                             </div>
 
                             <!-- Paso de Confirmación -->
