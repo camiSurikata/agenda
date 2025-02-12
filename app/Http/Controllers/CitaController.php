@@ -9,6 +9,7 @@ use App\Models\HorariosMedico;
 use App\Models\Medico;
 use App\Models\Paciente;
 use App\Models\Sucursal;
+use App\Models\BloqueoProgramado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -125,6 +126,8 @@ class CitaController extends Controller
     ]);
   }
 
+
+
   public function index()
   {
     $citas = Cita::all();
@@ -183,11 +186,19 @@ class CitaController extends Controller
 
   public function obtenerHorarios($medico_id)
   {
-      $horarios = HorariosMedico::where('medico_id', $medico_id)
-                  ->where('no_atiende', false) // Filtra solo los días en que atiende
-                  ->get(['dia_semana', 'hora_inicio', 'hora_termino']);
+    $horarios = HorariosMedico::where('medico_id', $medico_id)
+      ->where('no_atiende', 0) // Filtra solo los días en que atiende
+      ->get(['dia_semana', 'hora_inicio', 'hora_termino', 'descanso_inicio', 'descanso_termino']);
 
-      return response()->json($horarios);
+    $bloqueos = DB::table('bloqueos_programados')
+      ->where('medico_id', $medico_id)
+      ->where('fecha', '>=', now()) // Obtiene los horarios bloqueados desde la fecha de hoy en adelante
+      ->get(['fecha', 'hora_inicio', 'hora_termino']); // Obtiene los horarios bloqueados
+
+    return response()->json([
+      'horarios' => $horarios,
+      'bloqueos' => $bloqueos,
+    ]);
   }
 
 }
