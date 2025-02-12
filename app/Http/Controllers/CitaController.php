@@ -184,7 +184,7 @@ class CitaController extends Controller
   public function obtenerHorarios($medico_id)
   {
       $horarios = HorariosMedico::where('medico_id', $medico_id)
-                  ->where('no_atiende', 0) // Filtra solo los días en que atiende
+                  ->where('no_atiende', false) // Filtra solo los días en que atiende
                   ->get(['dia_semana', 'hora_inicio', 'hora_termino']);
 
       return response()->json($horarios);

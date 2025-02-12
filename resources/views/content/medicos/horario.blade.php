@@ -57,7 +57,7 @@
                             </td>
                             <td>
                                 <input type="checkbox" name="horarios[{{ $dia }}][no_atiende]" value="1" 
-                                {{ $horario->no_atiende ? 'checked' : '' }} class="no-atiende-checkbox">
+                                {{ $horario && $horario->no_atiende == 1 ? 'checked' : '' }} class="no-atiende-checkbox">
                             </td>
                         </tr>
                     @endforeach
