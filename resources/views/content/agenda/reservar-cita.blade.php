@@ -224,44 +224,36 @@
             }
         });
 
-
-
-        //EventListener para cargar médicos al seleccionar una especialidad
-        /*
-        document.getElementById('especialidad').addEventListener('change', function() {
-            let idEspecialidad = this.value; // Obtiene el ID de la especialidad seleccionada
-
-            if (idEspecialidad) {
-                axios.get(`/especialidad/${idEspecialidad}/medicos`)
-                    .then(response => {
-                        let selectMedico = document.getElementById('medico');
-                        selectMedico.innerHTML =
-                            '<option value="">Seleccione un médico</option>'; // Limpia el select
-
-                        response.data.forEach(medico => {
-                            let option = document.createElement('option');
-                            option.value = medico
-                                .id; // Asegúrate de que 'id' es el campo correcto en la base de datos
-                            option.textContent = medico
-                                .nombre; // Asegúrate de que 'nombre' es el campo correcto
-                            selectMedico.appendChild(option);
-                        });
-                    })
-                    .catch(error => {
-                        console.error('Error al cargar médicos:', error);
-                    });
-            }
-        });
-        */
-
         // Event listener para el botón "Siguiente" en el paso 3
         document.getElementById('siguientePaso').addEventListener('click', function() {
             stepper.next(); // Avanza al siguiente paso
         });
 
-        //
-        //script de calendario nuevo
-
+        // Definir la función reservarHora dentro del ámbito de la función DOMContentLoaded
+        window.reservarHora = function(button) {
+            // Obtener la fila del botón
+            const row = button.parentElement.parentElement;
+            // Obtener la hora seleccionada
+            const horaSeleccionada = row.querySelector('td:first-child').innerText;
+            // Asignar la hora seleccionada al campo oculto
+            const inputHora = document.getElementById('inputHora');
+            if (inputHora) {
+                inputHora.value = horaSeleccionada;
+            }
+            // Actualizar el resumen de la reserva
+            const resumenSucursal = document.getElementById('resumenSucursal');
+            const resumenEspecialidad = document.getElementById('resumenEspecialidad');
+            const resumenMedico = document.getElementById('resumenMedico');
+            const resumenHorario = document.getElementById('resumenHorario');
+            if (resumenSucursal && resumenEspecialidad && resumenMedico && resumenHorario) {
+                resumenSucursal.innerText = document.getElementById('sucursal').options[document.getElementById('sucursal').selectedIndex].text;
+                resumenEspecialidad.innerText = document.getElementById('especialidad').options[document.getElementById('especialidad').selectedIndex].text;
+                resumenMedico.innerText = document.getElementById('medico').options[document.getElementById('medico').selectedIndex].text;
+                resumenHorario.innerText = horaSeleccionada;
+            }
+            // Avanzar al siguiente paso
+            stepper.next();
+        }
     });
 
     function generateHorarios(fecha, horariosMedico) {
@@ -361,7 +353,7 @@
     <tr>
         <td>${hora}</td>
         <td>15 minutos</td>
-        <td><button class="btn btn-success">Reservar hora</button></td>
+        <td><button class="btn btn-success" onclick="reservarHora(this)">Reservar hora</button></td>
     </tr>`;
         });
 
@@ -381,14 +373,6 @@
             });
         });
     }
-
-
-
-
-
-
-
-
 
     function actualizarCalendario() {
         flatpickr(".inline-calendar", {
