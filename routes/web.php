@@ -14,6 +14,7 @@ use App\Http\Controllers\CitaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\ConvenioController;
+use App\Http\Controllers\ExamenesController;
 use App\Models\Cita;
 use App\Http\Controllers\EspecialidadController;
 use App\Models\Especialidad;
@@ -82,7 +83,8 @@ Route::post('/especialidades', [EspecialidadController::class, 'store'])->name('
 //Route::put('/especialidades/{especialidad}/edit', [EspecialidadController::class, 'update'])->name('especialidades.update');
 Route::delete('/especialidades/{id}', [EspecialidadController::class, 'destroy'])->name('especialidades.destroy');
 
-
+//EXAMENES
+Route::get('/examenes', [ExamenesController::class, 'index'])->name('examenes.index');
 
 // Mostrar bloqueos por médico
 Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index'])->name('bloqueo.index');
