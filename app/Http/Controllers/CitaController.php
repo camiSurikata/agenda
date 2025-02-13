@@ -28,54 +28,51 @@ class CitaController extends Controller
   }
   public function guardarReserva(Request $request)
   {
-      // Validar los datos del formulario
-      $validated = $request->validate([
-          'paciente_id' => 'required|integer',
-          'sucursal_id' => 'required|integer',
-          'especialidad_id' => 'required|integer',
-          'medico_id' => 'required|integer',
-          'start' => 'required|date_format:Y-m-d H:i:s',
-          'end' => 'required|date_format:Y-m-d H:i:s',
-          'title' => 'nullable|string|max:255',
-          'estado' => 'nullable|string|max:50',
-          'description' => 'nullable|string|max:255',
-          'box_id' => 'nullable|integer',
-          'comentarios' => 'nullable|string|max:255',
-          'motivo' => 'nullable|string|max:255'
-      ]);
+    // Depuración: Verificar qué datos llegan
+    // dd($request->all());
 
-      // Agregar registros de depuración
-      Log::info('Datos validados:', $validated);
+    //  Validar los datos del formulario
+    $validated = $request->validate([
+      'paciente_id' => 'required|integer',
+      'sucursal_id' => 'required|integer',
+      'especialidad_id' => 'required|integer',
+      'medico_id' => 'required|integer',
+      'start' => 'required|date_format:Y-m-d H:i:s',
+      'end' => 'required|date_format:Y-m-d H:i:s',
+      'title' => 'nullable|string|max:255',
+      'description' => 'nullable|string|max:255',
+      'comentarios' => 'nullable|string|max:255',
+      'motivo' => 'nullable|string|max:255',
+      'box_id' => 'nullable|integer'
+    ]);
 
-      try {
-          // Crear y guardar la cita
-          $cita = new Cita();
-          $cita->paciente_id = $validated['paciente_id'];
-          $cita->sucursal_id = $validated['sucursal_id'];
-          $cita->especialidad_id = $validated['especialidad_id'];
-          $cita->medico_id = $validated['medico_id'];
-          $cita->start = $validated['start'];
-          $cita->end = $validated['end'];
-          $cita->title = $validated['title'] ?? 'Cita médica';
-          $cita->estado = $validated['estado'] ?? 'pendiente';
-          $cita->description = $validated['description'] ?? '';
-          $cita->box_id = $validated['box_id'];
-          $cita->comentarios = $validated['comentarios'];
-          $cita->motivo = $validated['motivo'];
-          $cita->save();
+    try {
+      // Crear y guardar la cita
 
-          // Verificar si la cita se guardó correctamente
-          if ($cita->exists) {
-              Log::info('Cita guardada con éxito:', $cita->toArray());
-          } else {
-              Log::error('Error al guardar la cita.');
-          }
+      $cita = new Cita();
+      $cita->title = $request->title ?? 'Cita médica';
+      $cita->start = $request->start;
+      $cita->end = $request->end;
+      $cita->paciente_id = $request->paciente_id;
+      $cita->sucursal_id = $request->sucursal_id;
+      $cita->especialidad_id = $request->especialidad_id;
+      $cita->medico_id = $request->medico_id;
+      $cita->estado = 1; // Asignamos estado activo
+      $cita->description = $request->description ?? '';
+      $cita->box_id = $request->box_id ?? 1; // Opcional
+      $cita->comentarios = $request->comentarios ?? null;
+      $cita->motivo = $request->motivo ?? null;
 
-          return redirect()->back()->with('success', 'Cita reservada con éxito.');
-      } catch (\Exception $e) {
-          Log::error('Error al guardar la cita: ' . $e->getMessage());
-          return redirect()->back()->with('error', 'Error al reservar la cita.');
-      }
+      // Guardar cita
+      $cita->save();
+      // dd($request->all());
+      // Log::info('Cita guardada con éxito:', $cita->toArray());
+
+      return redirect()->back()->with('success', 'Cita reservada con éxito.');
+    } catch (\Exception $e) {
+      Log::error('Error al guardar la cita: ' . $e->getMessage());
+      return redirect()->back()->with('error', 'Error al reservar la cita.');
+    }
   }
 
   public function obtenerHorariosDisponibles(Request $request)

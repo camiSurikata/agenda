@@ -189,23 +189,23 @@
                                     <li><strong>Médico:</strong> <span id="resumenMedico"></span></li>
                                     <li><strong>Horario:</strong> <span id="resumenHorario"></span></li>
                                 </ul>
-                                <form action="{{ route('guardar-reserva') }}" method="POST">
+                                <form id="citaFinalform" action="{{ route('guardar-reserva') }}" method="POST">
                                     @csrf  <!-- Protección contra ataques CSRF -->
-
-                                    <input type="hidden" name="paciente_id" id="paciente_id" value="{{ $paciente->id ?? '' }}">
-                                    <input type="hidden" name="sucursal_id" id="sucursal_id" value="">
-                                    <input type="hidden" name="especialidad_id" id="especialidad_id" value="">
-                                    <input type="hidden" name="medico_id" id="medico_id" value="">
+                                    <input type="hidden" name="fechaSeleccionada" id="fechaSeleccionada"value="">
+                                    <input type="hidden" name="paciente_id" id="paciente_id" value="{{ $paciente->idpaciente ?? '' }}">
+                                    <input type="hidden" name="sucursal_id" id="sucursal_id" value="{{ $sucursal->id ?? '' }}">
+                                    <input type="hidden" name="especialidad_id" id="especialidad_id" value="{{ $especialidad->id ?? '' }}">
+                                    <input type="hidden" name="medico_id" id="medico_id" value="{{ $medico->id ?? '' }}">
                                     <input type="hidden" name="start" id="start" value="">
                                     <input type="hidden" name="end" id="end" value="">
                                     <input type="hidden" name="title" value="Cita médica">
-                                    <input type="hidden" name="estado" value="pendiente">
+                                    <input type="hidden" name="estado" value=1>
                                     <input type="hidden" name="description" id="description" value="">
                                     <input type="hidden" name="box_id" id="box_id" value="">
                                     <input type="text" name="comentarios" placeholder="Comentarios opcionales" class="form-control">
                                     <input type="text" name="motivo" placeholder="Motivo de la consulta" class="form-control" required>
 
-                                    <button type="submit" class="btn btn-success">Confirmar Reserva</button>
+                                    <button type="button" class="btn btn-success" onclick="confirmarActualizacion()">Confirmar Reserva</button>
                                 </form>
                             </div>
                         </div>
@@ -220,6 +220,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -235,7 +236,8 @@
             onChange: function(selectedDates, dateStr) {
                 console.log("Fecha seleccionada:", dateStr);
                 let diaSemana = new Date(dateStr).getDay();
-                console.log(diaSemana)
+                console.log(diaSemana);
+                document.getElementById('fechaSeleccionada').value = dateStr; // Guarda la fecha
                 loadHorarios(dateStr, 1, window.horariosMedico,
                     diaSemana); // Pasar los horarios del médico
             }
@@ -248,35 +250,62 @@
 
         // Definir la función reservarHora dentro del ámbito de la función DOMContentLoaded
         window.reservarHora = function(button) {
-            // Obtener la fila del botón
-            const row = button.parentElement.parentElement;
-            // Obtener la hora seleccionada
-            const horaSeleccionada = row.querySelector('td:first-child').innerText;
-            // Asignar la hora seleccionada al campo oculto
-            const inputHora = document.getElementById('inputHora');
-            if (inputHora) {
-                inputHora.value = horaSeleccionada;
-            }
-            // Actualizar el resumen de la reserva
-            const resumenSucursal = document.getElementById('resumenSucursal');
-            const resumenEspecialidad = document.getElementById('resumenEspecialidad');
-            const resumenMedico = document.getElementById('resumenMedico');
-            const resumenHorario = document.getElementById('resumenHorario');
-            if (resumenSucursal && resumenEspecialidad && resumenMedico && resumenHorario) {
-                resumenSucursal.innerText = document.getElementById('sucursal').options[document.getElementById('sucursal').selectedIndex].text;
-                resumenEspecialidad.innerText = document.getElementById('especialidad').options[document.getElementById('especialidad').selectedIndex].text;
-                resumenMedico.innerText = document.getElementById('medico').options[document.getElementById('medico').selectedIndex].text;
-                resumenHorario.innerText = horaSeleccionada;
+            const pacienteInput = document.getElementById('paciente_id');
 
-                // Asignar valores a los campos ocultos
-                document.getElementById('sucursal_id').value = document.getElementById('sucursal').value;
-                document.getElementById('especialidad_id').value = document.getElementById('especialidad').value;
-                document.getElementById('medico_id').value = document.getElementById('medico').value;
-                document.getElementById('start').value = `${document.getElementById('fechaSeleccionada') ? document.getElementById('fechaSeleccionada').value : ''} ${horaSeleccionada}`;
-                document.getElementById('end').value = `${document.getElementById('fechaSeleccionada') ? document.getElementById('fechaSeleccionada').value : ''} ${horaSeleccionada}`;
-                document.getElementById('description').value = `Cita médica con ${document.getElementById('medico').options[document.getElementById('medico').selectedIndex].text}`;
-                document.getElementById('box_id').value = document.getElementById('boxSeleccionado') ? document.getElementById('boxSeleccionado').value : '';
+            if (!pacienteInput.value) {
+                pacienteInput.value = document.getElementById('pacienteSeleccionado') ?
+                    document.getElementById('pacienteSeleccionado').value :
+                    '';
             }
+
+            console.log("Paciente ID asignado:", pacienteInput.value);
+
+            // Obtener la fecha seleccionada desde el campo oculto
+            const fechaSeleccionada = document.getElementById('fechaSeleccionada').value;
+            // Obtener la hora seleccionada
+            const row = button.parentElement.parentElement;
+            const horaSeleccionada = row.querySelector('td:first-child').innerText;
+
+
+            // Formatear start en formato YYYY-MM-DD HH:MM:SS
+            const startDateTime = `${fechaSeleccionada} ${horaSeleccionada}:00`;
+
+            // Calcular end sumando 15 minutos
+            let [horas, minutos] = horaSeleccionada.split(':').map(Number);
+            minutos += 15;
+            if (minutos >= 60) {
+                horas += 1;
+                minutos -= 60;
+            }
+            const endDateTime =
+                `${fechaSeleccionada} ${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:00`;
+
+            // Asignar valores a los campos
+            document.getElementById('sucursal_id').value = document.getElementById('sucursal').value;
+            document.getElementById('especialidad_id').value = document.getElementById('especialidad')
+                .value;
+            document.getElementById('medico_id').value = document.getElementById('medico').value;
+            document.getElementById('sucursal_id').value = document.getElementById('sucursal').value;
+            document.getElementById('especialidad_id').value = document.getElementById('especialidad')
+                .value;
+
+            document.getElementById('start').value = startDateTime;
+            document.getElementById('end').value = endDateTime;
+            document.getElementById('description').value =
+                `Cita médica con ${document.getElementById('medico').options[document.getElementById('medico').selectedIndex].text}`;
+            document.getElementById('box_id').value = document.getElementById('boxSeleccionado') ?
+                document.getElementById('boxSeleccionado').value : '';
+
+            // Actualizar resumen
+            document.getElementById('resumenSucursal').innerText = document.getElementById('sucursal')
+                .options[document.getElementById('sucursal').selectedIndex].text;
+            document.getElementById('resumenEspecialidad').innerText = document.getElementById(
+                'especialidad').options[document.getElementById('especialidad').selectedIndex].text;
+            document.getElementById('resumenMedico').innerText = document.getElementById('medico').options[
+                document.getElementById('medico').selectedIndex].text;
+            document.getElementById('resumenHorario').innerText =
+                `${horaSeleccionada} - ${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
+
             // Avanzar al siguiente paso
             stepper.next();
         }
@@ -418,6 +447,7 @@
                 let diaSemana = new Date(dateStr).getDay();
                 console.log(diaSemana);
                 console.log(window.horariosMedico);
+                document.getElementById('fechaSeleccionada').value = dateStr; // Guarda la fecha
                 loadHorarios(dateStr, 1, window.horariosMedico, diaSemana);
             }
         });
@@ -478,3 +508,22 @@
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+<script>
+    function confirmarActualizacion() {
+        Swal.fire({
+            title: "¿Confirmar cita?",
+            text: "Generaras una cita medica en nuestros servicios.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, confirmar",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('citaFinalform').submit();
+            }
+        });
+    }
+</script>
