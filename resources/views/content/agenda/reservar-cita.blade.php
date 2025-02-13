@@ -189,7 +189,24 @@
                                     <li><strong>Médico:</strong> <span id="resumenMedico"></span></li>
                                     <li><strong>Horario:</strong> <span id="resumenHorario"></span></li>
                                 </ul>
-                                <button type="submit" class="btn btn-success">Confirmar Reserva</button>
+                                <form action="{{ route('guardar-reserva') }}" method="POST">
+                                    @csrf  <!-- Protección contra ataques CSRF -->
+
+                                    <input type="hidden" name="paciente_id" id="paciente_id" value="{{ $paciente->id ?? '' }}">
+                                    <input type="hidden" name="sucursal_id" id="sucursal_id" value="">
+                                    <input type="hidden" name="especialidad_id" id="especialidad_id" value="">
+                                    <input type="hidden" name="medico_id" id="medico_id" value="">
+                                    <input type="hidden" name="start" id="start" value="">
+                                    <input type="hidden" name="end" id="end" value="">
+                                    <input type="hidden" name="title" value="Cita médica">
+                                    <input type="hidden" name="estado" value="pendiente">
+                                    <input type="hidden" name="description" id="description" value="">
+                                    <input type="hidden" name="box_id" id="box_id" value="">
+                                    <input type="text" name="comentarios" placeholder="Comentarios opcionales" class="form-control">
+                                    <input type="text" name="motivo" placeholder="Motivo de la consulta" class="form-control" required>
+
+                                    <button type="submit" class="btn btn-success">Confirmar Reserva</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -250,6 +267,15 @@
                 resumenEspecialidad.innerText = document.getElementById('especialidad').options[document.getElementById('especialidad').selectedIndex].text;
                 resumenMedico.innerText = document.getElementById('medico').options[document.getElementById('medico').selectedIndex].text;
                 resumenHorario.innerText = horaSeleccionada;
+
+                // Asignar valores a los campos ocultos
+                document.getElementById('sucursal_id').value = document.getElementById('sucursal').value;
+                document.getElementById('especialidad_id').value = document.getElementById('especialidad').value;
+                document.getElementById('medico_id').value = document.getElementById('medico').value;
+                document.getElementById('start').value = `${document.getElementById('fechaSeleccionada') ? document.getElementById('fechaSeleccionada').value : ''} ${horaSeleccionada}`;
+                document.getElementById('end').value = `${document.getElementById('fechaSeleccionada') ? document.getElementById('fechaSeleccionada').value : ''} ${horaSeleccionada}`;
+                document.getElementById('description').value = `Cita médica con ${document.getElementById('medico').options[document.getElementById('medico').selectedIndex].text}`;
+                document.getElementById('box_id').value = document.getElementById('boxSeleccionado') ? document.getElementById('boxSeleccionado').value : '';
             }
             // Avanzar al siguiente paso
             stepper.next();
