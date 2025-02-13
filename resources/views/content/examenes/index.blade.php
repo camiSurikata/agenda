@@ -2,9 +2,18 @@
 
 @section('content')
     <div class="container mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ route('examenes.index') }}">Agenda de atenciones</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('examenes.procesamiento') }}">Procesamiento de
+                    exámenes</a>
+            </li>
+        </ul>
 
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="d-flex gap-2">
                 <select class="form-select" name="professional" id="professional">
                     <option value="">Todos los Profesionales</option>
@@ -33,7 +42,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($examenes as $examen)
+                    @foreach ($examenes as $examen)
                         <tr>
                             <td>{{ $examen->codigo }}</td>
                             <td>{{ $examen->nombre }}</td>

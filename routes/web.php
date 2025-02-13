@@ -85,6 +85,7 @@ Route::delete('/especialidades/{id}', [EspecialidadController::class, 'destroy']
 
 //EXAMENES
 Route::get('/examenes', [ExamenesController::class, 'index'])->name('examenes.index');
+Route::get('/examenes/procesamiento', [ExamenesController::class, 'procesamiento'])->name('examenes.procesamiento');
 
 // Mostrar bloqueos por médico
 Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index'])->name('bloqueo.index');
