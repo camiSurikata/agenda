@@ -100,9 +100,22 @@
         rut = rut.replace(/\./g, '').replace('-', '');
         const cuerpo = rut.slice(0, -1);
         const digitoVerificador = rut.slice(-1).toUpperCase();
+    </div>
+@endsection
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Función para validar RUT
+    function validarRUT(rut) {
+        rut = rut.replace(/\./g, '').replace('-', '');
+        const cuerpo = rut.slice(0, -1);
+        const digitoVerificador = rut.slice(-1).toUpperCase();
 
         if (cuerpo.length < 7) return false;
+        if (cuerpo.length < 7) return false;
 
+        let suma = 0;
+        let multiplo = 2;
         let suma = 0;
         let multiplo = 2;
 
@@ -111,7 +124,14 @@
             suma += index;
             multiplo = multiplo < 7 ? multiplo + 1 : 2;
         }
+        for (let i = 1; i <= cuerpo.length; i++) {
+            const index = multiplo * rut.charAt(cuerpo.length - i);
+            suma += index;
+            multiplo = multiplo < 7 ? multiplo + 1 : 2;
+        }
 
+        const dvEsperado = 11 - (suma % 11);
+        const dv = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : dvEsperado.toString();
         const dvEsperado = 11 - (suma % 11);
         const dv = dvEsperado === 11 ? '0' : dvEsperado === 10 ? 'K' : dvEsperado.toString();
 
@@ -120,7 +140,14 @@
     $(document).ready(function() {
         $('#rutForm').on('submit', function(e) {
             e.preventDefault();
+        return dv === digitoVerificador;
+    }
+    $(document).ready(function() {
+        $('#rutForm').on('submit', function(e) {
+            e.preventDefault();
 
+            const rut = $('#rut').val();
+            const esValido = validarRUT(rut);
             const rut = $('#rut').val();
             const esValido = validarRUT(rut);
 
@@ -139,10 +166,29 @@
                             resultado.text('✅ RUT válido. Usuario registrado.')
                                 .addClass('text-success')
                                 .removeClass('text-danger');
+            const resultado = $('#resultado');
+            if (esValido) {
+                // Enviar el RUT al backend para verificar si está registrado
+                $.ajax({
+                    url: '/agenda/validar-paciente',
+                    type: 'POST',
+                    data: {
+                        rut: rut,
+                        _token: '{{ csrf_token() }}' // Agregar token CSRF para seguridad
+                    },
+                    success: function(response) {
+                        if (response.registrado) {
+                            resultado.text('✅ RUT válido. Usuario registrado.')
+                                .addClass('text-success')
+                                .removeClass('text-danger');
 
                             // Ocultar sección de identificación
                             // $('#identificacion').css('display', 'none');
+                            // Ocultar sección de identificación
+                            // $('#identificacion').css('display', 'none');
 
+                            // Mostrar sección de selección del profesional
+                            // $('#seleccion').css('display', 'block');
                             // Mostrar sección de selección del profesional
                             // $('#seleccion').css('display', 'block');
 
@@ -161,7 +207,34 @@
                                 )
                                 .addClass('text-warning')
                                 .removeClass('text-danger text-success');
+                            // Cambiar el paso activo en el encabezado
+                            // $('#iden').removeClass('active');
+                            // $('#sele').addClass('active');
+                            // Redirigir al formulario de registro
+                            setTimeout(function() {
+                                window.location.href =
+                                    '/reservar-cita?rut=' +
+                                    rut;
+                            }, 2000);
+                        } else {
+                            resultado.text(
+                                    '✅ RUT válido. Usuario no registrado. Redirigiendo a registro...'
+                                )
+                                .addClass('text-warning')
+                                .removeClass('text-danger text-success');
 
+                            // Redirigir al formulario de registro
+                            setTimeout(function() {
+                                window.location.href =
+                                    '/registro-paciente?rut=' +
+                                    rut;
+                            }, 2000);
+                        }
+                    },
+                    error: function() {
+                        resultado.text('❌ Error al validar el usuario.')
+                            .addClass('text-danger')
+                            .removeClass('text-success');
                             // Redirigir al formulario de registro
                             setTimeout(function() {
                                 window.location.href =

@@ -15,6 +15,8 @@ use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\ConvenioController;
 use App\Models\Cita;
+use App\Http\Controllers\EspecialidadController;
+use App\Models\Especialidad;
 
 // LOGIN
 Route::get('/', [LoginController::class, 'indexLogin'])->name('login');
@@ -68,8 +70,13 @@ Route::get('/api/citas', function () {
   return Cita::all(); // Puedes agregar filtros o relaciones si es necesario
 });
 
-// Obtener días disponibles para un médico específico
-Route::post('/dias-disponibles', [CitaController::class, 'obtenerDiasDisponibles'])->name('dias.disponibles');
+
+//ESPECIALIDAD
+Route::resource('especialidades', EspecialidadController::class);
+Route::post('/especialidades/{id}/especialidades', [EspecialidadController::class, 'store']);
+Route::post('/especialidades', [EspecialidadController::class, 'store'])->name('especialidades.store');
+Route::put('especialidades/{id}', [EspecialidadController::class, 'update'])->name('especialidades.update');
+
 
 // Mostrar bloqueos por médico
 Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index']);
