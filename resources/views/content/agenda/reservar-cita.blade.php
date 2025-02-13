@@ -189,23 +189,27 @@
                                     <li><strong>Médico:</strong> <span id="resumenMedico"></span></li>
                                     <li><strong>Horario:</strong> <span id="resumenHorario"></span></li>
                                 </ul>
-                                <form id="citaFinalform" action="{{ route('guardar-reserva') }}" method="POST">
-                                    @csrf  <!-- Protección contra ataques CSRF -->
-                                    <input type="hidden" name="fechaSeleccionada" id="fechaSeleccionada"value="">
-                                    <input type="hidden" name="paciente_id" id="paciente_id" value="{{ $paciente->idpaciente ?? '' }}">
-                                    <input type="hidden" name="sucursal_id" id="sucursal_id" value="{{ $sucursal->id ?? '' }}">
-                                    <input type="hidden" name="especialidad_id" id="especialidad_id" value="{{ $especialidad->id ?? '' }}">
-                                    <input type="hidden" name="medico_id" id="medico_id" value="{{ $medico->id ?? '' }}">
+                                <form action="{{ route('guardar-reserva') }}" method="POST">
+                                    @csrf <!-- Protección contra ataques CSRF -->
+                                    <input type="hidden" name="fechaSeleccionada" id="fechaSeleccionada"
+                                        value="">
+                                    <input type="hidden" name="paciente_id" id="paciente_id"
+                                        value="{{ $paciente->idpaciente ?? '' }}">
+                                    <input type="hidden" name="sucursal_id" id="sucursal_id" value="">
+                                    <input type="hidden" name="especialidad_id" id="especialidad_id" value="">
+                                    <input type="hidden" name="medico_id" id="medico_id" value="">
                                     <input type="hidden" name="start" id="start" value="">
                                     <input type="hidden" name="end" id="end" value="">
                                     <input type="hidden" name="title" value="Cita médica">
-                                    <input type="hidden" name="estado" value=1>
+                                    <input type="hidden" name="estado" value="pendiente">
                                     <input type="hidden" name="description" id="description" value="">
                                     <input type="hidden" name="box_id" id="box_id" value="">
-                                    <input type="text" name="comentarios" placeholder="Comentarios opcionales" class="form-control">
-                                    <input type="text" name="motivo" placeholder="Motivo de la consulta" class="form-control" required>
+                                    <input type="text" name="comentarios" placeholder="Comentarios opcionales"
+                                        class="form-control">
+                                    <input type="text" name="motivo" placeholder="Motivo de la consulta"
+                                        class="form-control" required>
 
-                                    <button type="button" class="btn btn-success" onclick="confirmarActualizacion()">Confirmar Reserva</button>
+                                    <button type="submit" class="btn btn-success">Confirmar Reserva</button>
                                 </form>
                             </div>
                         </div>
@@ -220,7 +224,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -306,21 +309,8 @@
             document.getElementById('resumenHorario').innerText =
                 `${horaSeleccionada} - ${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
 
-            // Mostrar confirmación antes de avanzar al siguiente paso
-            Swal.fire({
-                title: "¿Confirmar selección?",
-                text: "¿Desea confirmar la selección de horario?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Sí, confirmar",
-                cancelButtonText: "Cancelar"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    stepper.next(); // Avanza al siguiente paso
-                }
-            });
+            // Avanzar al siguiente paso
+            stepper.next();
         }
     });
 
@@ -362,6 +352,7 @@
         console.log("Día seleccionado (número):", diaSemana);
         console.log("Horarios médicos:", horariosMedico);
         console.log("Horario bloqueado:", window.bloqueosMedico);
+        console.log("Citas Medico:", window.citasMedico);
 
         const diasSemanaMap = {
             6: "Domingo",
@@ -389,19 +380,35 @@
 
         let horariosDisponibles = paginatedHorarios.filter(hora => {
             let horarioValido = true;
+            let seleccionadaFecha = new Date(fecha).toISOString().split('T')[0];
 
+            let horaSeleccionada = new Date(`${seleccionadaFecha}T${hora}`);
+
+            // 🔹 Filtrar bloqueos
             window.bloqueosMedico.forEach(bloqueo => {
                 let bloqueoFecha = new Date(bloqueo.fecha).toISOString().split('T')[0];
-                let seleccionadaFecha = new Date(fecha).toISOString().split('T')[0];
 
                 if (bloqueoFecha === seleccionadaFecha) {
                     let bloqueoInicio = new Date(`${bloqueoFecha}T${bloqueo.hora_inicio}`);
                     let bloqueoFin = new Date(`${bloqueoFecha}T${bloqueo.hora_termino}`);
-                    let horaSeleccionada = new Date(
-                    `${seleccionadaFecha}T${hora}`); // Convertir hora en cadena
 
                     if (!isNaN(horaSeleccionada) && horaSeleccionada >= bloqueoInicio &&
                         horaSeleccionada < bloqueoFin) {
+                        horarioValido = false;
+                    }
+                }
+            });
+
+            // 🔹 Filtrar citas ya agendadas
+            window.citasMedico.forEach(cita => {
+                let citaFecha = new Date(cita.start).toISOString().split('T')[0];
+
+                if (citaFecha === seleccionadaFecha) {
+                    let citaInicio = new Date(cita.start);
+                    let citaFin = new Date(cita.end);
+
+                    if (!isNaN(horaSeleccionada) && horaSeleccionada >= citaInicio && horaSeleccionada <
+                        citaFin) {
                         horarioValido = false;
                     }
                 }
@@ -418,19 +425,19 @@
 
         horariosDisponibles.forEach(hora => {
             horariosContainer.innerHTML += `
-    <tr>
-        <td>${hora}</td>
-        <td>15 minutos</td>
-        <td><button class="btn btn-success" onclick="reservarHora(this)">Reservar hora</button></td>
-    </tr>`;
+        <tr>
+            <td>${hora}</td>
+            <td>15 minutos</td>
+            <td><button class="btn btn-success" onclick="reservarHora(this)">Reservar hora</button></td>
+        </tr>`;
         });
 
         let totalPages = Math.ceil(horarios.length / itemsPerPage);
         for (let i = 1; i <= totalPages; i++) {
             paginationContainer.innerHTML += `
-    <li class="page-item ${i === page ? 'active' : ''}">
-        <a class="page-link" href="#" data-page="${i}">${i}</a>
-    </li>`;
+        <li class="page-item ${i === page ? 'active' : ''}">
+            <a class="page-link" href="#" data-page="${i}">${i}</a>
+        </li>`;
         }
 
         document.querySelectorAll('.page-link').forEach(link => {
@@ -441,6 +448,7 @@
             });
         });
     }
+
 
     function actualizarCalendario() {
         flatpickr(".inline-calendar", {
@@ -459,7 +467,6 @@
                 console.log("Fecha seleccionada:", dateStr);
                 let diaSemana = new Date(dateStr).getDay();
                 console.log(diaSemana);
-                console.log(window.horariosMedico);
                 document.getElementById('fechaSeleccionada').value = dateStr; // Guarda la fecha
                 loadHorarios(dateStr, 1, window.horariosMedico, diaSemana);
             }
@@ -475,6 +482,8 @@
                 .then(data => {
                     const horarios = data.horarios;
                     const bloqueos = data.bloqueos;
+                    const citas = data.citas;
+                    console.log("citas:", citas);
                     let horariosHtml = "<table class='table'>";
                     let diasLaborales = new Set();
 
@@ -509,6 +518,7 @@
                     // Guardar los horarios y los bloqueos en variables globales
                     window.horariosMedico = data.horarios;
                     window.bloqueosMedico = data.bloqueos;
+                    window.citasMedico = data.citas;
                     window.diasLaborales = diasLaborales;
                     console.log("Días bloqueados:", bloqueosMedico);
 
@@ -521,22 +531,3 @@
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-
-<script>
-    function confirmarActualizacion() {
-        Swal.fire({
-            title: "¿Confirmar cita?",
-            text: "Generaras una cita medica en nuestros servicios.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, confirmar",
-            cancelButtonText: "Cancelar"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                document.getElementById('citaFinalform').submit();
-            }
-        });
-    }
-</script>

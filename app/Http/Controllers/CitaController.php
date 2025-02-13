@@ -220,9 +220,15 @@ class CitaController extends Controller
       ->where('fecha', '>=', now()) // Obtiene los horarios bloqueados desde la fecha de hoy en adelante
       ->get(['fecha', 'hora_inicio', 'hora_termino']); // Obtiene los horarios bloqueados
 
+    $citas = Cita::where('medico_id', $medico_id)
+      ->where('start', '>=', now()) // Obtiene las citas desde la fecha de hoy en adelante
+      ->get(['start', 'end']); // Obtiene las citas
+
+
     return response()->json([
       'horarios' => $horarios,
       'bloqueos' => $bloqueos,
+      'citas' => $citas
     ]);
   }
 
