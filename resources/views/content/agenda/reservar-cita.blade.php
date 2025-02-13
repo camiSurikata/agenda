@@ -306,8 +306,21 @@
             document.getElementById('resumenHorario').innerText =
                 `${horaSeleccionada} - ${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}`;
 
-            // Avanzar al siguiente paso
-            stepper.next();
+            // Mostrar confirmación antes de avanzar al siguiente paso
+            Swal.fire({
+                title: "¿Confirmar selección?",
+                text: "¿Desea confirmar la selección de horario?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, confirmar",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    stepper.next(); // Avanza al siguiente paso
+                }
+            });
         }
     });
 
