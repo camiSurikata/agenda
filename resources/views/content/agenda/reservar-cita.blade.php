@@ -189,7 +189,7 @@
                                     <li><strong>Médico:</strong> <span id="resumenMedico"></span></li>
                                     <li><strong>Horario:</strong> <span id="resumenHorario"></span></li>
                                 </ul>
-                                <form action="{{ route('guardar-reserva') }}" method="POST">
+                                <form id="citaFinalform" action="{{ route('guardar-reserva') }}" method="POST">
                                     @csrf <!-- Protección contra ataques CSRF -->
                                     <input type="hidden" name="fechaSeleccionada" id="fechaSeleccionada"
                                         value="">
@@ -209,7 +209,7 @@
                                     <input type="text" name="motivo" placeholder="Motivo de la consulta"
                                         class="form-control" required>
 
-                                    <button type="submit" class="btn btn-success">Confirmar Reserva</button>
+                                    <button type="button" class="btn btn-success" onclick="confirmarReserva()">Confirmar Reserva</button>
                                 </form>
                             </div>
                         </div>
@@ -224,6 +224,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -527,6 +528,22 @@
                 })
                 .catch(error => console.error("Error obteniendo horarios:", error));
         }
+    }
+
+    function confirmarReserva() {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "No podrás revertir esto",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, confirmar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('citaFinalform').submit();
+            }
+        })
     }
 </script>
 
