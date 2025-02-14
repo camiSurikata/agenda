@@ -11,11 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('especialidades', function (Blueprint $table) {
+        Schema::create('examenes', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique();
+            $table->string('nombre');
+            $table->string('profesional');
+            $table->string('codigo');
+            $table->string('examen');
+            $table->string('resultado');
+            $table->string('fecha');
+            $table->string('estado');
             $table->timestamps();
-            $table->enum('status', [0, 1, 3])->default(1);
         });
     }
 
@@ -24,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('especialidades');
+        Schema::dropIfExists('examenes');
     }
 };

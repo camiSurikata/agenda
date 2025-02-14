@@ -14,7 +14,7 @@ class Medico extends Model
     'telefono',
     'rut',
     'email',
-    // 'especialidad',
+    'especialidad',
     'estado', // 1 activo, 0 deshabilitado
   ];
 

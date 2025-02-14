@@ -11,7 +11,7 @@
         <table class="datatables-basic table table-responsive">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <!--<th>ID</th>-->
                     <th>Nombre</th>
                     <th>Estado</th>
                     <th>Acciones</th>
@@ -20,20 +20,19 @@
             <tbody>
                 @foreach ($especialidades as $especialidad)
                     <tr>
-                        <td>{{ $especialidad->id }}</td>
+                        <!--<td>{{ $especialidad->id }}</td>-->
                         <td>{{ $especialidad->nombre }}</td>
                         <td>
                             @if ($especialidad->status == 1)
                                 <span class="badge rounded-pill bg-label-success me-1">Habilitado</span>
                             @elseif($especialidad->status == 0)
                                 <span class="badge rounded-pill bg-label-danger me-1">Deshabilitado</span>
-                            @else
-                                Desconocido
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('especialidades.edit', $especialidad->id) }}" class="btn-small blue">Editar</a>
-                            <form action="{{ route('especialidades.destroy', $especialidad->id) }}" method="POST"
+                            <a href="{{ route('especialidades.edit', $especialidad) }}" class="btn btn-primary btn-sm">Editar</a>
+                            <form id="delete-form-{{ $especialidad->id }}"
+                                action="{{ route('especialidades.destroy', $especialidad->id) }}" method="POST"
                                 style="display: inline-block;">
                                 @csrf
                                 @method('DELETE')
@@ -47,6 +46,7 @@
         </table>
     </div>
 @endsection
+
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
@@ -77,12 +77,13 @@
             cancelButtonText: "Cancelar"
         }).then((result) => {
             if (result.isConfirmed) {
+                console.log('Form submitted for especialidadId:', especialidadId);
                 // Si el usuario confirma, enviar el formulario para eliminar el convenio
                 document.getElementById('delete-form-' + especialidadId).submit();
 
                 Swal.fire({
                     title: "Eliminado!",
-                    text: "El convenio ha sido eliminado.",
+                    text: "La especialidad ha sido eliminado.",
                     icon: "success"
                 });
             }
