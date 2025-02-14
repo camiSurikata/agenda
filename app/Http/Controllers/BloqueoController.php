@@ -24,7 +24,7 @@ class BloqueoController extends Controller
       'fecha' => 'required|date',
       'hora_inicio' => 'required',
       'hora_termino' => 'required',
-      'recurso' => 'required|integer',
+      'recurso' => 'required|string|max:255',
       'creado_por' => 'required|string',
     ]);
 

@@ -15,7 +15,7 @@
             </div>
         @endif
 
-        <form action="{{ route('paciente.update', $paciente->idpaciente) }}" method="POST"  class="card p-4 shadow-sm">
+        <form id="pacienteForm" action="{{ route('paciente.update', $paciente->idpaciente) }}" method="POST"  class="card p-4 shadow-sm">
             @csrf
             @method('PUT')
             <div class="mb-3">
@@ -72,10 +72,11 @@
                 <small id="rutError" class="text-danger" style="display: none;">El RUT es inválido o no tiene el formato correcto.</small>
             </div>
             
-            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <button type="button" class="btn btn-primary mt-3" onclick="confirmarActualizacion()">Actualizar</button>
         </form>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
         function validarNombre(input) {
@@ -126,8 +127,7 @@
                 input.classList.add('is-invalid'); // Bootstrap: borde rojo
                 errorMsg.style.display = 'block'; // Mostrar mensaje de error
             } else {
-                input.classList.add('is-invalid'); // Bootstrap: borde rojo
-                errorMsg.style.display = 'block'; // Mostrar mensaje de error
+                errorMsg.style.display = 'none'; // Ocultar mensaje de error
             }
         }
     </script>
@@ -186,6 +186,25 @@
             return dv === dvCalculado.toString();
         }
 
+    </script>
+
+    <script>
+        function confirmarActualizacion() {
+            Swal.fire({
+                title: "¿Confirmar cambios?",
+                text: "Estás a punto de actualizar los datos del paciente.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Sí, actualizar",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('pacienteForm').submit();
+                }
+            });
+        }
     </script>
 
 @endsection

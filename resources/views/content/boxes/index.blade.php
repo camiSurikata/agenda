@@ -24,11 +24,11 @@
                     <tr>
                         <td>{{ $box->nombre }}</td>
                         <td>
-                            <a href="{{ route('boxes.edit', $box) }}">Editar</a>
+                            <a href="{{ route('boxes.edit', $box) }}"class="btn btn-warning btn-sm">Editar</a>
                             <form action="{{ route('boxes.destroy', $box) }}" method="POST" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit">Eliminar</button>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete({{ $box->id }})">Eliminar</button>
                             </form>
                         </td>
                     </tr>
@@ -40,7 +40,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     console.log('2');
     console.log($.fn.DataTable); // Debería devolver una función, no `undefined`.
@@ -53,4 +53,28 @@
             }
         });
     });
+</script>
+<script>
+    function confirmDelete(pacienteId) {
+        Swal.fire({
+            title: "¿Estás seguro?",
+            text: "¡No podrás revertir esta acción!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, eliminarlo",
+            cancelButtonText: "Cancelar"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('delete-form-' + pacienteId).submit();
+
+                Swal.fire({
+                    title: "Eliminado!",
+                    text: "El paciente ha sido eliminado.",
+                    icon: "success"
+                });
+            }
+        });
+    }
 </script>

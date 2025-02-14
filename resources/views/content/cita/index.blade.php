@@ -28,6 +28,39 @@
 @section('page-script')
     <script src="{{ asset('assets/js/app-calendar-events.js') }}"></script>
     {{-- <script src="{{ asset('assets/js/app-calendar.js') }}"></script> --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // ...existing code...
+
+            // Remove Event
+            function removeEvent(eventId) {
+                fetch(`/api/citas/${eventId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'Cita eliminada correctamente') {
+                        calendar.getEventById(eventId).remove();
+                    } else {
+                        console.error('Error al eliminar la cita:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error en la solicitud:', error));
+            }
+
+            // Call removeEvent function
+            btnDeleteEvent.addEventListener('click', e => {
+                removeEvent(parseInt(eventToUpdate.id));
+                bsAddEventModal.hide();
+            });
+
+            // ...existing code...
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -39,8 +72,8 @@
             <div class="col app-calendar-sidebar border-end" id="app-calendar-sidebar">
                 <div class="p-3 pb-2 my-sm-0 mb-3">
                     <div class="d-grid">
-                        <button class="btn btn-primary btn-toggle-sidebar" data-bs-toggle="offcanvas"
-                            data-bs-target="#addEventSidebar" aria-controls="addEventSidebar">
+                        <button class="btn btn-primary btn-toggle-modal" data-bs-toggle="modal"
+                            data-bs-target="#addEventModal" aria-controls="addEventModal">
                             <i class="mdi mdi-plus me-1"></i>
                             <span class="align-middle">Añadir Cita</span>
                         </button>
@@ -133,122 +166,90 @@
                     </div>
                 </div>
                 <div class="app-overlay"></div>
-                <!-- FullCalendar Offcanvas -->
-                <div class="offcanvas offcanvas-end event-sidebar" tabindex="-1" id="addEventSidebar"
-                    aria-labelledby="addEventSidebarLabel">
-                    <div class="offcanvas-header border-bottom">
-                        <h5 class="offcanvas-title" id="addEventSidebarLabel">Add Event</h5>
-                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                            aria-label="Close"></button>
-                    </div>
-                    <div class="offcanvas-body">
-                        <form class="event-form pt-0" id="eventForm" onsubmit="return false">
-                            <div class="form-floating form-floating-outline mb-4">
-                                <input type="text" class="form-control" id="eventTitle" name="eventTitle"
-                                    placeholder="Event Title" />
-                                <label for="eventTitle">Title</label>
+                <!-- FullCalendar Modal -->
+                <div class="modal fade" id="addEventModal" tabindex="-1" aria-labelledby="addEventModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header border-bottom">
+                                <h5 class="modal-title" id="addEventModalLabel">Add Event</h5>
+                                <button type="button" class="btn-close text-reset" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
-                            <div class="form-floating form-floating-outline mb-4">
-                                <select class="select2 select-event-label form-select" id="eventLabel" name="eventLabel">
-                                    <option data-label="primary" value="Atendido" selected>Atendido</option>
-                                    <option data-label="danger" value="Atendiendose">Atendiendose</option>
-                                    <option data-label="warning" value="Noasiste">No Asiste</option>
-                                    <option data-label="success" value="Confirmado">Confirmado</option>
-                                    <option data-label="info" value="Espera">Espera</option>
-                                </select>
-                                <label for="eventLabel">Label</label>
+                            <div class="modal-body">
+                                <form class="event-form pt-0" id="eventForm" onsubmit="return false">
+                                    <div class="form-floating form-floating-outline mb-4">
+                                        <input type="text" class="form-control" id="eventTitle" name="eventTitle"
+                                            placeholder="Event Title" />
+                                        <label for="eventTitle">Title</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4">
+                                        <select class="select2 select-event-label form-select" id="eventLabel" name="eventLabel">
+                                            <option data-label="primary" value="Atendido" selected>Atendido</option>
+                                            <option data-label="danger" value="Atendiendose">Atendiendose</option>
+                                            <option data-label="warning" value="Noasiste">No Asiste</option>
+                                            <option data-label="success" value="Confirmado">Confirmado</option>
+                                            <option data-label="info" value="Espera">Espera</option>
+                                        </select>
+                                        <label for="eventLabel">Label</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4">
+                                        <input type="text" class="form-control" id="eventStartDate" name="eventStartDate"
+                                            placeholder="Start Date" />
+                                        <label for="eventStartDate">Start Date</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4">
+                                        <input type="text" class="form-control" id="eventEndDate" name="eventEndDate"
+                                            placeholder="End Date" />
+                                        <label for="eventEndDate">End Date</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4 select2-primary">
+                                        <select class="select2 select-medicos form-select" id="eventMedico" name="eventMedico">
+                                            @foreach ($medicos as $medico)
+                                                <option value="{{ $medico->id }}"
+                                                    {{ isset($cita) && $medico->id == $citas->medico_id ? 'selected' : '' }}>
+                                                    {{ $medico->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <label for="medicosSelect">Seleccione Médico</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4 select2-primary">
+                                        <select class="select2 select-pacientes form-select" id="eventPaciente"
+                                            name="eventPaciente">
+                                            @foreach ($pacientes as $paciente)
+                                                <option value="{{ $paciente->idpaciente }}"
+                                                    {{ isset($cita) && $paciente->idpaciente == $citas->paciente_id ? 'selected' : '' }}>
+                                                    {{ $paciente->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <label for="pacientesSelect">Seleccione Paciente</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4 select2-primary">
+                                        <select class="select2 select-boxes form-select" id="eventBox" name="eventBox">
+                                            @foreach ($boxes as $box)
+                                                <option value="{{ $box->id }}"
+                                                    {{ isset($cita) && $box->id == $citas->box_id ? 'selected' : '' }}>
+                                                    {{ $box->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <label for="boxesSelect">Seleccione Box</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4">
+                                        <textarea class="form-control" name="eventDescription" id="eventDescription"></textarea>
+                                        <label for="eventDescription">Description</label>
+                                    </div>
+                                    <div class="mb-3 d-flex justify-content-sm-between justify-content-start my-4 gap-2">
+                                        <div class="d-flex">
+                                            <button type="submit" class="btn btn-primary btn-add-event me-sm-2 me-1">Add</button>
+                                            <button type="reset" class="btn btn-outline-secondary btn-cancel me-sm-0 me-1"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                        <button class="btn btn-outline-danger btn-delete-event d-none">Delete</button>
+                                    </div>
+                                </form>
                             </div>
-                            <div class="form-floating form-floating-outline mb-4">
-                                <input type="text" class="form-control" id="eventStartDate" name="eventStartDate"
-                                    placeholder="Start Date" />
-                                <label for="eventStartDate">Start Date</label>
-                            </div>
-                            <div class="form-floating form-floating-outline mb-4">
-                                <input type="text" class="form-control" id="eventEndDate" name="eventEndDate"
-                                    placeholder="End Date" />
-                                <label for="eventEndDate">End Date</label>
-                            </div>
-                            {{-- <div class="mb-3">
-                                <label class="switch">
-                                    <input type="checkbox" class="switch-input allDay-switch" />
-                                    <span class="switch-toggle-slider">
-                                        <span class="switch-on"></span>
-                                        <span class="switch-off"></span>
-                                    </span>
-                                    <span class="switch-label">All Day</span>
-                                </label>
-                            </div> --}}
-                            {{-- <div class="form-floating form-floating-outline mb-4">
-                                <input type="url" class="form-control" id="eventURL" name="eventURL"
-                                    placeholder="https://www.google.com" />
-                                <label for="eventURL">Event URL</label>
-                            </div> --}}
-                            {{-- <div class="form-floating form-floating-outline mb-4 select2-primary">
-                                <select class="select2 select-event-guests form-select" id="eventGuests"
-                                    name="eventGuests" multiple>
-                                    <option data-avatar="1.png" value="Jane Foster">Jane Foster</option>
-                                    <option data-avatar="3.png" value="Donna Frank">Donna Frank</option>
-                                    <option data-avatar="5.png" value="Gabrielle Robertson">Gabrielle Robertson</option>
-                                    <option data-avatar="7.png" value="Lori Spears">Lori Spears</option>
-                                    <option data-avatar="9.png" value="Sandy Vega">Sandy Vega</option>
-                                    <option data-avatar="11.png" value="Cheryl May">Cheryl May</option>
-                                </select>
-                                <label for="eventGuests">Add Guests</label>
-                            </div> --}}
-                            <div class="form-floating form-floating-outline mb-4 select2-primary">
-                                <select class="select2 select-medicos form-select" id="eventMedico" name="eventMedico">
-                                    @foreach ($medicos as $medico)
-                                        <option value="{{ $medico->id }}"
-                                            {{ isset($cita) && $medico->id == $citas->medico_id ? 'selected' : '' }}>
-                                            {{ $medico->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <label for="medicosSelect">Seleccione Médico</label>
-                            </div>
-                            <div class="form-floating form-floating-outline mb-4 select2-primary">
-                                <select class="select2 select-pacientes form-select" id="eventPaciente"
-                                    name="eventPaciente">
-                                    @foreach ($pacientes as $paciente)
-                                        <option value="{{ $paciente->idpaciente }}"
-                                            {{ isset($cita) && $paciente->idpaciente == $citas->paciente_id ? 'selected' : '' }}>
-                                            {{ $paciente->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <label for="pacientesSelect">Seleccione Paciente</label>
-                            </div>
-                            <div class="form-floating form-floating-outline mb-4 select2-primary">
-                                <select class="select2 select-boxes form-select" id="eventBox" name="eventBox">
-                                    @foreach ($boxes as $box)
-                                        <option value="{{ $box->id }}"
-                                            {{ isset($cita) && $box->id == $citas->box_id ? 'selected' : '' }}>
-                                            {{ $box->nombre }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <label for="boxesSelect">Seleccione Box</label>
-                            </div>
-
-                            {{--
-                            <div class="form-floating form-floating-outline mb-4">
-                                <input type="text" class="form-control" id="eventLocation" name="eventLocation"
-                                    placeholder="Enter Location" />
-                                <label for="eventLocation">Location</label>
-                            </div> --}}
-                            <div class="form-floating form-floating-outline mb-4">
-                                <textarea class="form-control" name="eventDescription" id="eventDescription"></textarea>
-                                <label for="eventDescription">Description</label>
-                            </div>
-                            <div class="mb-3 d-flex justify-content-sm-between justify-content-start my-4 gap-2">
-                                <div class="d-flex">
-                                    <button type="submit" class="btn btn-primary btn-add-event me-sm-2 me-1">Add</button>
-                                    <button type="reset" class="btn btn-outline-secondary btn-cancel me-sm-0 me-1"
-                                        data-bs-dismiss="offcanvas">Cancel</button>
-                                </div>
-                                <button class="btn btn-outline-danger btn-delete-event d-none">Delete</button>
-                            </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -256,18 +257,8 @@
         </div>
     </div>
 @endsection
+
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-<script>
-    // document.addEventListener('DOMContentLoaded', function() {
-    //     let calendarEl = document.getElementById('calendar');
-
-    //     let calendar = new FullCalendar.Calendar(calendarEl, {
-    //         initialView: 'dayGridMonth'
-    //     });
-
-    //     calendar.render();
-    // });
-</script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         (function() {
@@ -281,7 +272,7 @@
 
             const calendarEl = document.getElementById('calendar'),
                 appCalendarSidebar = document.querySelector('.app-calendar-sidebar'),
-                addEventSidebar = document.getElementById('addEventSidebar'),
+                addEventModal = document.getElementById('addEventModal'),
                 appOverlay = document.querySelector('.app-overlay'),
                 calendarsColor = {
                     Atendido: 'primary',
@@ -290,8 +281,8 @@
                     Confirmado: 'success',
                     Espera: 'info'
                 },
-                offcanvasTitle = document.querySelector('.offcanvas-title'),
-                btnToggleSidebar = document.querySelector('.btn-toggle-sidebar'),
+                modalTitle = document.querySelector('.modal-title'),
+                btnToggleModal = document.querySelector('.btn-toggle-modal'),
                 btnSubmit = document.querySelector('button[type="submit"]'),
                 btnDeleteEvent = document.querySelector('.btn-delete-event'),
                 btnCancel = document.querySelector('.btn-cancel'),
@@ -318,8 +309,8 @@
                 isFormValid = false,
                 inlineCalInstance;
 
-            // Init event Offcanvas
-            const bsAddEventSidebar = new bootstrap.Offcanvas(addEventSidebar);
+            // Init event Modal
+            const bsAddEventModal = new bootstrap.Modal(addEventModal);
 
             //! TODO: Update Event label and guest code to JS once select removes jQuery dependency
             // Event Label (select2)
@@ -421,10 +412,10 @@
                     info.jsEvent.preventDefault();
                     window.open(eventToUpdate.url, '_blank');
                 }
-                bsAddEventSidebar.show();
-                // For update event set offcanvas title text: Update Event
-                if (offcanvasTitle) {
-                    offcanvasTitle.innerHTML = 'Update Event';
+                bsAddEventModal.show();
+                // For update event set modal title text: Update Event
+                if (modalTitle) {
+                    modalTitle.innerHTML = 'Update Event';
                 }
                 btnSubmit.innerHTML = 'Update';
                 btnSubmit.classList.add('btn-update-event');
@@ -462,11 +453,11 @@
                 // btnDeleteEvent.addEventListener('click', e => {
                 //   removeEvent(parseInt(eventToUpdate.id));
                 //   // eventToUpdate.remove();
-                //   bsAddEventSidebar.hide();
+                //   bsAddEventModal.hide();
                 // });
             }
 
-            // Modify sidebar toggler
+            // Modify modal toggler
             function modifyToggler() {
                 const fcSidebarToggleButton = document.querySelector('.fc-sidebarToggle-button');
                 fcSidebarToggleButton.classList.remove('fc-button-primary');
@@ -474,9 +465,9 @@
                 while (fcSidebarToggleButton.firstChild) {
                     fcSidebarToggleButton.firstChild.remove();
                 }
-                fcSidebarToggleButton.setAttribute('data-bs-toggle', 'sidebar');
+                fcSidebarToggleButton.setAttribute('data-bs-toggle', 'modal');
                 fcSidebarToggleButton.setAttribute('data-overlay', '');
-                fcSidebarToggleButton.setAttribute('data-target', '#app-calendar-sidebar');
+                fcSidebarToggleButton.setAttribute('data-target', '#addEventModal');
                 fcSidebarToggleButton.insertAdjacentHTML('beforeend',
                     '<i class="mdi mdi-menu mdi-24px text-body"></i>');
             }
@@ -581,11 +572,11 @@
                 dateClick: function(info) {
                     let date = moment(info.date).format('YYYY-MM-DD');
                     resetValues();
-                    bsAddEventSidebar.show();
+                    bsAddEventModal.show();
 
-                    // For new event set offcanvas title text: Add Event
-                    if (offcanvasTitle) {
-                        offcanvasTitle.innerHTML = 'Add Event';
+                    // For new event set modal title text: Add Event
+                    if (modalTitle) {
+                        modalTitle.innerHTML = 'Add Event';
                     }
                     btnSubmit.innerHTML = 'Add';
                     btnSubmit.classList.remove('btn-update-event');
@@ -615,7 +606,7 @@
 
             // Render calendar
             calendar.render();
-            // Modify sidebar toggler
+            // Modify modal toggler
             modifyToggler();
 
             const eventForm = document.getElementById('eventForm');
@@ -668,9 +659,9 @@
                     isFormValid = false;
                 });
 
-            // Sidebar Toggle Btn
-            if (btnToggleSidebar) {
-                btnToggleSidebar.addEventListener('click', e => {
+            // Modal Toggle Btn
+            if (btnToggleModal) {
+                btnToggleModal.addEventListener('click', e => {
                     btnCancel.classList.remove('d-none');
                 });
             }
@@ -710,39 +701,6 @@
 
             function removeEvent(eventId) {
                 // ? Delete existing event data to current events object and refetch it to display on calender
-                // ? You can write below code to AJAX call success response
-                currentEvents = currentEvents.filter(function(event) {
-                    return event.id != eventId;
-                });
-                calendar.refetchEvents();
-
-                // ? To delete event directly to calender (won't update currentEvents object)
-                // removeEventInCalendar(eventId);
-            }
-
-            // (Update Event In Calendar (UI Only)
-            // ------------------------------------------------
-            const updateEventInCalendar = (updatedEventData, propsToUpdate, extendedPropsToUpdate) => {
-                const existingEvent = calendar.getEventById(updatedEventData.id);
-
-                // --- Set event properties except date related ----- //
-                // ? Docs: https://fullcalendar.io/docs/Event-setProp
-                // dateRelatedProps => ['start', 'end', 'allDay']
-                // eslint-disable-next-line no-plusplus
-                for (var index = 0; index < propsToUpdate.length; index++) {
-                    var propName = propsToUpdate[index];
-                    existingEvent.setProp(propName, updatedEventData[propName]);
-                }
-
-                // --- Set date related props ----- //
-                // ? Docs: https://fullcalendar.io/docs/Event-setDates
-                existingEvent.setDates(updatedEventData.start, updatedEventData.end, {
-                    // allDay: updatedEventData.allDay
-                });
-
-                // --- Set event's extendedProps ----- //
-                // ? Docs: https://fullcalendar.io/docs/Event-setExtendedProp
-                // eslint-disable-next-line no-plusplus
                 for (var index = 0; index < extendedPropsToUpdate.length; index++) {
                     var propName = extendedPropsToUpdate[index];
                     existingEvent.setExtendedProp(propName, updatedEventData.extendedProps[propName]);
@@ -812,7 +770,7 @@
                             });
                             console.log(addEvent)
 
-                            bsAddEventSidebar.hide();
+                            bsAddEventModal.hide();
                         } else {
                             console.error('Error al crear la cita:', response.statusText);
                         }
@@ -826,7 +784,7 @@
             // btnDeleteEvent.addEventListener('click', e => {
             //     removeEvent(parseInt(eventToUpdate.id));
             //     // eventToUpdate.remove();
-            //     bsAddEventSidebar.hide();
+            //     bsAddEventModal.hide();
             // });
 
             // Reset event form inputs values
@@ -847,14 +805,14 @@
             }
 
             // When modal hides reset input values
-            addEventSidebar.addEventListener('hidden.bs.offcanvas', function() {
+            addEventModal.addEventListener('hidden.bs.modal', function() {
                 resetValues();
             });
 
             // Hide left sidebar if the right sidebar is open
-            btnToggleSidebar.addEventListener('click', e => {
-                if (offcanvasTitle) {
-                    offcanvasTitle.innerHTML = 'Add Event';
+            btnToggleModal.addEventListener('click', e => {
+                if (modalTitle) {
+                    modalTitle.innerHTML = 'Add Event';
                 }
                 btnSubmit.innerHTML = 'Add';
                 btnSubmit.classList.remove('btn-update-event');

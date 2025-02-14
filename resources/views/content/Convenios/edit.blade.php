@@ -22,7 +22,7 @@
 
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre del Convenio</label>
-                <input type="text" class="form-control" id="nombre" name="nombre" value="{{ old('convenio', $convenio->convenio) }}" required>
+                <input type="text" class="form-control" id="nombre" name="convenio" value="{{ old('convenio', $convenio->convenio) }}" required>
             </div>
 
             <div class="mb-3">
@@ -40,14 +40,14 @@
 
             <div class="mb-3">
                 <label for="porcentaje_descuento" class="form-label">Porcentaje de Descuento</label>
-                <input type="number" class="form-control" id="porcentaje_descuento" name="porcentaje_descuento" value="{{ old('porcentaje_descuento', $convenio->porcentaje_descuento) }}" required>
+                <input type="number" class="form-control" id="porcentaje_descuento" name="porcentaje_descuento" value="{{ old('porcentaje_descuento', number_format($convenio->porcentaje_descuento, 0)) }}" required>
             </div>
 
             <div class="mb-3">
                 <label for="estado" class="form-label">Estado</label>
                 <select class="form-select" id="estado" name="estado" required>
                     <option value="1" {{ $convenio->estado == 1 ? 'selected' : '' }}>Activo</option>
-                    <option value="2" {{ $convenio->estado == 2 ? 'selected' : '' }}>Inhabilitado</option>
+                    <option value="2" {{ $convenio->estado == 2 ? 'selected' : '' }}>Desactivar</option>
                     <option value="3" {{ $convenio->estado == 3 ? 'selected' : '' }}>Eliminar</option>
                 </select>
             </div>

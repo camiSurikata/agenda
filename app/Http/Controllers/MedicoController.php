@@ -9,6 +9,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Sucursal; 
+use App\Models\Box; 
+
 
 class MedicoController extends Controller
 {
@@ -54,8 +57,9 @@ class MedicoController extends Controller
   public function editHorario($id)
   {
     $medico = Medico::with('horarios')->findOrFail($id);
-
-    return view('content.medicos.horario', compact('medico'));
+    $sucursales = Sucursal::all();
+    $boxes=Box::all();
+    return view('content.medicos.horario', compact('medico','sucursales','boxes'));
   }
   public function updateHorario(Request $request, $id)
   {
@@ -81,29 +85,37 @@ class MedicoController extends Controller
 
   public function getBloqueos($id)
   {
-    $bloqueos = BloqueoProgramado::where('medico_id', $id)->get();
+    $bloqueos = BloqueoProgramado::join('users', 'bloqueos_programados.creado_por', '=', 'users.id')
+      ->where('bloqueos_programados.medico_id', $id)
+      ->select('bloqueos_programados.*', 'users.name')
+      ->get();
     return response()->json($bloqueos);
   }
 
+  
+
   public function storeBloqueo(Request $request, $id)
   {
-    dd($request);
+    
     $request->validate([
-      'sucursal' => 'required|string|max:255',
+      'sucursal' => 'required|string|max:255', // Se valida como string
       'fecha' => 'required|date',
       'hora_inicio' => 'required',
       'hora_termino' => 'required',
-    ]);
-
+      'recurso' => 'required|string|max:255'
+  ]);
+  
+  
     BloqueoProgramado::create([
-      'medico_id' => $id,
-      'sucursal' => $request->sucursal,
-      'fecha' => $request->fecha,
-      'hora_inicio' => $request->hora_inicio,
-      'hora_termino' => $request->hora_termino,
-      'creado_por' => auth()->user()->name,
-      'recurso' => 1, // Fijo por ahora
+        'medico_id' => $id,
+        'sucursal' => $request->sucursal, // Ahora guarda el nombre en lugar del ID
+        'fecha' => $request->fecha,
+        'hora_inicio' => $request->hora_inicio,
+        'hora_termino' => $request->hora_termino,
+        'creado_por' => $request->creado_por,
+        'recurso' => $request->recurso
     ]);
+  
 
     return response()->json(['success' => true]);
   }

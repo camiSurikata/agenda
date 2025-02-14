@@ -26,5 +26,6 @@ class Paciente extends Model
   public function previsionConvenio(){
     return $this->belongsTo(Convenio::class, 'prevision', 'id');
   }
+  
 
 }

@@ -33,16 +33,29 @@
                             @if ($convenio->estado == 1)
                              Activo
                             @elseif ($convenio->estado == 2)
-                             Inhabilitado
+                             Desactivado
                             @endif
                         </td>
                         <td>
-                            <a href="{{ route('convenios.edit', $convenio) }}">Editar</a>
+                            <a class="btn btn-outline-info" href="{{ route('convenios.edit', $convenio) }}">Editar</a>
                             <form action="{{ route('convenios.destroy', $convenio) }}" method="POST" style="display:inline;" id="delete-form-{{ $convenio->id }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="button" class="btn btn-danger" onclick="confirmDelete({{ $convenio->id }})">Eliminar</button>
                             </form>
+                            @if ($convenio->estado == 1)
+                                <form action="{{ route('convenios.toggle', $convenio) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="btn btn-outline-danger">Desactivar</button>
+                                </form>
+                            @elseif ($convenio->estado == 2)
+                                <form action="{{ route('convenios.toggle', $convenio) }}" method="POST" style="display:inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <button type="submit" class="btn btn-outline-success">Activar</button>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                 @endforeach

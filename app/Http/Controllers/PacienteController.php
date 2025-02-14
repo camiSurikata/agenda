@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Models\Sucursal;
 use App\Models\Paciente;
 use App\Models\Convenio;
 use App\Models\Cita;
@@ -70,8 +70,10 @@ class PacienteController extends Controller
   }
 
   public function show($id){
+
     // Verificar que el ID recibido es válido
     $paciente = Paciente::where('idpaciente', $id)->firstOrFail();
+    
 
     // Obtener las citas del paciente
     $citas = Cita::where('paciente_id', $paciente->idpaciente)->get();

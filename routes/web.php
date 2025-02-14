@@ -14,6 +14,7 @@ use App\Http\Controllers\CitaController;
 use App\Http\Controllers\EncuestaController;
 use App\Http\Controllers\PacienteController;
 use App\Http\Controllers\ConvenioController;
+use App\Http\Controllers\ExamenesController;
 use App\Models\Cita;
 use App\Http\Controllers\EspecialidadController;
 use App\Models\Especialidad;
@@ -56,6 +57,7 @@ Route::delete('paciente/{paciente}', [PacienteController::class, 'destroy'])->na
 
 
 // CITAS
+Route::get('/obtener-horarios/{medico_id}', [CitaController::class, 'obtenerHorarios']);
 Route::resource('cita', CitaController::class);
 Route::get('/citas', [CitaController::class, 'index']);
 Route::get('/citas/{cita}', [CitaController::class, 'show'])->name('cita.show');;
@@ -82,7 +84,9 @@ Route::post('/especialidades', [EspecialidadController::class, 'store'])->name('
 //Route::put('/especialidades/{especialidad}/edit', [EspecialidadController::class, 'update'])->name('especialidades.update');
 Route::delete('/especialidades/{id}', [EspecialidadController::class, 'destroy'])->name('especialidades.destroy');
 
-
+//EXAMENES
+Route::get('/examenes', [ExamenesController::class, 'index'])->name('examenes.index');
+Route::get('/examenes/procesamiento', [ExamenesController::class, 'procesamiento'])->name('examenes.procesamiento');
 
 // Mostrar bloqueos por médico
 Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index'])->name('bloqueo.index');
@@ -102,6 +106,8 @@ Route::get('/reservar-cita', [CitaController::class, 'mostrarFormularioReserva']
 Route::post('/guardar-reserva', [CitaController::class, 'guardarReserva'])->name('guardar-reserva');
 // Obtener horarios disponibles
 Route::post('/horarios-disponibles', [CitaController::class, 'obtenerHorariosDisponibles'])->name('horarios.disponibles');
+// Obtener horarios disponibles para una fecha específica
+Route::post('/horarios-disponibles-fecha', [CitaController::class, 'obtenerHorariosDisponiblesFecha'])->name('horarios.disponibles.fecha');
 
 
 //Agenda-Pacientes
@@ -123,6 +129,10 @@ Route::get('/encuesta/enviar', [EncuestaController::class, 'enviar'])->name('enc
 
 //Convenio
 Route::resource('convenios', ConvenioController::class);
+Route::put('/convenios/{id}/toggle', [ConvenioController::class, 'toggleState'])->name('convenios.toggle');
+
+
+
 
 
 // Route::post('/medicos', [MedicoController::class, 'store'])->name('medicos.store');

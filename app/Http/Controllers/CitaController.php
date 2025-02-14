@@ -9,6 +9,7 @@ use App\Models\HorariosMedico;
 use App\Models\Medico;
 use App\Models\Paciente;
 use App\Models\Sucursal;
+use App\Models\BloqueoProgramado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -27,26 +28,51 @@ class CitaController extends Controller
   }
   public function guardarReserva(Request $request)
   {
-    // Validar los datos de la reserva
+    // Depuración: Verificar qué datos llegan
+    // dd($request->all());
+
+    //  Validar los datos del formulario
     $validated = $request->validate([
-      'paciente_id' => 'required|exists:pacientes,id',
-      'sucursal_id' => 'required|exists:sucursales,id',
-      'especialidad_id' => 'required|exists:especialidades,id',
-      'fecha' => 'required|date',
-      'hora' => 'required',
+      'paciente_id' => 'required|integer',
+      'sucursal_id' => 'required|integer',
+      'especialidad_id' => 'required|integer',
+      'medico_id' => 'required|integer',
+      'start' => 'required|date_format:Y-m-d H:i:s',
+      'end' => 'required|date_format:Y-m-d H:i:s',
+      'title' => 'nullable|string|max:255',
+      'description' => 'nullable|string|max:255',
+      'comentarios' => 'nullable|string|max:255',
+      'motivo' => 'nullable|string|max:255',
+      'box_id' => 'nullable|integer'
     ]);
 
-    // Crear la reserva
-    Cita::create([
-      'paciente_id' => $validated['paciente_id'],
-      'sucursal_id' => $validated['sucursal_id'],
-      'especialidad_id' => $validated['especialidad_id'],
-      'fecha' => $validated['fecha'],
-      'hora' => $validated['hora'],
-    ]);
-    return redirect()->route('reservar-cita')->with('success', 'Reserva realizada con éxito');
+    try {
+      // Crear y guardar la cita
 
-    // return redirect('/confirmacion-cita')->with('success', 'Cita reservada correctamente.');
+      $cita = new Cita();
+      $cita->title = $request->title ?? 'Cita médica';
+      $cita->start = $request->start;
+      $cita->end = $request->end;
+      $cita->paciente_id = $request->paciente_id;
+      $cita->sucursal_id = $request->sucursal_id;
+      $cita->especialidad_id = $request->especialidad_id;
+      $cita->medico_id = $request->medico_id;
+      $cita->estado = 1; // Asignamos estado activo
+      $cita->description = $request->description ?? '';
+      $cita->box_id = $request->box_id ?? 1; // Opcional
+      $cita->comentarios = $request->comentarios ?? null;
+      $cita->motivo = $request->motivo ?? null;
+
+      // Guardar cita
+      $cita->save();
+      // dd($request->all());
+      // Log::info('Cita guardada con éxito:', $cita->toArray());
+
+      return redirect()->back()->with('success', 'Cita reservada con éxito.');
+    } catch (\Exception $e) {
+      Log::error('Error al guardar la cita: ' . $e->getMessage());
+      return redirect()->back()->with('error', 'Error al reservar la cita.');
+    }
   }
 
   public function obtenerHorariosDisponibles(Request $request)
@@ -80,6 +106,50 @@ class CitaController extends Controller
     }
   }
 
+  public function obtenerHorariosDisponiblesFecha(Request $request)
+  {
+    $request->validate([
+      'sucursal_id' => 'required|integer',
+      'especialidad_id' => 'required|integer',
+      'medico_id' => 'required|integer',
+      'start' => 'required|date',
+      'end' => 'required|date',
+    ]);
+
+    $sucursalId = $request->input('sucursal_id');
+    $especialidadId = $request->input('especialidad_id');
+    $medicoId = $request->input('medico_id');
+    $start = $request->input('start');
+    $end = $request->input('end');
+
+    $horarios = HorariosMedico::with(['medico', 'sucursal'])
+        ->where('id_sucursal', $sucursalId)
+        ->where('especialidad_id', $especialidadId)
+        ->where('medico_id', $medicoId)
+        ->whereBetween('fecha', [$start, $end])
+        ->where('no_atiende', 0)
+        ->get();
+
+    return response()->json([
+      'horarios' => $horarios,
+    ]);
+  }
+
+  public function obtenerDiasDisponibles(Request $request)
+  {
+    $request->validate([
+        'medico_id' => 'required|exists:medicos,id',
+    ]);
+
+    $medicoId = $request->input('medico_id');
+    // Aquí puedes agregar tu lógica para obtener los días disponibles del médico
+    // Por ejemplo:
+    $diasDisponibles = $this->buscarDiasDisponiblesPorMedico($medicoId);
+
+    return response()->json([
+        'dias' => $diasDisponibles,
+    ]);
+  }
 
 
 
@@ -133,11 +203,33 @@ class CitaController extends Controller
   }
 
   // Eliminar una cita
-  public function destroy($id)
+  public function destroy(Cita $cita)
   {
-    $cita = Cita::findOrFail($id);
     $cita->delete();
-
-    return response()->json(['message' => 'Cita eliminada correctamente']);
+    return redirect()->route('cita.index')->with('success', 'cita eliminado correctamente.');
   }
+
+  public function obtenerHorarios($medico_id)
+  {
+    $horarios = HorariosMedico::where('medico_id', $medico_id)
+      ->where('no_atiende', 0) // Filtra solo los días en que atiende
+      ->get(['dia_semana', 'hora_inicio', 'hora_termino', 'descanso_inicio', 'descanso_termino']);
+
+    $bloqueos = DB::table('bloqueos_programados')
+      ->where('medico_id', $medico_id)
+      ->where('fecha', '>=', now()) // Obtiene los horarios bloqueados desde la fecha de hoy en adelante
+      ->get(['fecha', 'hora_inicio', 'hora_termino']); // Obtiene los horarios bloqueados
+
+    $citas = Cita::where('medico_id', $medico_id)
+      ->where('start', '>=', now()) // Obtiene las citas desde la fecha de hoy en adelante
+      ->get(['start', 'end']); // Obtiene las citas
+
+
+    return response()->json([
+      'horarios' => $horarios,
+      'bloqueos' => $bloqueos,
+      'citas' => $citas
+    ]);
+  }
+
 }
