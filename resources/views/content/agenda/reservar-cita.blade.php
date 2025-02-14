@@ -1,7 +1,5 @@
 @extends('layouts/blankLayout')
-@extends('layouts/blankLayout')
 
-@section('title', 'Reserva de Citas')
 @section('title', 'Reserva de Citas')
 
 @section('vendor-style')
@@ -65,29 +63,6 @@
                             </div>
                             <div class="line"></div>
 
-                            <!-- Paso 3: Ver Horarios Disponibles -->
-                            <div class="step" data-target="#seleccion-horarios">
-                                <button type="button" class="step-trigger">
-                                    <span class="bs-stepper-circle"><i class="mdi mdi-clock"></i></span>
-                                    <span class="bs-stepper-label">
-                                        <span class="bs-stepper-number">02</span>
-                                        <span class="bs-stepper-title">Ver Horarios</span>
-                                    </span>
-                                </button>
-                            </div>
-                            <div class="line"></div>
-
-                            <!-- Paso 4: Confirmar Reserva -->
-                            <div class="step" data-target="#confirmar-reserva">
-                                <button type="button" class="step-trigger">
-                                    <span class="bs-stepper-circle"><i class="mdi mdi-check-circle"></i></span>
-                                    <span class="bs-stepper-label">
-                                        <span class="bs-stepper-number">03</span>
-                                        <span class="bs-stepper-title">Confirmar Reserva</span>
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
                             <!-- Paso 3: Ver Horarios Disponibles -->
                             <div class="step" data-target="#seleccion-horarios">
                                 <button type="button" class="step-trigger">
@@ -214,7 +189,7 @@
                                     <li><strong>Médico:</strong> <span id="resumenMedico"></span></li>
                                     <li><strong>Horario:</strong> <span id="resumenHorario"></span></li>
                                 </ul>
-                                <form id="citaFinalform" action="{{ route('guardar-reserva') }}" method="POST">
+                                <form id = "citaFinalform" action="{{ route('guardar-reserva') }}" method="POST">
                                     @csrf <!-- Protección contra ataques CSRF -->
                                     <input type="hidden" name="fechaSeleccionada" id="fechaSeleccionada"
                                         value="">
@@ -554,7 +529,6 @@
                 .catch(error => console.error("Error obteniendo horarios:", error));
         }
     }
-
     function confirmarReserva() {
         Swal.fire({
             title: '¿Estás seguro?',
