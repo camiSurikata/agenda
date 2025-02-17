@@ -86,7 +86,7 @@
             <p>
             <p><strong>Gracias por confiar en nosotros.</strong></p>
             <p>Nuestro teléfono es: <strong>+56 2 2582 9200</strong> O bien nos puede escribir a nuestro WhatsApp al mismo número o haciendo clic en el siguiente enlace https://wa.me/56225829200</p>
-            <p><em>Equipo de </em></p>
+            <p><em>Equipo de averclaro.</em></p>
         </div>
     </div>
 </body>
