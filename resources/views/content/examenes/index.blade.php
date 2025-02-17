@@ -17,6 +17,9 @@
             <div class="d-flex gap-2">
                 <select class="form-select" name="professional" id="professional">
                     <option value="">Todos los Profesionales</option>
+                    @foreach ($medicos as $medico)
+                        <option value="{{ $medico->id }}">{{ $medico->nombre }}</option>
+                    @endforeach
                 </select>
 
                 <select class="form-select" name="resource" id="resource">
@@ -24,7 +27,8 @@
                     <!-- Add resources as needed -->
                 </select>
 
-                <button class="btn btn-success">+ Nueva atención</button>
+                <button class="btn btn-success" onclick="window.location='{{ route('examenes.create') }}'">+ Nueva
+                    atención</button>
             </div>
         </div>
 
@@ -41,7 +45,7 @@
                         <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="examenes-table-body">
                     @foreach ($examenes as $examen)
                         <tr>
                             <td>{{ $examen->codigo }}</td>

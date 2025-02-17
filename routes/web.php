@@ -35,6 +35,7 @@ Route::put('users/{user}/edit', [UserController::class, 'update'])->name('users.
 
 //medico
 Route::resource('medicos', MedicoController::class);
+Route::get('/medicos', [MedicoController::class, 'index'])->name('medicos.index');
 Route::get('/medicos/create', [MedicoController::class, 'create'])->name('medicos.create');
 //medico horario
 Route::get('/medicos/{medico}/horario', [MedicoController::class, 'editHorario'])->name('medicos.horario');
@@ -87,6 +88,9 @@ Route::delete('/especialidades/{id}', [EspecialidadController::class, 'destroy']
 //EXAMENES
 Route::get('/examenes', [ExamenesController::class, 'index'])->name('examenes.index');
 Route::get('/examenes/procesamiento', [ExamenesController::class, 'procesamiento'])->name('examenes.procesamiento');
+Route::get('/examenes/create', [ExamenesController::class, 'create'])->name('examenes.create');
+Route::post('/examenes', [ExamenesController::class, 'store'])->name('examenes.store');
+
 
 // Mostrar bloqueos por médico
 Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index'])->name('bloqueo.index');

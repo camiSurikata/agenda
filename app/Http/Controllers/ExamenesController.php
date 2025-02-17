@@ -3,16 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Examen;
+use App\Models\Medico;
+use Illuminate\Http\Request;
 
 class ExamenesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        
         $examenes = Examen::all();
-        return view('content.examenes.index', ['examenes' => $examenes]);
+        $medicos = Medico::all();
+
+        
+
+        return view('content.examenes.index', ['examenes' => $examenes, 'medicos' => $medicos]);
     }
-    
+
     public function procesamiento()
     {
 
@@ -44,5 +49,35 @@ class ExamenesController extends Controller
             ]
         ];
         return view('content.examenes.procesamiento', compact('detalles', 'examenes'));
+    }
+
+    public function create()
+    {
+        return view('content.examenes.create');
+    }
+
+    public function store()
+    {
+        request()->validate([
+            'nombre' => 'required',
+            'profesional' => 'required',
+            'codigo' => 'required',
+            'examen' => 'required',
+            'resultado' => 'required',
+            'fecha' => 'required',
+            'estado' => 'required',
+        ]);
+
+        Examen::create([
+            'nombre' => request('nombre'),
+            'profesional' => request('profesional'),
+            'codigo' => request('codigo'),
+            'examen' => request('examen'),
+            'resultado' => request('resultado'),
+            'fecha' => request('fecha'),
+            'estado' => request('estado'),
+        ]);
+
+        return redirect()->route('examenes.index')->with('success', 'Examen creado exitosamente!');
     }
 }
