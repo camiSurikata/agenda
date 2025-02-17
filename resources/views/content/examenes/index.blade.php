@@ -1,5 +1,9 @@
 @extends('layouts/layoutMaster')
 
+@section('vendor-style')
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+@endsection
+
 @section('content')
     <div class="container mt-4">
         <!-- Tabs -->
@@ -15,6 +19,16 @@
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="d-flex gap-2">
+
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center">
+                        <a href="{{ route('examenes.index', ['date' => $date->copy()->subDay()->format('Y-m-d')]) }}"
+                            class="btn btn-outline-secondary">&lt;</a>
+                        <h4 class="mb-0 mx-3">{{ $date->format('l d F Y') }}</h4>
+                        <a href="{{ route('examenes.index', ['date' => $date->copy()->addDay()->format('Y-m-d')]) }}"
+                            class="btn btn-outline-secondary">&gt;</a>
+                    </div>
+                </div>
                 <select class="form-select" name="professional" id="professional">
                     <option value="">Todos los Profesionales</option>
                     @foreach ($medicos as $medico)

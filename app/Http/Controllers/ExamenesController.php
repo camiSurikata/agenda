@@ -5,17 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Examen;
 use App\Models\Medico;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class ExamenesController extends Controller
 {
     public function index(Request $request)
     {
-        $examenes = Examen::all();
+
+        $date = $request->date ? Carbon::parse($request->date) : Carbon::now();
         $medicos = Medico::all();
 
-        
+        $examenes = Examen::whereDate('fecha', $date->format('Y-m-d'))->get();
 
-        return view('content.examenes.index', ['examenes' => $examenes, 'medicos' => $medicos]);
+        return view('content.examenes.index', ['examenes' => $examenes, 'medicos' => $medicos, 'date' => $date]);
     }
 
     public function procesamiento()
