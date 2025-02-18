@@ -13,6 +13,8 @@ use App\Models\BloqueoProgramado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Mail\CitaReservadaMail;
+use Illuminate\Support\Facades\Mail;
 
 class CitaController extends Controller
 {
@@ -65,8 +67,13 @@ class CitaController extends Controller
 
       // Guardar cita
       $cita->save();
-      // dd($request->all());
-      // Log::info('Cita guardada con éxito:', $cita->toArray());
+      // Enviar el correo
+      $paciente = Paciente::find($request->paciente_id);
+
+      if ($paciente) {
+          // Enviar el correo al paciente
+          Mail::to($paciente->email)->send(new CitaReservadaMail($cita));
+      }
 
       return redirect()->back()->with('success', 'Cita reservada con éxito.');
     } catch (\Exception $e) {
