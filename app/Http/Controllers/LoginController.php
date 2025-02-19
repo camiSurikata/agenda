@@ -46,7 +46,7 @@ class LoginController extends Controller
     $credentials = [
       "email" => $request->email,
       "password" => $request->password,
-      //"active" => true
+      "status" => ($request->status === 1 || $request->status === null) ? $request->status : 0
     ];
 
     if (Auth::attempt($credentials)) {

@@ -135,7 +135,10 @@ Route::get('/encuesta/enviar', [EncuestaController::class, 'enviar'])->name('enc
 Route::resource('convenios', ConvenioController::class);
 Route::put('/convenios/{id}/toggle', [ConvenioController::class, 'toggleState'])->name('convenios.toggle');
 
-
+//Permisos
+route::get('/permisos', [AdminController::class, 'index'])->name('permisos.index');
+route::get('/admin/permisos/{id}', [AdminController::class, 'show'])->name('permisos.show');
+route::post('/admin/permisos/guardar', [AdminController::class, 'store'])->name('permisos.store');
 
 
 

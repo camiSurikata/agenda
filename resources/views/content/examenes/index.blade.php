@@ -65,7 +65,7 @@
                     @foreach ($examenes as $examen)
                         <tr>
                             <td>{{ $examen->estado }}</td>
-                            <td>{{ $examen->codigo }}</td>
+                            <td>{{ $examen->id }}</td>
                             <td>{{ $examen->nombre }}</td>
                             <td>{{ $examen->profesional }}</td>
                             <td>{{ $examen->examen }}</td>

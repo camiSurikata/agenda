@@ -32,8 +32,8 @@
           "slug": "app-ecommerce-dashboard"
         },
         {
-          "url": "/convenios",
-          "name": "Convenios",
+          "url": "/permisos",
+          "name": "Administrar Permisos",
           "slug": "app-ecommerce-dashboard"
         }
       ]
