@@ -74,7 +74,8 @@ class CitaController extends Controller
           // Enviar el correo al paciente
           Mail::to($paciente->email)->send(new CitaReservadaMail($cita));
       }
-
+      // Devolver la respuesta JSON
+      return response()->json($cita, 201);
       return redirect()->back()->with('success', 'Cita reservada con éxito.');
     } catch (\Exception $e) {
       Log::error('Error al guardar la cita: ' . $e->getMessage());

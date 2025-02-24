@@ -711,17 +711,21 @@
                         start: eventStartDate.value,
                         end: eventEndDate.value,
                         description: eventDescription.value,
-                        medico_id: eventMedico.value,
-                        paciente_id: eventPaciente.value,
-                        box_id: eventBox.value,
+                        medico_id: parseInt(eventMedico.value),
+                        paciente_id: parseInt(eventPaciente.value),
+                        sucursal_id: 1, // Nuevo
+                        especialidad_id: 1, // Nuevo
+                        box_id: parseInt(eventBox.value),
+                        estado: 1, // Valor predeterminado según la BDD
+                        comentarios:  'test', // Evitar valores null
+                        motivo:  'test' // Evitar valores null
                     };
                     console.log(newEvent);
 
                     try {
-                        let csrfToken = document.querySelector('meta[name="csrf-token"]')
-                            .content;
+                        let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-                        let response = await fetch('/api/citas', {
+                        let response = await fetch('/guardar-reserva', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -729,45 +733,45 @@
                             },
                             body: JSON.stringify(newEvent)
                         });
+
                         console.log(response.ok);
-                        // Comprobar si la respuesta es exitosa
 
                         if (!response.ok) {
                             let errorData = await response.json();
                             console.error('Errores de validación:', errorData);
+                            return;
                         }
 
-                        if (response.ok) {
-                            console.log('1');
-                            let data = await response.json();
-                            console.log('2');
-                            console.log('Cita creada:', data);
+                        let data = await response.json();
+                        console.log('Cita creada:', data);
 
-                            // Opcional: actualizar la vista del calendario
-                            addEvent({
-                                // id: data.id, // ID generado por la base de datos
-                                title: data.title,
-                                start: data.start,
-                                end: data.end,
-                                description: data.description,
-                                medico_id: data.medico,
-                                paciente_id: data.paciente,
-                                box_id: data.box,
-                                extendedProps: {
-                                    calendar: 'Atendido'
-                                }
-                            });
-                            console.log(addEvent)
+                        // Actualizar la vista del calendario
+                        addEvent({
+                            id: data.id, // ID generado por la base de datos
+                            title: data.title,
+                            start: data.start,
+                            end: data.end,
+                            description: data.description,
+                            medico_id: data.medico_id,
+                            paciente_id: data.paciente_id,
+                            sucursal_id: data.sucursal_id, // Nuevo
+                            especialidad_id: data.especialidad_id, // Nuevo
+                            box_id: data.box_id,
+                            estado: data.estado,
+                            comentarios: data.comentarios,
+                            motivo: data.motivo,
+                            extendedProps: {
+                                calendar: 'Atendido'
+                            }
+                        });
 
-                            bsAddEventModal.hide();
-                        } else {
-                            console.error('Error al crear la cita:', response.statusText);
-                        }
+                        bsAddEventModal.hide();
                     } catch (error) {
                         console.error('Error en la solicitud:', error);
                     }
                 }
             });
+
 
             // Call removeEvent function
             btnDeleteEvent.addEventListener('click', e => {
