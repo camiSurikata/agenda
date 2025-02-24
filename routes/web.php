@@ -1,4 +1,3 @@
-web:
 <?php
 
 use App\Http\Controllers\AdminController;
@@ -61,14 +60,20 @@ Route::delete('paciente/{paciente}', [PacienteController::class, 'destroy'])->na
 Route::get('/obtener-horarios/{medico_id}', [CitaController::class, 'obtenerHorarios']);
 Route::resource('cita', CitaController::class);
 Route::get('/citas', [CitaController::class, 'index']);
-Route::get('/citas/{cita}', [CitaController::class, 'show'])->name('cita.show');
+Route::get('/citas/{cita}', [CitaController::class, 'show'])->name('cita.show');;
+// Ruta para crear una nueva cita
 Route::post('/api/citas', [CitaController::class, 'store']);
+// Route::middleware('api')->group(function () {
+//   Route::post('/citas', [CitaController::class, 'store']);
+// });
 Route::post('/citas', [CitaController::class, 'store']);
+
+// Ruta para actualizar una cita existente
 Route::put('/citas/{id}', [CitaController::class, 'update']);
-Route::delete('/api/citas/{id}', [CitaController::class, 'destroy']);
-Route::delete('/api/citas/{cita}', [CitaController::class, 'destroy']);
+// Ruta para eliminar una cita
+Route::delete('/citas/{id}', [CitaController::class, 'destroy']);
 Route::get('/api/citas', function () {
-  return Cita::all();
+  return Cita::all(); // Puedes agregar filtros o relaciones si es necesario
 });
 
 
