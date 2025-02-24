@@ -1,3 +1,4 @@
+
 @extends('layouts/layoutMaster')
 
 
@@ -28,39 +29,6 @@
 @section('page-script')
     <script src="{{ asset('assets/js/app-calendar-events.js') }}"></script>
     {{-- <script src="{{ asset('assets/js/app-calendar.js') }}"></script> --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // ...existing code...
-
-            // Remove Event
-            function removeEvent(eventId) {
-                fetch(`/api/citas/${eventId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message === 'Cita eliminada correctamente') {
-                        calendar.getEventById(eventId).remove();
-                    } else {
-                        console.error('Error al eliminar la cita:', data.message);
-                    }
-                })
-                .catch(error => console.error('Error en la solicitud:', error));
-            }
-
-            // Call removeEvent function
-            btnDeleteEvent.addEventListener('click', e => {
-                removeEvent(parseInt(eventToUpdate.id));
-                bsAddEventModal.hide();
-            });
-
-            // ...existing code...
-        });
-    </script>
 @endsection
 
 @section('content')
@@ -700,18 +668,39 @@
             // ------------------------------------------------
 
             function removeEvent(eventId) {
-                // ? Delete existing event data to current events object and refetch it to display on calender
-                for (var index = 0; index < extendedPropsToUpdate.length; index++) {
-                    var propName = extendedPropsToUpdate[index];
-                    existingEvent.setExtendedProp(propName, updatedEventData.extendedProps[propName]);
-                }
-            };
+                console.log("Intentando eliminar el evento con ID:", eventId);
 
-            // Remove Event In Calendar (UI Only)
-            // ------------------------------------------------
-            function removeEventInCalendar(eventId) {
-                calendar.getEventById(eventId).remove();
+                fetch('/eliminar-reserva', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ cita_id: eventId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Respuesta del servidor:", data);
+
+                    if (data.message === 'Cita eliminada correctamente') {
+                        const event = calendar.getEventById(eventId);
+                        if (event) {
+                            console.log("Evento encontrado y eliminado en la UI.");
+                            event.remove(); // Elimina el evento del calendario sin recargar
+                        } else {
+                            console.warn("No se encontró el evento en FullCalendar.");
+                        }
+
+                        setTimeout(() => {
+                            calendar.refetchEvents(); // Refresca eventos después de eliminar
+                        }, 500);
+                    } else {
+                        console.error('Error al eliminar la cita:', data.message);
+                    }
+                })
+                .catch(error => console.error('Error en la solicitud:', error));
             }
+
 
             // Add new event
             // ------------------------------------------------
@@ -781,11 +770,11 @@
             });
 
             // Call removeEvent function
-            // btnDeleteEvent.addEventListener('click', e => {
-            //     removeEvent(parseInt(eventToUpdate.id));
-            //     // eventToUpdate.remove();
-            //     bsAddEventModal.hide();
-            // });
+            btnDeleteEvent.addEventListener('click', e => {
+                removeEvent(parseInt(eventToUpdate.id));
+                calendar.refetchEvents()
+                bsAddEventModal.hide();
+            });
 
             // Reset event form inputs values
             // ------------------------------------------------

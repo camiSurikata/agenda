@@ -210,10 +210,17 @@ class CitaController extends Controller
   }
 
   // Eliminar una cita
-  public function destroy(Cita $cita)
+  public function eliminarReserva(Request $request)
   {
-    $cita->delete();
-    return redirect()->route('cita.index')->with('success', 'cita eliminado correctamente.');
+    $citaId = $request->input('cita_id');
+    $cita = Cita::find($citaId);
+
+    if ($cita) {
+      $cita->delete();
+      return response()->json(['message' => 'Cita eliminada correctamente.'], 200);
+    } else {
+      return response()->json(['message' => 'Cita no encontrada.'], 404);
+    }
   }
 
   public function obtenerHorarios($medico_id)
