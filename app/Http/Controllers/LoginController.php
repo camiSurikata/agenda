@@ -43,19 +43,18 @@ class LoginController extends Controller
 
     //validacion
 
+
     $credentials = [
       "email" => $request->email,
-      "password" => $request->password,
-      "status" => ($request->status === 1 || $request->status === null) ? $request->status : 0
+      "password" => $request->password
     ];
 
     if (Auth::attempt($credentials)) {
-
       $request->session()->regenerate();
       return redirect()->intended(route('users.index'));
     } else {
-      return redirect(route('medicos.index'));
-    };
+      return redirect()->back()->withErrors(['email' => 'Las credenciales no coinciden con nuestros registros.']);
+    }
   }
 
   public function logout(Request $request)

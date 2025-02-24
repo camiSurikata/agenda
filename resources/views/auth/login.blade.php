@@ -19,13 +19,30 @@
 @endsection
 
 @section('vendor-script')
-    {{-- <script src="{{asset('assets/vendor/libs/@form-validation/umd/bundle/popular.min.js')}}"></script>
-    <script src="{{asset('assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js')}}"></script>
-    <script src="{{asset('assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js')}}"></script> --}}
+    <script src="{{ asset('assets/vendor/libs/@form-validation/umd/bundle/popular.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js') }}"></script>
 @endsection
 
 @section('page-script')
     <script src="{{ asset('assets/js/pages-auth.js') }}"></script>
+
+    <!-- Script para capturar los datos al hacer submit al login -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('formAuthentication');
+            form.addEventListener('submit', function (event) {
+                event.preventDefault(); // Evita el envío del formulario para capturar los datos
+                const formData = new FormData(form);
+                const data = {};
+                formData.forEach((value, key) => {
+                    data[key] = value;
+                });
+                console.log(data); // Muestra los datos del formulario en la consola
+                //form.submit(); // Envía el formulario después de capturar los datos
+            });
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -46,6 +63,16 @@
                                 <img src="{{ asset('img/averclaro2.png') }}" width="300px" alt="">
                             </div>
                             <h4 class="mb-4">Inicia sesión en tu cuenta</h4>
+
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul>
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
 
                             <form id="formAuthentication" class="mb-3" action="{{ route('iniciar-sesion') }}"
                                 method="POST">
@@ -77,7 +104,7 @@
                                         </label>
                                     </div>
                                 </div>
-                                <button class="btn btn-primary d-grid w-100">
+                                <button class="btn btn-primary d-grid w-100" id="login-button">
                                     Ingresar
                                 </button>
                             </form>
@@ -86,4 +113,8 @@
                     <!-- /Login -->
                 </div>
             </div>
-        @endsection
+            <!-- /Right Section -->
+        </div>
+    </div>
+
+@endsection

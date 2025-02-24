@@ -35,7 +35,7 @@ Route::put('users/{user}/edit', [UserController::class, 'update'])->name('users.
 
 //medico
 Route::resource('medicos', MedicoController::class);
-Route::get('/medicos', [MedicoController::class, 'index'])->name('medicos.index');
+
 Route::get('/medicos/create', [MedicoController::class, 'create'])->name('medicos.create');
 //medico horario
 Route::get('/medicos/{medico}/horario', [MedicoController::class, 'editHorario'])->name('medicos.horario');
@@ -149,4 +149,6 @@ Route::middleware([
   'auth',
   // 'verified',
   // 'checkRole:3',
-])->group(function () {});
+])->group(function () {
+  Route::get('/medicos', [MedicoController::class, 'index'])->name('medicos.index');
+});
