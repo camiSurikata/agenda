@@ -79,7 +79,7 @@ class CitaController extends Controller
       return redirect()->back()->with('success', 'Cita reservada con éxito.');
     } catch (\Exception $e) {
       Log::error('Error al guardar la cita: ' . $e->getMessage());
-      return redirect()->back()->with('error', 'Error al reservar la cita.');
+      return response()->json(['error' => 'Error al reservar la cita.'], 500);
     }
   }
 

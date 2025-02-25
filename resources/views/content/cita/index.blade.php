@@ -691,12 +691,11 @@
                             console.warn("No se encontró el evento en FullCalendar.");
                         }
 
-                        setTimeout(() => {
-                            calendar.refetchEvents(); // Refresca eventos después de eliminar
-                        }, 500);
+                         // Asegura que el calendario se actualice
                     } else {
                         console.error('Error al eliminar la cita:', data.message);
                     }
+                    calendar.refetchEvents();
                 })
                 .catch(error => console.error('Error en la solicitud:', error));
             }
@@ -706,10 +705,22 @@
             // ------------------------------------------------
             btnSubmit.addEventListener('click', async e => {
                 if (isFormValid) {
+                    // Función para formatear la fecha en "YYYY-MM-DD HH:MM:SS"
+                    function formatDate(dateString) {
+                        let date = new Date(dateString);
+                        let year = date.getFullYear();
+                        let month = String(date.getMonth() + 1).padStart(2, '0');
+                        let day = String(date.getDate()).padStart(2, '0');
+                        let hours = String(date.getHours()).padStart(2, '0');
+                        let minutes = String(date.getMinutes()).padStart(2, '0');
+                        let seconds = String(date.getSeconds()).padStart(2, '0');
+                        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                    }
+
                     let newEvent = {
                         title: eventTitle.value,
-                        start: eventStartDate.value,
-                        end: eventEndDate.value,
+                        start: formatDate(eventStartDate.value),
+                        end: formatDate(eventEndDate.value),
                         description: eventDescription.value,
                         medico_id: parseInt(eventMedico.value),
                         paciente_id: parseInt(eventPaciente.value),
@@ -717,9 +728,10 @@
                         especialidad_id: 1, // Nuevo
                         box_id: parseInt(eventBox.value),
                         estado: 1, // Valor predeterminado según la BDD
-                        comentarios:  'test', // Evitar valores null
-                        motivo:  'test' // Evitar valores null
+                        comentarios: 'test', // Evitar valores null
+                        motivo: 'test' // Evitar valores null
                     };
+
                     console.log(newEvent);
 
                     try {
@@ -771,6 +783,7 @@
                     }
                 }
             });
+
 
 
             // Call removeEvent function
