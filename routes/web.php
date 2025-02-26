@@ -106,6 +106,8 @@ Route::get('/reservar-cita', [CitaController::class, 'mostrarFormularioReserva']
 Route::post('/guardar-reserva', [CitaController::class, 'guardarReserva'])->name('guardar-reserva');
 //Eliminar una reserva
 Route::post('/eliminar-reserva', [CitaController::class, 'eliminarReserva'])->name('eliminar-reserva');
+//editar una reserva
+Route::put('/actualizar-reserva/{id}', [CitaController::class, 'update']);
 // Obtener horarios disponibles
 Route::post('/horarios-disponibles', [CitaController::class, 'obtenerHorariosDisponibles'])->name('horarios.disponibles');
 // Obtener horarios disponibles para una fecha específica

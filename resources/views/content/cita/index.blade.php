@@ -373,9 +373,12 @@
                 });
             }
 
+            let isEditMode = false;
+
             // Event click function
             function eventClick(info) {
                 eventToUpdate = info.event;
+                isEditMode = true;
                 if (eventToUpdate.url) {
                     info.jsEvent.preventDefault();
                     window.open(eventToUpdate.url, '_blank');
@@ -717,7 +720,8 @@
                         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
                     }
 
-                    let newEvent = {
+                    // Crear el objeto con los datos del evento
+                    let eventData = {
                         title: eventTitle.value,
                         start: formatDate(eventStartDate.value),
                         end: formatDate(eventEndDate.value),
@@ -732,50 +736,95 @@
                         motivo: 'test' // Evitar valores null
                     };
 
-                    console.log(newEvent);
+                    console.log(eventData);
 
                     try {
                         let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-                        let response = await fetch('/guardar-reserva', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': csrfToken
-                            },
-                            body: JSON.stringify(newEvent)
-                        });
+                        if (isEditMode) {
+                            // Si estás en modo edición, actualizar el evento
+                            eventData.id = eventToUpdate.id; // Asegúrate de incluir el ID del evento a editar
+                            let response = await fetch(`/actualizar-reserva/${eventData.id}`, {
+                                method: 'PUT', // O 'PATCH'
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken
+                                },
+                                body: JSON.stringify(eventData)
+                            });
 
-                        console.log(response.ok);
+                            console.log(response.ok);
 
-                        if (!response.ok) {
-                            let errorData = await response.json();
-                            console.error('Errores de validación:', errorData);
-                            return;
-                        }
-
-                        let data = await response.json();
-                        console.log('Cita creada:', data);
-
-                        // Actualizar la vista del calendario
-                        addEvent({
-                            id: data.id, // ID generado por la base de datos
-                            title: data.title,
-                            start: data.start,
-                            end: data.end,
-                            description: data.description,
-                            medico_id: data.medico_id,
-                            paciente_id: data.paciente_id,
-                            sucursal_id: data.sucursal_id, // Nuevo
-                            especialidad_id: data.especialidad_id, // Nuevo
-                            box_id: data.box_id,
-                            estado: data.estado,
-                            comentarios: data.comentarios,
-                            motivo: data.motivo,
-                            extendedProps: {
-                                calendar: 'Atendido'
+                            if (!response.ok) {
+                                let errorData = await response.json();
+                                console.error('Errores de validación:', errorData);
+                                return;
                             }
-                        });
+
+                            let data = await response.json();
+                            console.log('Cita actualizada:', data);
+
+                            // Actualizar la vista del calendario
+                            updateEvent({
+                                id: data.id, // ID del evento actualizado
+                                title: data.title,
+                                start: data.start,
+                                end: data.end,
+                                description: data.description,
+                                medico_id: data.medico_id,
+                                paciente_id: data.paciente_id,
+                                sucursal_id: data.sucursal_id, // Nuevo
+                                especialidad_id: data.especialidad_id, // Nuevo
+                                box_id: data.box_id,
+                                estado: data.estado,
+                                comentarios: data.comentarios,
+                                motivo: data.motivo,
+                                extendedProps: {
+                                    calendar: 'Atendido'
+                                }
+                            });
+                        } else {
+                            // Si no estás en modo edición, crear un nuevo evento
+                            let response = await fetch('/guardar-reserva', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken
+                                },
+                                body: JSON.stringify(eventData)
+                            });
+
+                            console.log(response.ok);
+
+                            if (!response.ok) {
+                                let errorData = await response.json();
+                                console.error('Errores de validación:', errorData);
+                                return;
+                            }
+
+                            let data = await response.json();
+                            console.log('Cita creada:', data);
+
+                            // Agregar el nuevo evento al calendario
+                            addEvent({
+                                id: data.id, // ID generado por la base de datos
+                                title: data.title,
+                                start: data.start,
+                                end: data.end,
+                                description: data.description,
+                                medico_id: data.medico_id,
+                                paciente_id: data.paciente_id,
+                                sucursal_id: data.sucursal_id, // Nuevo
+                                especialidad_id: data.especialidad_id, // Nuevo
+                                box_id: data.box_id,
+                                estado: data.estado,
+                                comentarios: data.comentarios,
+                                motivo: data.motivo,
+                                extendedProps: {
+                                    calendar: 'Atendido'
+                                }
+                            });
+                        }
 
                         bsAddEventModal.hide();
                     } catch (error) {
@@ -783,6 +832,7 @@
                     }
                 }
             });
+
 
 
 

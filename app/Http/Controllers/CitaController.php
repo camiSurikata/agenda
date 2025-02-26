@@ -204,9 +204,20 @@ class CitaController extends Controller
       'title' => 'required|string|max:255',
       'start' => 'required|date',
       'end' => 'required|date',
+      'description' => 'nullable|string',
+      'medico_id' => 'required|integer',
+      'paciente_id' => 'required|integer',
+      'sucursal_id' => 'required|integer',
+      'especialidad_id' => 'required|integer',
+      'box_id' => 'nullable|integer',
+      'estado' => 'required|integer',
+      'comentarios' => 'nullable|string',
+      'motivo' => 'nullable|string',
     ]);
 
+    // Actualiza la cita con los datos validados
     $cita->update($validated);
+
     return response()->json($cita);
   }
 
