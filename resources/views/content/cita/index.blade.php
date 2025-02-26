@@ -170,6 +170,17 @@
                                         <label for="eventEndDate">End Date</label>
                                     </div>
                                     <div class="form-floating form-floating-outline mb-4 select2-primary">
+                                        <select class="select2 select-sucursal form-select" id="eventSucursal" name="eventSucursal">
+                                            @foreach ($sucursales as $sucursal)
+                                                <option value="{{ $sucursal->id }}"
+                                                    {{ isset($cita) && $sucursal->id == $citas->id ? 'selected' : '' }}>
+                                                    {{ $sucursal->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <label for="sucursalSelect">Seleccione Sucursal</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4 select2-primary">
                                         <select class="select2 select-medicos form-select" id="eventMedico" name="eventMedico">
                                             @foreach ($medicos as $medico)
                                                 <option value="{{ $medico->id }}"
@@ -179,6 +190,17 @@
                                             @endforeach
                                         </select>
                                         <label for="medicosSelect">Seleccione Médico</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4 select2-primary">
+                                        <select class="select2 select-especialidad form-select" id="eventEspecialidad" name="eventEspecialidad">
+                                            @foreach ($especialidades as $especialidad)
+                                                <option value="{{ $especialidad->id }}"
+                                                    {{ isset($cita) && $especialidad->id == $citas->especialidad_id ? 'selected' : '' }}>
+                                                    {{ $especialidad->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <label for="especialidadSelect">Seleccione Especialidad</label>
                                     </div>
                                     <div class="form-floating form-floating-outline mb-4 select2-primary">
                                         <select class="select2 select-pacientes form-select" id="eventPaciente"
@@ -206,6 +228,14 @@
                                     <div class="form-floating form-floating-outline mb-4">
                                         <textarea class="form-control" name="eventDescription" id="eventDescription"></textarea>
                                         <label for="eventDescription">Description</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4">
+                                        <textarea class="form-control" name="eventComentario" id="eventComentario"></textarea>
+                                        <label for="eventDescription">Comentario</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4">
+                                        <textarea class="form-control" name="eventMotivo" id="eventMotivo"></textarea>
+                                        <label for="eventMotivo">Motivo</label>
                                     </div>
                                     <div class="mb-3 d-flex justify-content-sm-between justify-content-start my-4 gap-2">
                                         <div class="d-flex">
@@ -265,6 +295,11 @@
                 eventMedico = document.querySelector('#eventMedico'),
                 eventPaciente = document.querySelector('#eventPaciente'),
                 eventBox = document.querySelector('#eventBox'),
+                eventSucursal = document.querySelector('#eventSucursal'),
+                eventEspecialidad = document.querySelector('#eventEspecialidad'),
+                eventComentario = document.querySelector('#eventComentario'),
+                eventMotivo = document.querySelector('#eventMotivo'),
+
 
                 // allDaySwitch = document.querySelector('.allDay-switch'),
                 selectAll = document.querySelector('.select-all'),
@@ -418,6 +453,18 @@
                     null;
                 eventToUpdate.extendedProps.box !== undefined ?
                     (eventBox.value = eventToUpdate.extendedProps.box) :
+                    null;
+                eventToUpdate.extendedProps.sucursal !== undefined ?
+                    (eventSucursal.value = eventToUpdate.extendedProps.sucursal) :
+                    null;
+                eventToUpdate.extendedProps.especialidad !== undefined ?
+                    (eventEspecialidad.value = eventToUpdate.extendedProps.especialidad) :
+                    null;
+                eventToUpdate.extendedProps.comentarios !== undefined ?
+                    (eventComentario.value = eventToUpdate.extendedProps.comentarios) :
+                    null;
+                eventToUpdate.extendedProps.motivo !== undefined ?
+                    (eventMotivo.value = eventToUpdate.extendedProps.motivo) :
                     null;
 
                 // // Call removeEvent function
@@ -728,12 +775,12 @@
                         description: eventDescription.value,
                         medico_id: parseInt(eventMedico.value),
                         paciente_id: parseInt(eventPaciente.value),
-                        sucursal_id: 1, // Nuevo
-                        especialidad_id: 1, // Nuevo
+                        sucursal_id: parseInt(eventSucursal.value), // Nuevo
+                        especialidad_id: parseInt(eventEspecialidad.value), // Nuevo
                         box_id: parseInt(eventBox.value),
                         estado: 1, // Valor predeterminado según la BDD
-                        comentarios: 'test', // Evitar valores null
-                        motivo: 'test' // Evitar valores null
+                        comentarios: eventComentario.value, // Evitar valores null
+                        motivo: eventMotivo.value // Evitar valores null
                     };
 
                     console.log(eventData);

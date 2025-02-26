@@ -167,7 +167,9 @@ class CitaController extends Controller
     $medicos = Medico::all(); // Obtiene todos los médicos
     $pacientes = Paciente::all();
     $boxes = Box::all();
-    return view('content.cita.index', compact('citas', 'medicos', 'pacientes', 'boxes'));
+    $especialidades= Especialidad::all();
+    $sucursales = Sucursal::all(); 
+    return view('content.cita.index', compact('citas', 'medicos', 'pacientes', 'boxes', 'especialidades', 'sucursales'));
   }
 
   // Crear una nueva cita
