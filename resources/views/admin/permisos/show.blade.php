@@ -10,13 +10,18 @@
 
                 <label>Permisos a Módulos:</label><br>
                 @foreach ($modulosDisponibles as $modulo)
-                    <input type="checkbox" name="modulos[]" value="{{ $modulo }}"
-                        {{ in_array($modulo, $modulosPermitidos) ? 'checked' : '' }}>
-                    {{ $modulo }}<br>
+                    <div>
+                        <input type="hidden" name="usuario" value="{{ $user->id }}">
+                        <input type="checkbox" name="modulos[]" value="{{ $modulo->id }}"
+                            {{ in_array($modulo->id, $modulosPermitidos) ? 'checked' : '' }}>
+                        {{ $modulo->nombre }}<br>
+                    </div>
                 @endforeach
 
                 <button type="submit" class="btn btn-primary">Guardar</button>
                 <button type="button" class="btn btn-secondary">Cancelar</button>
+                <!-- falta agregarle la funcion al cancelar que simplemente te devuelva a la lista de usuarios -->
+            </div>
         </form>
 
     </div>

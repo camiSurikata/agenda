@@ -34,25 +34,19 @@ class AdminController extends Controller
 
     public function show($id)
     {
+        if (auth()->user()->idRol != 1) {
+            return redirect()->route('medicos')->with('no-permiso', ' no admin');
+        }
 
-        //if(auth()->user()->idRol != 1){
-        //    return redirect()->route('home')->with('no-permiso', ' no admin');
-        //}
-        $modulosDisponibles = [
-            "Paciente",
-            "Asistencia",
-            "Tecnología Médica",
-            "Diagnóstico",
-            "Presupuesto",
-            "Agenda Quirúrgica",
-            "Personal",
-            "Cotizador"
-        ];
+        // Obtener los nombres de los módulos desde la base de datos
+        $modulosDisponibles = Modulo::select('id', 'nombre')->get();
 
         $modulosPermitidos = DB::table('permisos')->where('idUser', $id)->pluck('idModulo')->toArray();
-        // dd($user);
 
-        return view('admin.permisos.show', compact('modulosDisponibles', 'modulosPermitidos', 'id'));
+        $user = User::find($id);
+        $user_modulos = Permisos::where('idUser', '=', $id)->get();
+
+        return view('admin.permisos.show', compact('modulosDisponibles', 'modulosPermitidos', 'id', 'user', 'user_modulos'));
     }
 
     public function store(Request $request)
@@ -61,15 +55,15 @@ class AdminController extends Controller
         //    return redirect()->route('home')->with('no-permiso', ' no admin');
         //}
 
-        $personalEspecialidad = Permisos::where('idUser', $request->usuario)->delete();
+        Permisos::where('idUser', $request->usuario)->delete();
 
         // dd($request);
-        $permisosSeleccionados = $request->input('modulo', []);
+        $permisosSeleccionados = $request->input('modulos', []);
 
-        foreach ($permisosSeleccionados as $permisoId) {
+        foreach ($permisosSeleccionados as $modulo) {
             $permiso = new Permisos();
             $permiso->idUser = $request->usuario;
-            $permiso->idModulo = $permisoId;
+            $permiso->idModulo = $modulo;
             $permiso->save();
         }
         return redirect()->route('permisos.index')->with('permisos-exito', 'exito');
