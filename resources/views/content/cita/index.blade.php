@@ -894,16 +894,17 @@
             // ------------------------------------------------
             function resetValues() {
                 eventEndDate.value = '';
-                // eventUrl.value = '';
                 eventStartDate.value = '';
                 eventTitle.value = '';
-                // eventLocation.value = '';
-                // allDaySwitch.checked = false;
-                // eventGuests.val('').trigger('change');
                 eventDescription.value = '';
                 eventMedico.value = '';
                 eventPaciente.value = '';
                 eventBox.value = '';
+                eventSucursal.value = '';
+                eventEspecialidad.value = '';
+                eventComentario.value = '';
+                eventMotivo.value = '';
+                isEditMode = false;
 
             }
 
