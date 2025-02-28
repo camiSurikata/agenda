@@ -59,7 +59,7 @@ class CitaController extends Controller
       $cita->sucursal_id = $request->sucursal_id;
       $cita->especialidad_id = $request->especialidad_id;
       $cita->medico_id = $request->medico_id;
-      $cita->estado = 1; // Asignamos estado activo
+      $cita->estado = $request->estado; // Asignamos estado activo
       $cita->description = $request->description ?? '';
       $cita->box_id = $request->box_id ?? 1; // Opcional
       $cita->comentarios = $request->comentarios ?? null;

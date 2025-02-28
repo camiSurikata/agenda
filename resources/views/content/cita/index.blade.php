@@ -231,7 +231,7 @@
                                     </div>
                                     <div class="form-floating form-floating-outline mb-4">
                                         <textarea class="form-control" name="eventComentario" id="eventComentario"></textarea>
-                                        <label for="eventDescription">Comentario</label>
+                                        <label for="eventComentario">Comentario</label>
                                     </div>
                                     <div class="form-floating form-floating-outline mb-4">
                                         <textarea class="form-control" name="eventMotivo" id="eventMotivo"></textarea>
@@ -305,6 +305,24 @@
                 selectAll = document.querySelector('.select-all'),
                 filterInput = [].slice.call(document.querySelectorAll('.input-filter')),
                 inlineCalendar = document.querySelector('.inline-calendar');
+            
+            // Variable para almacenar el número del estado
+            let eventLabelValue = null;
+
+            // Función para obtener la clave del estado según el valor
+            function obtenerClaveEstado(valor) {
+                return Object.keys(estadosCita).find(key => estadosCita[key] === valor);
+            }
+
+            // Obtener el valor inicial del evento (si ya está seleccionado un valor)
+            eventLabelValue = obtenerClaveEstado(eventLabel.val());
+            console.log("Valor inicial de eventLabel:", eventLabelValue);
+
+            // Evento cuando cambia el select para capturar el valor
+            eventLabel.on("change", function() {
+                eventLabelValue = obtenerClaveEstado(this.value); // Guarda el número en la variable
+                console.log("Número guardado en eventLabel:", eventLabelValue);
+            });
 
             let eventToUpdate,
                 currentEvents =
@@ -778,7 +796,7 @@
                         sucursal_id: parseInt(eventSucursal.value), // Nuevo
                         especialidad_id: parseInt(eventEspecialidad.value), // Nuevo
                         box_id: parseInt(eventBox.value),
-                        estado: 1, // Valor predeterminado según la BDD
+                        estado: eventLabelValue, // Valor predeterminado según la BDD
                         comentarios: eventComentario.value, // Evitar valores null
                         motivo: eventMotivo.value // Evitar valores null
                     };
