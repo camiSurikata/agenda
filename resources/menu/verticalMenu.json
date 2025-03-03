@@ -2,7 +2,6 @@
   "menu": [
     {
       "idRol": 1,
-      "idCompany": 0,
       "name": "Dashboards",
       "icon": "menu-icon tf-icons mdi mdi-home-outline",
       "slug": "dashboard",

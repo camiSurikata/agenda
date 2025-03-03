@@ -7,10 +7,19 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Controller;
+// Al importarlo tira error de undefined
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+
 
 class LoginController extends Controller
 {
-  //
+  //use AuthenticatesUsers;
+  protected function authenticated(Request $request, $user)
+  {
+    $user->load('permisos');
+  }
+
 
   public function indexLogin()
   {

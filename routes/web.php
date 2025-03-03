@@ -18,6 +18,7 @@ use App\Http\Controllers\ExamenesController;
 use App\Models\Cita;
 use App\Http\Controllers\EspecialidadController;
 use App\Models\Especialidad;
+use App\Http\Controllers\ContentNavbarController;
 
 // LOGIN
 Route::get('/', [LoginController::class, 'indexLogin'])->name('login');
@@ -140,6 +141,9 @@ route::get('/permisos', [AdminController::class, 'index'])->name('permisos.index
 route::get('/admin/permisos/{id}', [AdminController::class, 'show'])->name('permisos.show');
 route::post('/admin/permisos/guardar', [AdminController::class, 'store'])->name('permisos.store');
 
+
+//controlador NavbarPermisos
+Route::get('/content-navbar', [ContentNavbarController::class, 'someMethod']);
 
 
 // Route::post('/medicos', [MedicoController::class, 'store'])->name('medicos.store');
