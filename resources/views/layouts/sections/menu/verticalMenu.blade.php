@@ -26,79 +26,50 @@
     @endif
 
     <div class="menu-inner-shadow"></div>
-    <ul class="menu-inner py-1">
-        @foreach ($menuData[0]->menu as $menu)
-            {{-- adding active and open class if child is active --}}
-
-            {{-- menu headers --}}
-            @if (isset($menu->menuHeader))
-                <li class="menu-header fw-medium mt-4">
-                    <span class="menu-header-text">{{ __($menu->menuHeader) }}</span>
-                </li>
-            @else
-                {{-- active menu method --}}
+    @if (!empty($menu))
+        <ul class="menu-inner py-1">
+            @foreach ($filteredMenu as $menu)
                 @php
                     $activeClass = null;
                     $currentRouteName = Route::currentRouteName();
-
-                    if ($currentRouteName === $menu->slug) {
+                    if ($currentRouteName === $menu['slug']) {
                         $activeClass = 'active';
-                    } elseif (isset($menu->submenu)) {
-                        if (gettype($menu->slug) === 'array') {
-                            foreach ($menu->slug as $slug) {
-                                if (str_contains($currentRouteName, $slug) and strpos($currentRouteName, $slug) === 0) {
-                                    $activeClass = 'active open';
-                                }
-                            }
-                        } else {
-                            if (
-                                str_contains($currentRouteName, $menu->slug) and
-                                strpos($currentRouteName, $menu->slug) === 0
-                            ) {
+                    } elseif (isset($menu['submenu'])) {
+                        foreach ($menu['submenu'] as $submenu) {
+                            if (str_contains($currentRouteName, $submenu['slug'])) {
                                 $activeClass = 'active open';
                             }
                         }
                     }
-
-                    // Obtener el idCompany y idRol del usuario autenticado
-                    $user = Auth::user();
-                    // $idCompany = $user->idCompany;
-                    // $idRol = $user->idRol;
-
-                    // Validar si el usuario tiene el rol 1 (admin) para mostrar todo sin verificar idCompany
-                    // if ($idRol == 1) {
-                    //     $idCompany = null; // Restablecer idCompany para mostrar todo
-                    // }
-
-                    // // Validar si el menú es accesible para el idCompany del usuario
-                    // if (isset($menu->idCompany) && $menu->idCompany != $idCompany && $idCompany !== null) {
-                    //     continue; // Saltar al siguiente elemento de menú
-                    // }
                 @endphp
 
-                {{-- main menu --}}
                 <li class="menu-item {{ $activeClass }}">
-                    <a href="{{ isset($menu->url) ? url($menu->url) : 'javascript:void(0);' }}"
-                        class="{{ isset($menu->submenu) ? 'menu-link menu-toggle' : 'menu-link' }}"
-                        @if (isset($menu->target) and !empty($menu->target)) target="_blank" @endif>
-                        @isset($menu->icon)
-                            <i class="{{ $menu->icon }}"></i>
+                    <a href="{{ isset($menu['url']) ? url($menu['url']) : 'javascript:void(0);' }}"
+                        class="{{ isset($menu['submenu']) ? 'menu-link menu-toggle' : 'menu-link' }}">
+                        @isset($menu['icon'])
+                            <i class="{{ $menu['icon'] }}"></i>
                         @endisset
-                        <div>{{ isset($menu->name) ? __($menu->name) : '' }}</div>
-                        @isset($menu->badge)
-                            <div class="badge bg-{{ $menu->badge[0] }} rounded-pill ms-auto">{{ $menu->badge[1] }}</div>
+                        <div>{{ $menu['name'] }}</div>
+                        @isset($menu['badge'])
+                            <div class="badge bg-{{ $menu['badge'][0] }} rounded-pill ms-auto">{{ $menu['badge'][1] }}</div>
                         @endisset
                     </a>
 
-                    {{-- submenu --}}
-                    @isset($menu->submenu)
-                        @include('layouts.sections.menu.submenu', ['menu' => $menu->submenu])
+                    @isset($menu['submenu'])
+                        <ul class="submenu">
+                            @foreach ($menu['submenu'] as $submenu)
+                                <li class="submenu-item">
+                                    <a href="{{ url($submenu['url']) }}" class="menu-link">
+                                        <div>{{ $submenu['name'] }}</div>
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
                     @endisset
                 </li>
-            @endif
-        @endforeach
-    </ul>
-
-
-
+            @endforeach
+        </ul>
+    @else
+        <p>No hay módulos disponibles</p>
+    @endif
 </aside>
