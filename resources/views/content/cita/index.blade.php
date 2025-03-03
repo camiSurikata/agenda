@@ -239,11 +239,11 @@
                                     </div>
                                     <div class="mb-3 d-flex justify-content-sm-between justify-content-start my-4 gap-2">
                                         <div class="d-flex">
-                                            <button type="submit" class="btn btn-primary btn-add-event me-sm-2 me-1">Add</button>
+                                            <button type="submit" class="btn btn-primary btn-add-event me-sm-2 me-1" onclick="confirmarReserva()">Add</button>
                                             <button type="reset" class="btn btn-outline-secondary btn-cancel me-sm-0 me-1"
                                                 data-bs-dismiss="modal">Cancel</button>
                                         </div>
-                                        <button class="btn btn-outline-danger btn-delete-event d-none">Delete</button>
+                                        <button class="btn btn-outline-danger btn-delete-event d-none" onclick="confirmarReserva()">Delete</button>
                                     </div>
                                 </form>
                             </div>
@@ -397,6 +397,7 @@
                 var start = eventStartDate.flatpickr({
                     enableTime: true,
                     altFormat: 'Y-m-dTH:i:S',
+                    minDate: "today",
                     onReady: function(selectedDates, dateStr, instance) {
                         if (instance.isMobile) {
                             instance.mobileInput.setAttribute('step', null);
@@ -410,6 +411,7 @@
                 var end = eventEndDate.flatpickr({
                     enableTime: true,
                     altFormat: 'Y-m-dTH:i:S',
+                    minDate: "today",
                     onReady: function(selectedDates, dateStr, instance) {
                         if (instance.isMobile) {
                             instance.mobileInput.setAttribute('step', null);
@@ -597,20 +599,18 @@
                 },
                 direction: 1,
                 initialDate: new Date(),
-                navLinks: true, // can click day/week names to navigate views
-                eventClassNames: function({
-                    event: calendarEvent
-                }) {
+                navLinks: true,
+                validRange: { 
+                    start: new Date() // Bloquea días pasados 
+                },
+                eventClassNames: function({ event: calendarEvent }) {
                     const colorName = calendarsColor[calendarEvent._def.extendedProps.calendar];
-                    // Background Color
                     return ['fc-event-' + colorName];
                 },
                 dateClick: function(info) {
                     let date = moment(info.date).format('YYYY-MM-DD');
                     resetValues();
                     bsAddEventModal.show();
-
-                    // For new event set modal title text: Add Event
                     if (modalTitle) {
                         modalTitle.innerHTML = 'Add Event';
                     }
@@ -630,7 +630,6 @@
                 viewDidMount: function() {
                     modifyToggler();
                 },
-                //Opciones de texto para los botones de vista
                 buttonText: {
                     today: 'Hoy',
                     month: 'Mes',
@@ -639,6 +638,7 @@
                     list: 'Lista'
                 }
             });
+
 
             // Render calendar
             calendar.render();
@@ -992,3 +992,4 @@
         })();
     });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
