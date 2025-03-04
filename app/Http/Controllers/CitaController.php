@@ -169,7 +169,10 @@ class CitaController extends Controller
     $boxes = Box::all();
     $especialidades= Especialidad::all();
     $sucursales = Sucursal::all(); 
-    return view('content.cita.index', compact('citas', 'medicos', 'pacientes', 'boxes', 'especialidades', 'sucursales'));
+    $horarios = DB::table('horarios_medicos')
+    ->where('no_atiende', 1)
+    ->pluck('dia_semana'); // Obtiene solo los días en que NO atiende
+    return view('content.cita.index', compact('citas', 'medicos', 'pacientes', 'boxes', 'especialidades', 'sucursales', 'horarios'));
   }
 
   // Crear una nueva cita

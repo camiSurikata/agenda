@@ -579,6 +579,16 @@
 
             // Init FullCalendar
             // ------------------------------------------------
+            // Obtener los días deshabilitados desde PHP (convertidos a JSON)
+            let diasNoAtiende = @json($horarios);
+
+            // Mapear nombres de días a números según FullCalendar
+            let diasMap = {
+                'Domingo': 0, 'Lunes': 1, 'Martes': 2, 'Miércoles': 3, 
+                'Jueves': 4, 'Viernes': 5, 'Sábado': 6
+            };
+            let diasDeshabilitados = diasNoAtiende.map(dia => diasMap[dia]);
+
             let calendar = new Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 events: fetchEvents,
@@ -609,6 +619,16 @@
                 },
                 dateClick: function(info) {
                     let date = moment(info.date).format('YYYY-MM-DD');
+                    // Bloquear selección si es un día en el que el médico NO atiende
+                    if (diasDeshabilitados.includes(info.date.getDay())) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Día no disponible',
+                            text: 'Este día el médico no atiende.',
+                            confirmButtonColor: '#d33'
+                        });
+                        return;
+                    }
                     resetValues();
                     bsAddEventModal.show();
                     if (modalTitle) {
