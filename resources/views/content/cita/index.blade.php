@@ -86,14 +86,30 @@
 
                     <!-- Filter -->
                     <div class="mb-4">
-                        <small class="text-small text-muted text-uppercase align-middle">Filter</small>
+                        <small class="text-small text-muted text-uppercase align-middle">Filtrar por medico</small>
                     </div>
+
+                    <div class="form-floating form-floating-outline mb-4 select2-primary">
+                        <select class="select2 select-medicos form-select" id="filtroMedico" name="filtroMedico">
+                            @foreach ($medicos as $medico)
+                                <option value="{{ $medico->id }}"
+                                    {{ isset($cita) && $medico->id == $citas->medico_id ? 'selected' : '' }}>
+                                    {{ $medico->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <label for="medicosSelect">Seleccione Médico</label>
+                    </div>
+
+                    <div class="mb-4">
+                        <small class="text-small text-muted text-uppercase align-middle">Estado de la cita</small>
+                    </div>    
 
                     <div class="form-check form-check-secondary mb-3">
                         <input class="form-check-input select-all" type="checkbox" id="selectAll" data-value="all" checked>
                         <label class="form-check-label" for="selectAll">Ver Todas</label>
                     </div>
-
+                    
                     <div class="app-calendar-events-filter">
                         <div class="form-check form-check-danger mb-3">
                             <input class="form-check-input input-filter" type="checkbox" id="select-atendiendose"
@@ -591,6 +607,24 @@
 
             let calendar = new Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
+                views: {
+                    timeGridWeek: {
+                        titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }, // Formato del título
+                        slotMinTime: "08:00:00", // Hora mínima (ejemplo: 8 AM)
+                        slotMaxTime: "18:00:00", // Hora máxima (ejemplo: 6 PM)
+                        slotDuration: "00:30:00", // Intervalos de 30 minutos
+                        nowIndicator: true, // Línea indicadora del tiempo actual
+                        allDaySlot: false, // Ocultar "Todo el día"
+                        eventContent: function(arg) {
+                            // Personaliza el contenido del evento
+                            let numberLabel = document.createElement('div');
+                            numberLabel.innerHTML = `<span class="event-number">${arg.event.extendedProps.number}</span>`;
+                            let arrayOfDomNodes = [ numberLabel ];
+                            return { domNodes: arrayOfDomNodes };
+                        }
+                    }
+                },   
+
                 events: fetchEvents,
                 plugins: [dayGridPlugin, interactionPlugin, listPlugin, timegridPlugin],
                 editable: true,
