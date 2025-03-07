@@ -5,6 +5,7 @@ namespace App\Helpers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
+
 class MenuHelper
 {
     public static function getFilteredMenu($menu)
