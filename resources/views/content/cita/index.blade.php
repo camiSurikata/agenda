@@ -332,8 +332,9 @@
 
             // Obtener el valor inicial del evento (si ya está seleccionado un valor)
             eventLabelValue = obtenerClaveEstado(eventLabel.val());
+            let eventMedicofiltro = document.querySelector('#filtroMedico');
             console.log("Valor inicial de eventLabel:", eventLabelValue);
-
+            console.log("Valor inicial de filtro Medico:", eventMedicofiltro.value);
             // Evento cuando cambia el select para capturar el valor
             eventLabel.on("change", function() {
                 eventLabelValue = obtenerClaveEstado(this.value); // Guarda el número en la variable
