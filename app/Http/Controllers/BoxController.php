@@ -14,6 +14,12 @@ class BoxController extends Controller
   {
     $boxes = Box::all();
 
+    // aqui simplemente se modifica el id rol para quien tenga acceso a la vista
+    if (auth()->user()->idRol != 1) {
+      session()->flash('no-permiso', 'No tienes permisos de administrador.');
+      return redirect()->route('home');
+    }
+
     return view('content.boxes.index', compact('boxes'));
   }
 

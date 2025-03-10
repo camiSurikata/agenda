@@ -11,26 +11,31 @@
       ],
       "submenu": [
         {
+          "idModulo": 10,
           "url": "/users",
           "name": "Usuarios",
           "slug": "app-ecommerce-dashboard"
         },
         {
+          "idModulo": 11,
           "url": "/boxes",
           "name": "Boxes",
           "slug": "app-ecommerce-dashboard"
         },
         {
+          "idModulo": 12,
           "url": "/especialidades",
           "name": "Especialidades",
           "slug": "app-ecommerce-dashboard"
         },
         {
+          "idModulo": 13,
           "url": "/convenios",
           "name": "Convenios",
           "slug": "app-ecommerce-dashboard"
         },
         {
+          "idModulo": 14,
           "url": "/permisos",
           "name": "Administrar Permisos",
           "slug": "app-ecommerce-dashboard"
@@ -45,11 +50,13 @@
       "slug": "dashboard",
       "submenu": [
         {
+          "idModulo": 15,
           "url": "/medicos",
           "name": "Medicos",
           "slug": "app-ecommerce-dashboard"
         },
         {
+          "idModulo": 16,
           "url": "/paciente",
           "name": "Pacientes",
           "slug": "app-ecommerce-dashboard"
@@ -64,16 +71,19 @@
       "slug": "dashboard",
       "submenu": [
         {
+          "idModulo": 17,
           "url": "/examenes",
           "name": "Examenes",
           "slug": "app-ecommerce-dashboard"
         },
         {
+          "idModulo": 18,
           "url": "/urgencias",
           "name": "Urgencias",
           "slug": "app-ecommerce-dashboard"
         },
         {
+          "idModulo": 19,
           "url": "/hospitalizaciones",
           "name": "Hospitalizaciones",
           "slug": "app-ecommerce-dashboard"

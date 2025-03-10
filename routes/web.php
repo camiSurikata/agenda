@@ -19,6 +19,10 @@ use App\Models\Cita;
 use App\Http\Controllers\EspecialidadController;
 use App\Models\Especialidad;
 use App\Http\Controllers\ContentNavbarController;
+use App\Http\Controllers\HomeController;
+
+// Home
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 // LOGIN
 Route::get('/', [LoginController::class, 'indexLogin'])->name('login');
