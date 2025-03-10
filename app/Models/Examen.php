@@ -20,4 +20,9 @@ class Examen extends Model
         'fecha',
         'estado'
     ];
+
+    public function medico()
+    {
+        return $this->belongsTo(Medico::class, 'medico_id');
+    }
 }

@@ -1,5 +1,10 @@
 @extends('layouts/layoutMaster')
 
+@section('vendor-style')
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+@endsection
+
 @section('content')
     <div class="container mt-4">
         <!-- Tabs -->
@@ -15,8 +20,22 @@
 
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="d-flex gap-2">
+
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center">
+                        <a href="{{ route('examenes.index', ['date' => $date->copy()->subDay()->format('Y-m-d')]) }}"
+                            class="btn btn-outline-secondary">&lt;</a>
+                        <h4 class="mb-0 mx-3"><i class="fas fa-calendar-alt"></i>
+                            {{ $date->locale('es')->translatedFormat('l d F Y') }}</h4>
+                        <a href="{{ route('examenes.index', ['date' => $date->copy()->addDay()->format('Y-m-d')]) }}"
+                            class="btn btn-outline-secondary">&gt;</a>
+                    </div>
+                </div>
                 <select class="form-select" name="professional" id="professional">
                     <option value="">Todos los Profesionales</option>
+                    @foreach ($medicos as $medico)
+                        <option value="{{ $medico->id }}">{{ $medico->nombre }}</option>
+                    @endforeach
                 </select>
 
                 <select class="form-select" name="resource" id="resource">
@@ -24,7 +43,8 @@
                     <!-- Add resources as needed -->
                 </select>
 
-                <button class="btn btn-success">+ Nueva atención</button>
+                <button class="btn btn-success" onclick="window.location='{{ route('examenes.create') }}'">+ Nueva
+                    atención</button>
             </div>
         </div>
 
@@ -32,28 +52,25 @@
             <table class="table table-striped">
                 <thead>
                     <tr>
+                        <th>Estado</th>
                         <th>Id</th>
                         <th>Nombre Paciente</th>
                         <th>Profesional/Recurso</th>
                         <th>Examen</th>
                         <th>Resultado</th>
                         <th>Fecha</th>
-                        <th>Acciones</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="examenes-table-body">
                     @foreach ($examenes as $examen)
                         <tr>
-                            <td>{{ $examen->codigo }}</td>
+                            <td>{{ $examen->estado }}</td>
+                            <td>{{ $examen->id }}</td>
                             <td>{{ $examen->nombre }}</td>
                             <td>{{ $examen->profesional }}</td>
                             <td>{{ $examen->examen }}</td>
                             <td>{{ $examen->resultado }}</td>
                             <td>{{ $examen->fecha }}</td>
-                            <td>
-                                <!-- Aquí puedes agregar botones de acción, como editar o eliminar -->
-                                <button class="btn btn-danger">Botón</button>
-                            </td>
                         </tr>
                     @endforeach
                 </tbody>

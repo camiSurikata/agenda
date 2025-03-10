@@ -6,6 +6,8 @@ $configData = Helper::appClasses();
 @endphp
 @extends('layouts/commonMaster' )
 
+@include('layouts/sections/menu/verticalMenu', ['menu' => $filteredMenu ?? []])
+
 @php
 /* Display elements */
 $contentNavbar = ($contentNavbar ?? true);
@@ -36,7 +38,10 @@ $container = ($configData['contentLayout'] === 'compact') ? 'container-xxl' : 'c
   <div class="layout-container">
 
     @if ($isMenu)
-      @include('layouts/sections/menu/verticalMenu')
+      @php
+        $filteredMenu = $filteredMenu ?? [];
+      @endphp
+      @include('layouts/sections/menu/verticalMenu', ['menu' => $filteredMenu])
     @endif
 
 

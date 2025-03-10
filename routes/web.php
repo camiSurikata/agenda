@@ -18,6 +18,7 @@ use App\Http\Controllers\ExamenesController;
 use App\Models\Cita;
 use App\Http\Controllers\EspecialidadController;
 use App\Models\Especialidad;
+use App\Http\Controllers\ContentNavbarController;
 
 // LOGIN
 Route::get('/', [LoginController::class, 'indexLogin'])->name('login');
@@ -35,6 +36,7 @@ Route::put('users/{user}/edit', [UserController::class, 'update'])->name('users.
 
 //medico
 Route::resource('medicos', MedicoController::class);
+
 Route::get('/medicos/create', [MedicoController::class, 'create'])->name('medicos.create');
 //medico horario
 Route::get('/medicos/{medico}/horario', [MedicoController::class, 'editHorario'])->name('medicos.horario');
@@ -87,6 +89,9 @@ Route::delete('/especialidades/{id}', [EspecialidadController::class, 'destroy']
 //EXAMENES
 Route::get('/examenes', [ExamenesController::class, 'index'])->name('examenes.index');
 Route::get('/examenes/procesamiento', [ExamenesController::class, 'procesamiento'])->name('examenes.procesamiento');
+Route::get('/examenes/create', [ExamenesController::class, 'create'])->name('examenes.create');
+Route::post('/examenes', [ExamenesController::class, 'store'])->name('examenes.store');
+
 
 // Mostrar bloqueos por médico
 Route::get('/medicos/{medicoId}/bloqueos', [BloqueoController::class, 'index'])->name('bloqueo.index');
@@ -135,8 +140,14 @@ Route::get('/encuesta/enviar', [EncuestaController::class, 'enviar'])->name('enc
 Route::resource('convenios', ConvenioController::class);
 Route::put('/convenios/{id}/toggle', [ConvenioController::class, 'toggleState'])->name('convenios.toggle');
 
+//Permisos
+route::get('/permisos', [AdminController::class, 'index'])->name('permisos.index');
+route::get('/admin/permisos/{id}', [AdminController::class, 'show'])->name('permisos.show');
+route::post('/admin/permisos/guardar', [AdminController::class, 'store'])->name('permisos.store');
 
 
+//controlador NavbarPermisos
+Route::get('/content-navbar', [ContentNavbarController::class, 'someMethod']);
 
 
 // Route::post('/medicos', [MedicoController::class, 'store'])->name('medicos.store');
@@ -146,4 +157,6 @@ Route::middleware([
   'auth',
   // 'verified',
   // 'checkRole:3',
-])->group(function () {});
+])->group(function () {
+  Route::get('/medicos', [MedicoController::class, 'index'])->name('medicos.index');
+});

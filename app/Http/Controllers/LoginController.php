@@ -7,10 +7,19 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Controller;
+// Al importarlo tira error de undefined
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
+
 
 class LoginController extends Controller
 {
-  //
+  //use AuthenticatesUsers;
+  protected function authenticated(Request $request, $user)
+  {
+    $user->load('permisos');
+  }
+
 
   public function indexLogin()
   {
@@ -43,19 +52,18 @@ class LoginController extends Controller
 
     //validacion
 
+
     $credentials = [
       "email" => $request->email,
-      "password" => $request->password,
-      //"active" => true
+      "password" => $request->password
     ];
 
     if (Auth::attempt($credentials)) {
-
       $request->session()->regenerate();
       return redirect()->intended(route('users.index'));
     } else {
-      return redirect(route('medicos.index'));
-    };
+      return redirect()->back()->withErrors(['email' => 'Las credenciales no coinciden con nuestros registros.']);
+    }
   }
 
   public function logout(Request $request)
