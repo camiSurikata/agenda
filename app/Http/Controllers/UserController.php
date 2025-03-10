@@ -15,6 +15,12 @@ class UserController extends Controller
       ->join('roles', 'users.idRol', '=', 'roles.idRoles')
       ->get();
 
+    // aqui simplemente se modifica el id rol para quien tenga acceso a la vista
+    if (auth()->user()->idRol != 1) {
+      session()->flash('no-permiso', 'No tienes permisos de administrador.');
+      return redirect()->route('home');
+    }
+
     // dd($users);
     return view('content.users.index', compact('users'));
   }

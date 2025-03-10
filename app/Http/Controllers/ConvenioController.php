@@ -15,10 +15,14 @@ class ConvenioController extends Controller
         // Obtener todos los convenios desde la base de datos
         $convenios = Convenio::where('estado', '!=', 3)->get();
 
+        // aqui simplemente se modifica el id rol para quien tenga acceso a la vista
+        if (auth()->user()->idRol != 1) {
+            session()->flash('no-permiso', 'No tienes permisos de administrador.');
+            return redirect()->route('home');
+        }
+
         // Retornar la vista con los convenios
         return view('content.convenios.index', compact('convenios'));
-
-
     }
 
     /**
@@ -107,17 +111,14 @@ class ConvenioController extends Controller
     public function toggleState($id)
     {
         $convenio = Convenio::findOrFail($id);
-        
+
         // Cambiar el estado entre 1 (activo) y 2 (desactivado)
         $convenio->estado = ($convenio->estado == 1) ? 2 : 1;
-        
+
         // Guardar los cambios
         $convenio->save();
 
         // Redirigir de vuelta con un mensaje
         return redirect()->route('convenios.index')->with('success', 'Estado actualizado con éxito');
     }
-
-
 }
-

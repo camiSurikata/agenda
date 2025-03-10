@@ -28,6 +28,12 @@ class AdminController extends Controller
 
         // dd($users);
 
+        // aqui simplemente se modifica el id rol para quien tenga acceso a la vista
+        if (auth()->user()->idRol != 1) {
+            session()->flash('no-permiso', 'No tienes permisos de administrador.');
+            return redirect()->route('home');
+        }
+
 
         return view('admin.permisos.index', compact('users'));
     }

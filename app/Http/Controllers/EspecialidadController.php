@@ -13,6 +13,12 @@ class EspecialidadController extends Controller
     public function index()
     {
         $especialidades = Especialidad::where('status', '!=', 3)->get();
+
+        // aqui simplemente se modifica el id rol para quien tenga acceso a la vista
+        if (auth()->user()->idRol != 1) {
+            session()->flash('no-permiso', 'No tienes permisos de administrador.');
+            return redirect()->route('home');
+        }
         return view('content.especialidades.index', compact('especialidades'));
     }
 
@@ -53,7 +59,7 @@ class EspecialidadController extends Controller
      */
     public function edit(Especialidad $especialidade)
     {
-        
+
         return view('content.especialidades.edit', compact('especialidade'));
     }
 
@@ -62,10 +68,10 @@ class EspecialidadController extends Controller
      */
     public function update(Request $request, Especialidad $especialidade)
     {
-        
-   
-        $especialidade->update($request->all()); 
- 
+
+
+        $especialidade->update($request->all());
+
         return redirect()->route('especialidades.index')->with('success', 'Especialidad actualizada correctamente');
     }
 

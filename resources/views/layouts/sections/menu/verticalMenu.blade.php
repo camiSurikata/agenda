@@ -5,18 +5,10 @@
 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
     @if (!isset($navbarFull))
         <div class="app-brand demo">
-            <a href="" class="app-brand-link">
+            <a href="{{ url('/home') }}" class="app-brand-link">
                 <img src="{{ asset('img/averclaro.png') }}" alt="" width="210px">
             </a>
 
-            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path
-                        d="M11.4854 4.88844C11.0081 4.41121 10.2344 4.41121 9.75715 4.88844L4.51028 10.1353C4.03297 10.6126 4.03297 11.3865 4.51028 11.8638L9.75715 17.1107C10.2344 17.5879 11.0081 17.5879 11.4854 17.1107C11.9626 16.6334 11.9626 15.8597 11.4854 15.3824L7.96672 11.8638C7.48942 11.3865 7.48942 10.6126 7.96672 10.1353L11.4854 6.61667C11.9626 6.13943 11.9626 5.36568 11.4854 4.88844Z"
-                        fill="currentColor" fill-opacity="0.6" />
-                </svg>
-            </a>
         </div>
     @endif
 
