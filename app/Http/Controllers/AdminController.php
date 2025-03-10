@@ -35,7 +35,8 @@ class AdminController extends Controller
     public function show($id)
     {
         if (auth()->user()->idRol != 1) {
-            return redirect()->route('medicos')->with('no-permiso', ' no admin');
+            session()->flash('no-permiso', 'No tienes permisos de administrador.');
+            return redirect()->route('permisos.index');
         }
 
         // Obtener los nombres de los módulos desde la base de datos

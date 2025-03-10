@@ -123,10 +123,28 @@
                                     @if (Auth::check())
                                         {{ Auth::user()->name }}
                                     @else
-                                        John Doe
+                                        Invi tacio
                                     @endif
                                 </span>
-                                <small class="text-muted">Admin</small>
+                                <small class="text-muted">
+                                    @if (Auth::check())
+                                        @switch(Auth::user()->idRol)
+                                            @case(1)
+                                                AdminSurikata
+                                                @break
+                                            @case(2)
+                                                Admin
+                                                @break
+                                            @case(3)
+                                                Personal
+                                                @break
+                                            @default
+                                                Rol Desconocido
+                                        @endswitch
+                                    @else
+                                        Invitado
+                                    @endif
+                                </small>
                             </div>
                         </div>
                     </div>
