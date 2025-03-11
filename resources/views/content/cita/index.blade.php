@@ -28,39 +28,6 @@
 @section('page-script')
     <script src="{{ asset('assets/js/app-calendar-events.js') }}"></script>
     {{-- <script src="{{ asset('assets/js/app-calendar.js') }}"></script> --}}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // ...existing code...
-
-            // Remove Event
-            function removeEvent(eventId) {
-                fetch(`/api/citas/${eventId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message === 'Cita eliminada correctamente') {
-                        calendar.getEventById(eventId).remove();
-                    } else {
-                        console.error('Error al eliminar la cita:', data.message);
-                    }
-                })
-                .catch(error => console.error('Error en la solicitud:', error));
-            }
-
-            // Call removeEvent function
-            btnDeleteEvent.addEventListener('click', e => {
-                removeEvent(parseInt(eventToUpdate.id));
-                bsAddEventModal.hide();
-            });
-
-            // ...existing code...
-        });
-    </script>
 @endsection
 
 @section('content')
@@ -118,14 +85,30 @@
 
                     <!-- Filter -->
                     <div class="mb-4">
-                        <small class="text-small text-muted text-uppercase align-middle">Filter</small>
+                        <small class="text-small text-muted text-uppercase align-middle">Filtrar por medico</small>
                     </div>
+
+                    <div class="form-floating form-floating-outline mb-4 select2-primary">
+                        <select class="select2 select-medicos form-select" id="filtroMedico" name="filtroMedico">
+                            @foreach ($medicos as $medico)
+                                <option value="{{ $medico->id }}"
+                                    {{ isset($cita) && $medico->id == $citas->medico_id ? 'selected' : '' }}>
+                                    {{ $medico->nombre }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <label for="medicosSelect">Seleccione Médico</label>
+                    </div>
+
+                    <div class="mb-4">
+                        <small class="text-small text-muted text-uppercase align-middle">Estado de la cita</small>
+                    </div>    
 
                     <div class="form-check form-check-secondary mb-3">
                         <input class="form-check-input select-all" type="checkbox" id="selectAll" data-value="all" checked>
                         <label class="form-check-label" for="selectAll">Ver Todas</label>
                     </div>
-
+                    
                     <div class="app-calendar-events-filter">
                         <div class="form-check form-check-danger mb-3">
                             <input class="form-check-input input-filter" type="checkbox" id="select-atendiendose"
@@ -202,6 +185,17 @@
                                         <label for="eventEndDate">End Date</label>
                                     </div>
                                     <div class="form-floating form-floating-outline mb-4 select2-primary">
+                                        <select class="select2 select-sucursal form-select" id="eventSucursal" name="eventSucursal">
+                                            @foreach ($sucursales as $sucursal)
+                                                <option value="{{ $sucursal->id }}"
+                                                    {{ isset($cita) && $sucursal->id == $citas->id ? 'selected' : '' }}>
+                                                    {{ $sucursal->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <label for="sucursalSelect">Seleccione Sucursal</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4 select2-primary">
                                         <select class="select2 select-medicos form-select" id="eventMedico" name="eventMedico">
                                             @foreach ($medicos as $medico)
                                                 <option value="{{ $medico->id }}"
@@ -211,6 +205,17 @@
                                             @endforeach
                                         </select>
                                         <label for="medicosSelect">Seleccione Médico</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4 select2-primary">
+                                        <select class="select2 select-especialidad form-select" id="eventEspecialidad" name="eventEspecialidad">
+                                            @foreach ($especialidades as $especialidad)
+                                                <option value="{{ $especialidad->id }}"
+                                                    {{ isset($cita) && $especialidad->id == $citas->especialidad_id ? 'selected' : '' }}>
+                                                    {{ $especialidad->nombre }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <label for="especialidadSelect">Seleccione Especialidad</label>
                                     </div>
                                     <div class="form-floating form-floating-outline mb-4 select2-primary">
                                         <select class="select2 select-pacientes form-select" id="eventPaciente"
@@ -239,13 +244,21 @@
                                         <textarea class="form-control" name="eventDescription" id="eventDescription"></textarea>
                                         <label for="eventDescription">Description</label>
                                     </div>
+                                    <div class="form-floating form-floating-outline mb-4">
+                                        <textarea class="form-control" name="eventComentario" id="eventComentario"></textarea>
+                                        <label for="eventComentario">Comentario</label>
+                                    </div>
+                                    <div class="form-floating form-floating-outline mb-4">
+                                        <textarea class="form-control" name="eventMotivo" id="eventMotivo"></textarea>
+                                        <label for="eventMotivo">Motivo</label>
+                                    </div>
                                     <div class="mb-3 d-flex justify-content-sm-between justify-content-start my-4 gap-2">
                                         <div class="d-flex">
-                                            <button type="submit" class="btn btn-primary btn-add-event me-sm-2 me-1">Add</button>
+                                            <button type="submit" class="btn btn-primary btn-add-event me-sm-2 me-1" onclick="confirmarReserva()">Add</button>
                                             <button type="reset" class="btn btn-outline-secondary btn-cancel me-sm-0 me-1"
                                                 data-bs-dismiss="modal">Cancel</button>
                                         </div>
-                                        <button class="btn btn-outline-danger btn-delete-event d-none">Delete</button>
+                                        <button class="btn btn-outline-danger btn-delete-event d-none" onclick="confirmarReserva()">Delete</button>
                                     </div>
                                 </form>
                             </div>
@@ -297,11 +310,35 @@
                 eventMedico = document.querySelector('#eventMedico'),
                 eventPaciente = document.querySelector('#eventPaciente'),
                 eventBox = document.querySelector('#eventBox'),
+                eventSucursal = document.querySelector('#eventSucursal'),
+                eventEspecialidad = document.querySelector('#eventEspecialidad'),
+                eventComentario = document.querySelector('#eventComentario'),
+                eventMotivo = document.querySelector('#eventMotivo'),
+
 
                 // allDaySwitch = document.querySelector('.allDay-switch'),
                 selectAll = document.querySelector('.select-all'),
                 filterInput = [].slice.call(document.querySelectorAll('.input-filter')),
                 inlineCalendar = document.querySelector('.inline-calendar');
+            
+            // Variable para almacenar el número del estado
+            let eventLabelValue = null;
+
+            // Función para obtener la clave del estado según el valor
+            function obtenerClaveEstado(valor) {
+                return Object.keys(estadosCita).find(key => estadosCita[key] === valor);
+            }
+
+            // Obtener el valor inicial del evento (si ya está seleccionado un valor)
+            eventLabelValue = obtenerClaveEstado(eventLabel.val());
+            let eventMedicofiltro = document.querySelector('#filtroMedico');
+            console.log("Valor inicial de eventLabel:", eventLabelValue);
+            console.log("Valor inicial de filtro Medico:", eventMedicofiltro.value);
+            // Evento cuando cambia el select para capturar el valor
+            eventLabel.on("change", function() {
+                eventLabelValue = obtenerClaveEstado(this.value); // Guarda el número en la variable
+                console.log("Número guardado en eventLabel:", eventLabelValue);
+            });
 
             let eventToUpdate,
                 currentEvents =
@@ -376,6 +413,7 @@
                 var start = eventStartDate.flatpickr({
                     enableTime: true,
                     altFormat: 'Y-m-dTH:i:S',
+                    minDate: "today",
                     onReady: function(selectedDates, dateStr, instance) {
                         if (instance.isMobile) {
                             instance.mobileInput.setAttribute('step', null);
@@ -389,6 +427,7 @@
                 var end = eventEndDate.flatpickr({
                     enableTime: true,
                     altFormat: 'Y-m-dTH:i:S',
+                    minDate: "today",
                     onReady: function(selectedDates, dateStr, instance) {
                         if (instance.isMobile) {
                             instance.mobileInput.setAttribute('step', null);
@@ -405,9 +444,12 @@
                 });
             }
 
+            let isEditMode = false;
+
             // Event click function
             function eventClick(info) {
                 eventToUpdate = info.event;
+                isEditMode = true;
                 if (eventToUpdate.url) {
                     info.jsEvent.preventDefault();
                     window.open(eventToUpdate.url, '_blank');
@@ -447,6 +489,18 @@
                     null;
                 eventToUpdate.extendedProps.box !== undefined ?
                     (eventBox.value = eventToUpdate.extendedProps.box) :
+                    null;
+                eventToUpdate.extendedProps.sucursal !== undefined ?
+                    (eventSucursal.value = eventToUpdate.extendedProps.sucursal) :
+                    null;
+                eventToUpdate.extendedProps.especialidad !== undefined ?
+                    (eventEspecialidad.value = eventToUpdate.extendedProps.especialidad) :
+                    null;
+                eventToUpdate.extendedProps.comentarios !== undefined ?
+                    (eventComentario.value = eventToUpdate.extendedProps.comentarios) :
+                    null;
+                eventToUpdate.extendedProps.motivo !== undefined ?
+                    (eventMotivo.value = eventToUpdate.extendedProps.motivo) :
                     null;
 
                 // // Call removeEvent function
@@ -490,7 +544,11 @@
             // --------------------------------------------------------------------------------------------------
             async function fetchEvents(info, successCallback) {
                 try {
-                    let response = await fetch('/api/citas');
+                    // Obtener el ID del médico seleccionado
+                    let medicoId = document.getElementById('filtroMedico').value;
+
+                    // Realizar la solicitud fetch con el ID del médico
+                    let response = await fetch(`/medicos/${medicoId}/citas`);
                     if (response.ok) {
                         let data = await response.json();
                         console.log('Data recibida:', data);
@@ -499,21 +557,15 @@
                         let events = data.map(cita => ({
                             id: cita.id,
                             url: '', // Puedes agregar una URL si lo necesitas
-                            title: cita
-                                .title, // Asumiendo que 'title' existe en los datos de la cita
-                            start: cita
-                                .start, // Asegúrate de que 'start' esté en el formato adecuado
-                            end: cita
-                                .end, // Asegúrate de que 'end' esté en el formato adecuado
-                            // allDay: false, // Por si no hay valor de allDay
+                            title: cita.title, // Asumiendo que 'title' existe en los datos de la cita
+                            start: cita.start, // Asegúrate de que 'start' esté en el formato adecuado
+                            end: cita.end, // Asegúrate de que 'end' esté en el formato adecuado
                             description: cita.description,
                             medico: cita.medico_id,
                             paciente: cita.paciente_id,
                             box: cita.box_id,
-                            // direction: 1,
                             extendedProps: {
-                                calendar: estadosCita[cita
-                                    .estado] // Mapea el estado (1) a "Atendido"
+                                calendar: estadosCita[cita.estado] // Mapea el estado (1) a "Atendido"
                             }
                         }));
 
@@ -525,8 +577,7 @@
 
                         // Filtra los eventos de acuerdo con los calendarios seleccionados
                         let selectedEvents = events.filter(event => {
-                            return calendars.includes(event.extendedProps.calendar
-                                .toLowerCase());
+                            return calendars.includes(event.extendedProps.calendar.toLowerCase());
                         });
 
                         // Llama al callback con los eventos filtrados
@@ -541,8 +592,36 @@
 
             // Init FullCalendar
             // ------------------------------------------------
+            // Obtener los días deshabilitados desde PHP (convertidos a JSON)
+            let diasNoAtiende = @json($horarios);
+
+            // Mapear nombres de días a números según FullCalendar
+            let diasMap = {
+                'Domingo': 0, 'Lunes': 1, 'Martes': 2, 'Miércoles': 3, 
+                'Jueves': 4, 'Viernes': 5, 'Sábado': 6
+            };
+            let diasDeshabilitados = diasNoAtiende.map(dia => diasMap[dia]);
+
             let calendar = new Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
+                views: {
+                    timeGridWeek: {
+                        titleFormat: { year: 'numeric', month: 'short', day: 'numeric' }, // Formato del título
+                        slotMinTime: "08:00:00", // Hora mínima (ejemplo: 8 AM)
+                        slotMaxTime: "18:00:00", // Hora máxima (ejemplo: 6 PM)
+                        slotDuration: "00:30:00", // Intervalos de 30 minutos
+                        nowIndicator: true, // Línea indicadora del tiempo actual
+                        allDaySlot: false, // Ocultar "Todo el día"
+                        eventContent: function(arg) {
+                            // Personaliza el contenido del evento
+                            let numberLabel = document.createElement('div');
+                            numberLabel.innerHTML = `<span class="event-number">${arg.event.extendedProps.number}</span>`;
+                            let arrayOfDomNodes = [ numberLabel ];
+                            return { domNodes: arrayOfDomNodes };
+                        }
+                    }
+                },   
+
                 events: fetchEvents,
                 plugins: [dayGridPlugin, interactionPlugin, listPlugin, timegridPlugin],
                 editable: true,
@@ -561,20 +640,28 @@
                 },
                 direction: 1,
                 initialDate: new Date(),
-                navLinks: true, // can click day/week names to navigate views
-                eventClassNames: function({
-                    event: calendarEvent
-                }) {
+                navLinks: true,
+                validRange: { 
+                    start: new Date() // Bloquea días pasados 
+                },
+                eventClassNames: function({ event: calendarEvent }) {
                     const colorName = calendarsColor[calendarEvent._def.extendedProps.calendar];
-                    // Background Color
                     return ['fc-event-' + colorName];
                 },
                 dateClick: function(info) {
                     let date = moment(info.date).format('YYYY-MM-DD');
+                    // Bloquear selección si es un día en el que el médico NO atiende
+                    if (diasDeshabilitados.includes(info.date.getDay())) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Día no disponible',
+                            text: 'Este día el médico no atiende.',
+                            confirmButtonColor: '#d33'
+                        });
+                        return;
+                    }
                     resetValues();
                     bsAddEventModal.show();
-
-                    // For new event set modal title text: Add Event
                     if (modalTitle) {
                         modalTitle.innerHTML = 'Add Event';
                     }
@@ -594,7 +681,6 @@
                 viewDidMount: function() {
                     modifyToggler();
                 },
-                //Opciones de texto para los botones de vista
                 buttonText: {
                     today: 'Hoy',
                     month: 'Mes',
@@ -604,8 +690,15 @@
                 }
             });
 
+
             // Render calendar
             calendar.render();
+
+            // Agregar evento change al filtro de médico
+            document.getElementById('filtroMedico').addEventListener('change', function() {
+                calendar.refetchEvents();
+            });
+
             // Modify modal toggler
             modifyToggler();
 
@@ -700,107 +793,193 @@
             // ------------------------------------------------
 
             function removeEvent(eventId) {
-                // ? Delete existing event data to current events object and refetch it to display on calender
-                for (var index = 0; index < extendedPropsToUpdate.length; index++) {
-                    var propName = extendedPropsToUpdate[index];
-                    existingEvent.setExtendedProp(propName, updatedEventData.extendedProps[propName]);
-                }
-            };
+                console.log("Intentando eliminar el evento con ID:", eventId);
 
-            // Remove Event In Calendar (UI Only)
-            // ------------------------------------------------
-            function removeEventInCalendar(eventId) {
-                calendar.getEventById(eventId).remove();
+                fetch('/eliminar-reserva', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({ cita_id: eventId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Respuesta del servidor:", data);
+
+                    if (data.message === 'Cita eliminada correctamente') {
+                        const event = calendar.getEventById(eventId);
+                        if (event) {
+                            console.log("Evento encontrado y eliminado en la UI.");
+                            event.remove(); // Elimina el evento del calendario sin recargar
+                        } else {
+                            console.warn("No se encontró el evento en FullCalendar.");
+                        }
+
+                         // Asegura que el calendario se actualice
+                    } else {
+                        console.error('Error al eliminar la cita:', data.message);
+                    }
+                    calendar.refetchEvents();
+                })
+                .catch(error => console.error('Error en la solicitud:', error));
             }
+
 
             // Add new event
             // ------------------------------------------------
             btnSubmit.addEventListener('click', async e => {
                 if (isFormValid) {
-                    let newEvent = {
+                    // Función para formatear la fecha en "YYYY-MM-DD HH:MM:SS"
+                    function formatDate(dateString) {
+                        let date = new Date(dateString);
+                        let year = date.getFullYear();
+                        let month = String(date.getMonth() + 1).padStart(2, '0');
+                        let day = String(date.getDate()).padStart(2, '0');
+                        let hours = String(date.getHours()).padStart(2, '0');
+                        let minutes = String(date.getMinutes()).padStart(2, '0');
+                        let seconds = String(date.getSeconds()).padStart(2, '0');
+                        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                    }
+
+                    // Crear el objeto con los datos del evento
+                    let eventData = {
                         title: eventTitle.value,
-                        start: eventStartDate.value,
-                        end: eventEndDate.value,
+                        start: formatDate(eventStartDate.value),
+                        end: formatDate(eventEndDate.value),
                         description: eventDescription.value,
-                        medico_id: eventMedico.value,
-                        paciente_id: eventPaciente.value,
-                        box_id: eventBox.value,
+                        medico_id: parseInt(eventMedico.value),
+                        paciente_id: parseInt(eventPaciente.value),
+                        sucursal_id: parseInt(eventSucursal.value), // Nuevo
+                        especialidad_id: parseInt(eventEspecialidad.value), // Nuevo
+                        box_id: parseInt(eventBox.value),
+                        estado: eventLabelValue, // Valor predeterminado según la BDD
+                        comentarios: eventComentario.value, // Evitar valores null
+                        motivo: eventMotivo.value // Evitar valores null
                     };
-                    console.log(newEvent);
+
+                    console.log(eventData);
 
                     try {
-                        let csrfToken = document.querySelector('meta[name="csrf-token"]')
-                            .content;
+                        let csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-                        let response = await fetch('/api/citas', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': csrfToken
-                            },
-                            body: JSON.stringify(newEvent)
-                        });
-                        console.log(response.ok);
-                        // Comprobar si la respuesta es exitosa
+                        if (isEditMode) {
+                            // Si estás en modo edición, actualizar el evento
+                            eventData.id = eventToUpdate.id; // Asegúrate de incluir el ID del evento a editar
+                            let response = await fetch(`/actualizar-reserva/${eventData.id}`, {
+                                method: 'PUT', // O 'PATCH'
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken
+                                },
+                                body: JSON.stringify(eventData)
+                            });
 
-                        if (!response.ok) {
-                            let errorData = await response.json();
-                            console.error('Errores de validación:', errorData);
-                        }
+                            console.log(response.ok);
 
-                        if (response.ok) {
-                            console.log('1');
+                            if (!response.ok) {
+                                let errorData = await response.json();
+                                console.error('Errores de validación:', errorData);
+                                return;
+                            }
+
                             let data = await response.json();
-                            console.log('2');
-                            console.log('Cita creada:', data);
+                            console.log('Cita actualizada:', data);
 
-                            // Opcional: actualizar la vista del calendario
-                            addEvent({
-                                // id: data.id, // ID generado por la base de datos
+                            // Actualizar la vista del calendario
+                            updateEvent({
+                                id: data.id, // ID del evento actualizado
                                 title: data.title,
                                 start: data.start,
                                 end: data.end,
                                 description: data.description,
-                                medico_id: data.medico,
-                                paciente_id: data.paciente,
-                                box_id: data.box,
+                                medico_id: data.medico_id,
+                                paciente_id: data.paciente_id,
+                                sucursal_id: data.sucursal_id, // Nuevo
+                                especialidad_id: data.especialidad_id, // Nuevo
+                                box_id: data.box_id,
+                                estado: data.estado,
+                                comentarios: data.comentarios,
+                                motivo: data.motivo,
                                 extendedProps: {
                                     calendar: 'Atendido'
                                 }
                             });
-                            console.log(addEvent)
-
-                            bsAddEventModal.hide();
                         } else {
-                            console.error('Error al crear la cita:', response.statusText);
+                            // Si no estás en modo edición, crear un nuevo evento
+                            let response = await fetch('/guardar-reserva', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': csrfToken
+                                },
+                                body: JSON.stringify(eventData)
+                            });
+
+                            console.log(response.ok);
+
+                            if (!response.ok) {
+                                let errorData = await response.json();
+                                console.error('Errores de validación:', errorData);
+                                return;
+                            }
+
+                            let data = await response.json();
+                            console.log('Cita creada:', data);
+
+                            // Agregar el nuevo evento al calendario
+                            addEvent({
+                                id: data.id, // ID generado por la base de datos
+                                title: data.title,
+                                start: data.start,
+                                end: data.end,
+                                description: data.description,
+                                medico_id: data.medico_id,
+                                paciente_id: data.paciente_id,
+                                sucursal_id: data.sucursal_id, // Nuevo
+                                especialidad_id: data.especialidad_id, // Nuevo
+                                box_id: data.box_id,
+                                estado: data.estado,
+                                comentarios: data.comentarios,
+                                motivo: data.motivo,
+                                extendedProps: {
+                                    calendar: 'Atendido'
+                                }
+                            });
                         }
+
+                        bsAddEventModal.hide();
                     } catch (error) {
                         console.error('Error en la solicitud:', error);
                     }
                 }
             });
 
+
+
+
             // Call removeEvent function
-            // btnDeleteEvent.addEventListener('click', e => {
-            //     removeEvent(parseInt(eventToUpdate.id));
-            //     // eventToUpdate.remove();
-            //     bsAddEventModal.hide();
-            // });
+            btnDeleteEvent.addEventListener('click', e => {
+                removeEvent(parseInt(eventToUpdate.id));
+                calendar.refetchEvents()
+                bsAddEventModal.hide();
+            });
 
             // Reset event form inputs values
             // ------------------------------------------------
             function resetValues() {
                 eventEndDate.value = '';
-                // eventUrl.value = '';
                 eventStartDate.value = '';
                 eventTitle.value = '';
-                // eventLocation.value = '';
-                // allDaySwitch.checked = false;
-                // eventGuests.val('').trigger('change');
                 eventDescription.value = '';
                 eventMedico.value = '';
                 eventPaciente.value = '';
                 eventBox.value = '';
+                eventSucursal.value = '';
+                eventEspecialidad.value = '';
+                eventComentario.value = '';
+                eventMotivo.value = '';
+                isEditMode = false;
 
             }
 
@@ -870,3 +1049,4 @@
         })();
     });
 </script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

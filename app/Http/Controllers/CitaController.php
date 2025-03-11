@@ -59,7 +59,7 @@ class CitaController extends Controller
       $cita->sucursal_id = $request->sucursal_id;
       $cita->especialidad_id = $request->especialidad_id;
       $cita->medico_id = $request->medico_id;
-      $cita->estado = 1; // Asignamos estado activo
+      $cita->estado = $request->estado; // Asignamos estado activo
       $cita->description = $request->description ?? '';
       $cita->box_id = $request->box_id ?? 1; // Opcional
       $cita->comentarios = $request->comentarios ?? null;
@@ -74,11 +74,12 @@ class CitaController extends Controller
           // Enviar el correo al paciente
           Mail::to($paciente->email)->send(new CitaReservadaMail($cita));
       }
-
+      // Devolver la respuesta JSON
+      return response()->json($cita, 201);
       return redirect()->back()->with('success', 'Cita reservada con éxito.');
     } catch (\Exception $e) {
       Log::error('Error al guardar la cita: ' . $e->getMessage());
-      return redirect()->back()->with('error', 'Error al reservar la cita.');
+      return response()->json(['error' => 'Error al reservar la cita.'], 500);
     }
   }
 
@@ -166,7 +167,12 @@ class CitaController extends Controller
     $medicos = Medico::all(); // Obtiene todos los médicos
     $pacientes = Paciente::all();
     $boxes = Box::all();
-    return view('content.cita.index', compact('citas', 'medicos', 'pacientes', 'boxes'));
+    $especialidades= Especialidad::all();
+    $sucursales = Sucursal::all(); 
+    $horarios = DB::table('horarios_medicos')
+    ->where('no_atiende', 1)
+    ->pluck('dia_semana'); // Obtiene solo los días en que NO atiende
+    return view('content.cita.index', compact('citas', 'medicos', 'pacientes', 'boxes', 'especialidades', 'sucursales', 'horarios'));
   }
 
   // Crear una nueva cita
@@ -203,17 +209,35 @@ class CitaController extends Controller
       'title' => 'required|string|max:255',
       'start' => 'required|date',
       'end' => 'required|date',
+      'description' => 'nullable|string',
+      'medico_id' => 'required|integer',
+      'paciente_id' => 'required|integer',
+      'sucursal_id' => 'required|integer',
+      'especialidad_id' => 'required|integer',
+      'box_id' => 'nullable|integer',
+      'estado' => 'required|integer',
+      'comentarios' => 'nullable|string',
+      'motivo' => 'nullable|string',
     ]);
 
+    // Actualiza la cita con los datos validados
     $cita->update($validated);
+
     return response()->json($cita);
   }
 
   // Eliminar una cita
-  public function destroy(Cita $cita)
+  public function eliminarReserva(Request $request)
   {
-    $cita->delete();
-    return redirect()->route('cita.index')->with('success', 'cita eliminado correctamente.');
+    $citaId = $request->input('cita_id');
+    $cita = Cita::find($citaId);
+
+    if ($cita) {
+      $cita->delete();
+      return response()->json(['message' => 'Cita eliminada correctamente.'], 200);
+    } else {
+      return response()->json(['message' => 'Cita no encontrada.'], 404);
+    }
   }
 
   public function obtenerHorarios($medico_id)
@@ -237,6 +261,12 @@ class CitaController extends Controller
       'bloqueos' => $bloqueos,
       'citas' => $citas
     ]);
+  }
+
+  public function obtenerCitasPorMedico($medicoId)
+  {
+    $citas = Cita::where('medico_id', $medicoId)->get();
+    return response()->json($citas);
   }
 
 }

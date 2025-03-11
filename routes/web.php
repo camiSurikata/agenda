@@ -52,7 +52,8 @@ Route::get('/medicos/{medico}/bloqueos', [MedicoController::class, 'getBloqueos'
 //Medicos por especialidad
 Route::get('/especialidad/{idEspecialidad}/medicos', [MedicoController::class, 'getMedicos'])->name('medicos.especialidad');
 
-
+// Obtener citas por médico
+Route::get('/medicos/{medicoId}/citas', [CitaController::class, 'obtenerCitasPorMedico'])->name('medicos.citas');
 
 
 // PACIENTE
@@ -113,10 +114,15 @@ Route::post('/agenda/agendamiento', [AgendaController::class, 'validarRUT']);
 Route::get('/reservar-cita', [CitaController::class, 'mostrarFormularioReserva'])->name('reservar-cita');
 // Guardar una reserva
 Route::post('/guardar-reserva', [CitaController::class, 'guardarReserva'])->name('guardar-reserva');
+//Eliminar una reserva
+Route::post('/eliminar-reserva', [CitaController::class, 'eliminarReserva'])->name('eliminar-reserva');
+//editar una reserva
+Route::put('/actualizar-reserva/{id}', [CitaController::class, 'update']);
 // Obtener horarios disponibles
 Route::post('/horarios-disponibles', [CitaController::class, 'obtenerHorariosDisponibles'])->name('horarios.disponibles');
 // Obtener horarios disponibles para una fecha específica
 Route::post('/horarios-disponibles-fecha', [CitaController::class, 'obtenerHorariosDisponiblesFecha'])->name('horarios.disponibles.fecha');
+
 
 
 //Agenda-Pacientes
