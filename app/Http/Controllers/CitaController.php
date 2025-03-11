@@ -263,4 +263,10 @@ class CitaController extends Controller
     ]);
   }
 
+  public function obtenerCitasPorMedico($medicoId)
+  {
+    $citas = Cita::where('medico_id', $medicoId)->get();
+    return response()->json($citas);
+  }
+
 }

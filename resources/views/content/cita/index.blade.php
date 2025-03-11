@@ -1,4 +1,3 @@
-
 @extends('layouts/layoutMaster')
 
 
@@ -545,7 +544,11 @@
             // --------------------------------------------------------------------------------------------------
             async function fetchEvents(info, successCallback) {
                 try {
-                    let response = await fetch('/api/citas');
+                    // Obtener el ID del médico seleccionado
+                    let medicoId = document.getElementById('filtroMedico').value;
+
+                    // Realizar la solicitud fetch con el ID del médico
+                    let response = await fetch(`/medicos/${medicoId}/citas`);
                     if (response.ok) {
                         let data = await response.json();
                         console.log('Data recibida:', data);
@@ -554,21 +557,15 @@
                         let events = data.map(cita => ({
                             id: cita.id,
                             url: '', // Puedes agregar una URL si lo necesitas
-                            title: cita
-                                .title, // Asumiendo que 'title' existe en los datos de la cita
-                            start: cita
-                                .start, // Asegúrate de que 'start' esté en el formato adecuado
-                            end: cita
-                                .end, // Asegúrate de que 'end' esté en el formato adecuado
-                            // allDay: false, // Por si no hay valor de allDay
+                            title: cita.title, // Asumiendo que 'title' existe en los datos de la cita
+                            start: cita.start, // Asegúrate de que 'start' esté en el formato adecuado
+                            end: cita.end, // Asegúrate de que 'end' esté en el formato adecuado
                             description: cita.description,
                             medico: cita.medico_id,
                             paciente: cita.paciente_id,
                             box: cita.box_id,
-                            // direction: 1,
                             extendedProps: {
-                                calendar: estadosCita[cita
-                                    .estado] // Mapea el estado (1) a "Atendido"
+                                calendar: estadosCita[cita.estado] // Mapea el estado (1) a "Atendido"
                             }
                         }));
 
@@ -580,8 +577,7 @@
 
                         // Filtra los eventos de acuerdo con los calendarios seleccionados
                         let selectedEvents = events.filter(event => {
-                            return calendars.includes(event.extendedProps.calendar
-                                .toLowerCase());
+                            return calendars.includes(event.extendedProps.calendar.toLowerCase());
                         });
 
                         // Llama al callback con los eventos filtrados
@@ -697,6 +693,12 @@
 
             // Render calendar
             calendar.render();
+
+            // Agregar evento change al filtro de médico
+            document.getElementById('filtroMedico').addEventListener('change', function() {
+                calendar.refetchEvents();
+            });
+
             // Modify modal toggler
             modifyToggler();
 

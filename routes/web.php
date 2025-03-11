@@ -48,7 +48,8 @@ Route::get('/medicos/{medico}/bloqueos', [MedicoController::class, 'getBloqueos'
 //Medicos por especialidad
 Route::get('/especialidad/{idEspecialidad}/medicos', [MedicoController::class, 'getMedicos'])->name('medicos.especialidad');
 
-
+// Obtener citas por médico
+Route::get('/medicos/{medicoId}/citas', [CitaController::class, 'obtenerCitasPorMedico'])->name('medicos.citas');
 
 
 // PACIENTE
@@ -117,6 +118,7 @@ Route::put('/actualizar-reserva/{id}', [CitaController::class, 'update']);
 Route::post('/horarios-disponibles', [CitaController::class, 'obtenerHorariosDisponibles'])->name('horarios.disponibles');
 // Obtener horarios disponibles para una fecha específica
 Route::post('/horarios-disponibles-fecha', [CitaController::class, 'obtenerHorariosDisponiblesFecha'])->name('horarios.disponibles.fecha');
+
 
 
 //Agenda-Pacientes
